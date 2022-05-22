@@ -16,8 +16,8 @@ import (
 var (
 	minimalVersion = semver.MustParse("0.13.0")
 
-	errNotFound = errors.New("kubectl not found. see https://kind.sigs.k8s.io/docs/user/quick-start/")
-	errOutdated = errors.New("kubectl is outdated. see https://kind.sigs.k8s.io/docs/user/quick-start/")
+	errNotFound = errors.New("kind not found. see https://kind.sigs.k8s.io/docs/user/quick-start/")
+	errOutdated = errors.New("kind is outdated. see https://kind.sigs.k8s.io/docs/user/quick-start/")
 )
 
 func Tool(ctx context.Context) (string, *semver.Version, error) {
