@@ -29,7 +29,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 				"allow_sign_up":        false,
 				"allow_org_create":     false,
 				"auto_assign_org":      true,
-				"auto_assign_org_role": true,
+				"auto_assign_org_role": "Viewer",
 				"viewers_can_edit":     true,
 				"editors_can_admin":    false,
 			},
