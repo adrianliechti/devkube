@@ -10,7 +10,7 @@ import (
 var (
 	dashboard = "dashboard"
 
-	chartRepo    = "https://kubernetes.github.io/dashboard/"
+	chartRepo    = "https://kubernetes.github.io/dashboard"
 	chartName    = "kubernetes-dashboard"
 	chartVersion = "5.4.1"
 
