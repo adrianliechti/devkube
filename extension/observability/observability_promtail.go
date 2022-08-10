@@ -10,7 +10,7 @@ const (
 	promtail        = "promtail"
 	promtailRepo    = "https://grafana.github.io/helm-charts"
 	promtailChart   = "promtail"
-	promtailVersion = "4.2.0"
+	promtailVersion = "6.2.2"
 )
 
 func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
@@ -31,7 +31,7 @@ func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 
 func uninstallPromtail(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, kubeconfig, namespace, promtail); err != nil {
-		return err
+		//return err
 	}
 
 	return nil

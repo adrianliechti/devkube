@@ -12,12 +12,12 @@ var (
 
 	chartRepo    = "https://kubernetes.github.io/dashboard"
 	chartName    = "kubernetes-dashboard"
-	chartVersion = "5.4.1"
+	chartVersion = "5.7.0"
 
 	Images = []string{
-		"kubernetesui/dashboard:v2.5.1",
-		"kubernetesui/metrics-scraper:v1.0.7",
-		"k8s.gcr.io/metrics-server/metrics-server:v0.5.0",
+		// "kubernetesui/dashboard:v2.5.1",
+		// "kubernetesui/metrics-scraper:v1.0.7",
+		// "k8s.gcr.io/metrics-server/metrics-server:v0.5.0",
 	}
 )
 
@@ -73,11 +73,11 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "clusterrolebinding", dashboard); err != nil {
-		return err
+		//return err
 	}
 
 	if err := helm.Uninstall(ctx, kubeconfig, namespace, dashboard); err != nil {
-		return err
+		//return err
 	}
 
 	return nil

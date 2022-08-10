@@ -40,7 +40,30 @@ func CreateCommand() *cli.Command {
 				return err
 			}
 
-			if err := kind.Create(c.Context, name); err != nil {
+			config := map[string]any{
+				"kind":       "Cluster",
+				"apiVersion": "kind.x-k8s.io/v1alpha4",
+
+				"kubeadmConfigPatches": []string{
+					`kind: ClusterConfiguration
+controllerManager:
+  extraArgs:
+    bind-address: 0.0.0.0
+scheduler:
+  extraArgs:
+    bind-address: 0.0.0.0
+etcd:
+  local:
+    extraArgs:
+      listen-metrics-urls: http://0.0.0.0:2381
+`,
+					`kind: KubeProxyConfiguration
+metricsBindAddress: 0.0.0.0
+`,
+				},
+			}
+
+			if err := kind.Create(c.Context, name, config); err != nil {
 				return err
 			}
 

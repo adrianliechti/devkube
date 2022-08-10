@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -98,7 +99,7 @@ func List(ctx context.Context) ([]string, error) {
 	return list, nil
 }
 
-func Create(ctx context.Context, name string) error {
+func Create(ctx context.Context, name string, config map[string]any) error {
 	tool, _, err := Tool(ctx)
 
 	if err != nil {
@@ -113,9 +114,23 @@ func Create(ctx context.Context, name string) error {
 		args = append(args, "--name", name)
 	}
 
+	if len(config) > 0 {
+		args = append(args, "--config", "-")
+	}
+
 	cmd := exec.CommandContext(ctx, tool, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
+	if len(config) > 0 {
+		data, err := yaml.Marshal(config)
+
+		if err != nil {
+			return err
+		}
+
+		cmd.Stdin = bytes.NewReader(data)
+	}
 
 	return cmd.Run()
 }

@@ -10,7 +10,7 @@ const (
 	grafana        = "grafana"
 	grafanaRepo    = "https://grafana.github.io/helm-charts"
 	grafanaChart   = "grafana"
-	grafanaVersion = "6.29.2"
+	grafanaVersion = "6.32.12"
 )
 
 func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
@@ -19,6 +19,25 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 
 		"adminUser":     "admin",
 		"adminPassword": "admin",
+
+		"persistence": map[string]any{
+			"enabled": true,
+			"size":    "10Gi",
+		},
+
+		"sidecar": map[string]any{
+			"dashboards": map[string]any{
+				"enabled": true,
+			},
+
+			"datasources": map[string]any{
+				"enabled": true,
+			},
+
+			"plugins": map[string]any{
+				"enabled": true,
+			},
+		},
 
 		"grafana.ini": map[string]any{
 			"alerting": map[string]any{
@@ -35,7 +54,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 			},
 
 			"auth": map[string]any{
-				"disable_login_form": false,
+				"disable_login_form": true,
 			},
 
 			"auth.basic": map[string]any{
@@ -45,7 +64,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 			"auth.anonymous": map[string]any{
 				"enabled":  true,
 				"org_name": "Main Org.",
-				"org_role": "Viewer",
+				"org_role": "Admin",
 			},
 		},
 
@@ -54,8 +73,6 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 				"apiVersion": 1,
 				"datasources": []map[string]any{
 					{
-						"isDefault": true,
-
 						"name":   "Loki",
 						"type":   "loki",
 						"uid":    "loki",
@@ -73,8 +90,19 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 						"name":   "Prometheus",
 						"type":   "prometheus",
 						"uid":    "prometheus",
-						"url":    "http://" + prometheus + "-server",
+						"url":    "http://" + prometheus + "-prometheus:9090",
 						"access": "proxy",
+					},
+					{
+						"name":   "Alertmanager",
+						"type":   "alertmanager",
+						"uid":    "alertmanager",
+						"url":    "http://" + prometheus + "-alertmanager:9093",
+						"access": "proxy",
+
+						"jsonData": map[string]any{
+							"implementation": "prometheus",
+						},
 					},
 				},
 			},
@@ -90,7 +118,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 
 func uninstallGrafana(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, kubeconfig, namespace, grafana); err != nil {
-		return err
+		//return err
 	}
 
 	return nil

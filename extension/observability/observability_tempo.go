@@ -22,10 +22,6 @@ func installTempo(ctx context.Context, kubeconfig, namespace string) error {
 			"enabled": true,
 			"size":    "10Gi",
 		},
-
-		"tempoQuery": map[string]any{
-			"tag": "1.4.0",
-		},
 	}
 
 	if err := helm.Install(ctx, kubeconfig, namespace, tempo, tempoRepo, tempoChart, tempoVersion, values); err != nil {
@@ -37,11 +33,11 @@ func installTempo(ctx context.Context, kubeconfig, namespace string) error {
 
 func uninstallTempo(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, kubeconfig, namespace, tempo); err != nil {
-		return err
+		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "storage-"+tempo+"-0"); err != nil {
-		return err
+	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "-n", namespace, "storage-"+tempo+"-0"); err != nil {
+		//return err
 	}
 
 	return nil
