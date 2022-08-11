@@ -11,7 +11,7 @@ const (
 	tempo        = "tempo"
 	tempoRepo    = "https://grafana.github.io/helm-charts"
 	tempoChart   = "tempo"
-	tempoVersion = "0.15.0"
+	tempoVersion = "0.15.8"
 )
 
 func installTempo(ctx context.Context, kubeconfig, namespace string) error {

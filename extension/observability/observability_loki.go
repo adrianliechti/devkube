@@ -11,7 +11,7 @@ const (
 	loki        = "loki"
 	lokiRepo    = "https://grafana.github.io/helm-charts"
 	lokiChart   = "loki"
-	lokiVersion = "2.13.3"
+	lokiVersion = "2.14.0"
 )
 
 func installLoki(ctx context.Context, kubeconfig, namespace string) error {
