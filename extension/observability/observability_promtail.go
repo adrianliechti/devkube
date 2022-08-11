@@ -18,7 +18,11 @@ func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 		"nameOverride": promtail,
 
 		"config": map[string]any{
-			"lokiAddress": "http://" + loki + ":3100/loki/api/v1/push",
+			"clients": []map[string]any{
+				{
+					"url": "http://" + loki + ":3100/loki/api/v1/push",
+				},
+			},
 		},
 	}
 
