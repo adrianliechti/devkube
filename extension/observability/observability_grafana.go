@@ -22,6 +22,10 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 			"size":    "10Gi",
 		},
 
+		"serviceMonitor": map[string]any{
+			"enabled": true,
+		},
+
 		"sidecar": map[string]any{
 			"dashboards": map[string]any{
 				"enabled": true,

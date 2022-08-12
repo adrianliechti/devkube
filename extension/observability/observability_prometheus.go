@@ -8,13 +8,16 @@ import (
 )
 
 const (
-	prometheus        = "kube-prometheus-stack"
+	prometheus        = "monitoring"
 	prometheusChart   = "kube-prometheus-stack"
 	prometheusVersion = "39.6.0"
 )
 
 func installPrometheus(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
+		"nameOverride":     prometheus,
+		"fullnameOverride": prometheus,
+
 		"kubeEtcd": map[string]any{
 			"service": map[string]any{
 				"targetPort": 2381,
@@ -76,6 +79,10 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 
 	if err := helm.Install(ctx, kubeconfig, namespace, prometheus, prometheusRepo, prometheusChart, prometheusVersion, values); err != nil {
 		return err
+	}
+
+	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "configmap", "-n", namespace, prometheus+"-nodes-darwin"); err != nil {
+		//return err
 	}
 
 	return nil
