@@ -9,6 +9,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/dashboard"
+	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/observability"
 )
 
@@ -74,6 +75,14 @@ metricsBindAddress: 0.0.0.0
 
 			namespace := "loop"
 			kubeconfig := ""
+
+			if err := observability.InstallCRD(c.Context, kubeconfig, namespace); err != nil {
+				return err
+			}
+
+			if err := metrics.Install(c.Context, kubeconfig, namespace); err != nil {
+				return err
+			}
 
 			if err := dashboard.Install(c.Context, kubeconfig, namespace); err != nil {
 				return err

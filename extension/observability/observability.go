@@ -2,6 +2,8 @@ package observability
 
 import (
 	"context"
+
+	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
 
 const (
@@ -27,9 +29,36 @@ var (
 	}
 )
 
+func InstallCRD(ctx context.Context, kubeconfig, namespace string) error {
+	crds := []string{
+		"crd-alertmanagerconfigs.yaml",
+		"crd-alertmanagers.yaml",
+		"crd-podmonitors.yaml",
+		"crd-probes.yaml",
+		"crd-prometheuses.yaml",
+		"crd-prometheusrules.yaml",
+		"crd-servicemonitors.yaml",
+		"crd-thanosrulers.yaml",
+	}
+
+	for _, crd := range crds {
+		url := "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + prometheusVersion + "/charts/kube-prometheus-stack/crds/" + crd
+
+		if err := kubectl.Invoke(ctx, kubeconfig, "apply", "-n", namespace, "-f", url); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func Install(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
+	}
+
+	if err := installPrometheus(ctx, kubeconfig, namespace); err != nil {
+		return err
 	}
 
 	if err := installLoki(ctx, kubeconfig, namespace); err != nil {
@@ -41,10 +70,6 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := installPromtail(ctx, kubeconfig, namespace); err != nil {
-		return err
-	}
-
-	if err := installPrometheus(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
 
