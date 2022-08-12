@@ -34,6 +34,10 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 			"plugins": map[string]any{
 				"enabled": true,
 			},
+
+			"notifiers": map[string]any{
+				"enabled": true,
+			},
 		},
 
 		"grafana.ini": map[string]any{
