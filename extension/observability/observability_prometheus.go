@@ -47,6 +47,18 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 
 		"prometheus": map[string]any{
 			"prometheusSpec": map[string]any{
+				"serviceMonitorSelector":                  nil,
+				"serviceMonitorSelectorNilUsesHelmValues": false,
+
+				"podMonitorSelector":                  nil,
+				"podMonitorSelectorNilUsesHelmValues": false,
+
+				"probeSelector":                  nil,
+				"probeSelectorNilUsesHelmValues": false,
+
+				"ruleSelector":                  nil,
+				"ruleSelectorNilUsesHelmValues": false,
+
 				"storageSpec": map[string]any{
 					"volumeClaimTemplate": map[string]any{
 						"spec": map[string]any{
