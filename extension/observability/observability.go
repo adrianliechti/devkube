@@ -44,7 +44,7 @@ func InstallCRD(ctx context.Context, kubeconfig, namespace string) error {
 	for _, crd := range crds {
 		url := "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + prometheusVersion + "/charts/kube-prometheus-stack/crds/" + crd
 
-		if err := kubectl.Invoke(ctx, kubeconfig, "apply", "-n", namespace, "-f", url); err != nil {
+		if err := kubectl.Invoke(ctx, kubeconfig, "apply", "-n", namespace, "-f", url, "--validate=false", "--server-side=true", "--overwrite=true"); err != nil {
 			return err
 		}
 	}
