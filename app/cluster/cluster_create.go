@@ -44,6 +44,22 @@ func CreateCommand() *cli.Command {
 				"kind":       "Cluster",
 				"apiVersion": "kind.x-k8s.io/v1alpha4",
 
+				"nodes": []map[string]any{
+					{
+						"role": "control-plane",
+						"extraMounts": []map[string]any{
+							{
+								"hostPath":      "/dev",
+								"containerPath": "/dev",
+							},
+							{
+								"hostPath":      "/var/run/docker.sock",
+								"containerPath": "/var/run/docker.sock",
+							},
+						},
+					},
+				},
+
 				"kubeadmConfigPatches": []string{
 					`kind: ClusterConfiguration
 controllerManager:
