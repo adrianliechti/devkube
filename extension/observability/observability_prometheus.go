@@ -9,7 +9,6 @@ import (
 
 const (
 	prometheus        = "kube-prometheus-stack"
-	prometheusRepo    = "https://prometheus-community.github.io/helm-charts"
 	prometheusChart   = "kube-prometheus-stack"
 	prometheusVersion = "39.6.0"
 )

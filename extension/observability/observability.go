@@ -4,6 +4,12 @@ import (
 	"context"
 )
 
+const (
+	falcoRepo      = "https://falcosecurity.github.io/charts"
+	grafanaRepo    = "https://grafana.github.io/helm-charts"
+	prometheusRepo = "https://prometheus-community.github.io/helm-charts"
+)
+
 var (
 	Images = []string{
 		// "grafana/loki:2.5.0",

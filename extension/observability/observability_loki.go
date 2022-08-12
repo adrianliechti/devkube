@@ -9,15 +9,12 @@ import (
 
 const (
 	loki        = "loki"
-	lokiRepo    = "https://grafana.github.io/helm-charts"
 	lokiChart   = "loki"
 	lokiVersion = "2.14.0"
 )
 
 func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
-		"nameOverride": loki,
-
 		"persistence": map[string]any{
 			"enabled": true,
 			"size":    "10Gi",
@@ -41,7 +38,7 @@ func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, loki, lokiRepo, lokiChart, lokiVersion, values); err != nil {
+	if err := helm.Install(ctx, kubeconfig, namespace, loki, grafanaRepo, lokiChart, lokiVersion, values); err != nil {
 		return err
 	}
 

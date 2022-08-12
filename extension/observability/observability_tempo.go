@@ -9,22 +9,19 @@ import (
 
 const (
 	tempo        = "tempo"
-	tempoRepo    = "https://grafana.github.io/helm-charts"
 	tempoChart   = "tempo"
 	tempoVersion = "0.15.8"
 )
 
 func installTempo(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
-		"nameOverride": tempo,
-
 		"persistence": map[string]any{
 			"enabled": true,
 			"size":    "10Gi",
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, tempo, tempoRepo, tempoChart, tempoVersion, values); err != nil {
+	if err := helm.Install(ctx, kubeconfig, namespace, tempo, grafanaRepo, tempoChart, tempoVersion, values); err != nil {
 		return err
 	}
 

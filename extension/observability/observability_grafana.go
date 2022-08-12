@@ -8,15 +8,12 @@ import (
 
 const (
 	grafana        = "grafana"
-	grafanaRepo    = "https://grafana.github.io/helm-charts"
 	grafanaChart   = "grafana"
 	grafanaVersion = "6.32.12"
 )
 
 func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
-		"nameOverride": grafana,
-
 		"adminUser":     "admin",
 		"adminPassword": "admin",
 
@@ -109,7 +106,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, "grafana", grafanaRepo, grafanaChart, grafanaVersion, values); err != nil {
+	if err := helm.Install(ctx, kubeconfig, namespace, grafana, grafanaRepo, grafanaChart, grafanaVersion, values); err != nil {
 		return err
 	}
 

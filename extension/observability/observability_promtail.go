@@ -8,15 +8,12 @@ import (
 
 const (
 	promtail        = "promtail"
-	promtailRepo    = "https://grafana.github.io/helm-charts"
 	promtailChart   = "promtail"
 	promtailVersion = "6.2.2"
 )
 
 func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
-		"nameOverride": promtail,
-
 		"config": map[string]any{
 			"clients": []map[string]any{
 				{
@@ -26,7 +23,7 @@ func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, promtail, promtailRepo, promtailChart, promtailVersion, values); err != nil {
+	if err := helm.Install(ctx, kubeconfig, namespace, promtail, grafanaRepo, promtailChart, promtailVersion, values); err != nil {
 		return err
 	}
 
