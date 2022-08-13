@@ -25,6 +25,10 @@ func CreateCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			name := c.String("name")
 
+			if name == "" {
+				name = "devkube"
+			}
+
 			if _, _, err := docker.Tool(c.Context); err != nil {
 				return err
 			}
