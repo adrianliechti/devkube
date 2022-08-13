@@ -15,6 +15,10 @@ const (
 
 func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
+		"rbac": map[string]any{
+			"pspEnabled": false,
+		},
+
 		"persistence": map[string]any{
 			"enabled": true,
 			"size":    "10Gi",

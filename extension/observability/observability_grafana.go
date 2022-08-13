@@ -17,6 +17,10 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 		"adminUser":     "admin",
 		"adminPassword": "admin",
 
+		"rbac": map[string]any{
+			"pspEnabled": false,
+		},
+
 		"persistence": map[string]any{
 			"enabled": true,
 			"size":    "10Gi",
