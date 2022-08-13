@@ -42,6 +42,8 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		"metricsScraper": map[string]any{
 			"enabled": true,
 		},
+
+		"resources": nil,
 	}
 
 	if err := helm.Install(ctx, kubeconfig, namespace, dashboard, dashboardRepo, dashboardChart, dashboardVersion, values); err != nil {
