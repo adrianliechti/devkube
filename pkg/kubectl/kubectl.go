@@ -97,7 +97,6 @@ func Invoke(ctx context.Context, kubeconfig string, arg ...string) error {
 
 	cmd := exec.CommandContext(ctx, tool, arg...)
 	cmd.Env = env
-	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
