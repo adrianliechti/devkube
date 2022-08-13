@@ -21,7 +21,8 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	values := map[string]any{
-		"nameOverride": dashboard,
+		"nameOverride":     dashboard,
+		"fullnameOverride": dashboard,
 
 		"extraArgs": []string{
 			"--enable-skip-login",
