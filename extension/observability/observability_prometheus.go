@@ -18,6 +18,8 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 		"nameOverride":     prometheus,
 		"fullnameOverride": prometheus,
 
+		"cleanPrometheusOperatorObjectNames": true,
+
 		"kubeEtcd": map[string]any{
 			"service": map[string]any{
 				"targetPort": 2381,
@@ -93,11 +95,11 @@ func uninstallPrometheus(ctx context.Context, kubeconfig, namespace string) erro
 		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "-n", namespace, "-l", "app.kubernetes.io/instance="+prometheus+"-alertmanager"); err != nil {
+	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "-n", namespace, "-l", "app.kubernetes.io/instance="+prometheus); err != nil {
 		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "-n", namespace, "-l", "app.kubernetes.io/instance="+prometheus+"-prometheus"); err != nil {
+	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "secret", "-n", namespace, prometheus+"-admission"); err != nil {
 		//return err
 	}
 

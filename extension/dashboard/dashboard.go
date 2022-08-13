@@ -13,11 +13,6 @@ var (
 	dashboard        = "dashboard"
 	dashboardChart   = "kubernetes-dashboard"
 	dashboardVersion = "5.8.0"
-
-	Images = []string{
-		// "kubernetesui/dashboard:v2.5.1",
-		// "kubernetesui/metrics-scraper:v1.0.7",
-	}
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {

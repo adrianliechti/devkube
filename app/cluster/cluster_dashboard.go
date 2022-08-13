@@ -49,7 +49,7 @@ func DashboardCommand() *cli.Command {
 				cli.OpenURL(url)
 			})
 
-			namespace := "loop"
+			namespace := DefaultNamespace
 
 			if err := kubectl.Invoke(c.Context, kubeconfig, "port-forward", "-n", namespace, "service/dashboard", fmt.Sprintf("%d:80", port)); err != nil {
 				return err

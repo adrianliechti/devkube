@@ -69,15 +69,10 @@ metricsBindAddress: 0.0.0.0
 			}
 
 			if err := kind.Create(c.Context, name, config); err != nil {
-				return err
+				//return err
 			}
 
-			for _, image := range append(dashboard.Images, observability.Images...) {
-				docker.Pull(c.Context, image)
-				kind.LoadImage(c.Context, name, image)
-			}
-
-			namespace := "loop"
+			namespace := DefaultNamespace
 			kubeconfig := ""
 
 			if err := observability.InstallCRD(c.Context, kubeconfig, namespace); err != nil {

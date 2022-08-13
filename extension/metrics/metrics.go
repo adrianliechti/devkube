@@ -12,10 +12,6 @@ var (
 	metrics        = "metrics-server"
 	metricsChart   = "metrics-server"
 	metricsVersion = "3.8.2"
-
-	Images = []string{
-		// "k8s.gcr.io/metrics-server/metrics-server:v0.5.0",
-	}
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {

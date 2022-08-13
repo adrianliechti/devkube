@@ -54,8 +54,8 @@ func uninstallLoki(ctx context.Context, kubeconfig, namespace string) error {
 		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "-n", namespace, "storage-"+loki+"-0"); err != nil {
-		//return err
+	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "-n", namespace, "-l", "release="+loki); err != nil {
+		return err
 	}
 
 	return nil

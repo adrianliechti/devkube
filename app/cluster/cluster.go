@@ -8,6 +8,10 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kind"
 )
 
+const (
+	DefaultNamespace = "loop"
+)
+
 func SelectCluster(ctx context.Context) (string, error) {
 	list, err := kind.List(ctx)
 
@@ -23,6 +27,10 @@ func SelectCluster(ctx context.Context) (string, error) {
 
 	if len(items) == 0 {
 		return "", errors.New("no instances found")
+	}
+
+	if len(items) == 1 {
+		return items[0], nil
 	}
 
 	i, _, err := cli.Select("Select instance", items)
