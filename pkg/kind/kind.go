@@ -99,7 +99,7 @@ func List(ctx context.Context) ([]string, error) {
 	return list, nil
 }
 
-func Create(ctx context.Context, name string, config map[string]any) error {
+func Create(ctx context.Context, name string, config map[string]any, path string) error {
 	tool, _, err := Tool(ctx)
 
 	if err != nil {
@@ -112,6 +112,10 @@ func Create(ctx context.Context, name string, config map[string]any) error {
 
 	if name != "" {
 		args = append(args, "--name", name)
+	}
+
+	if path != "" {
+		args = append(args, "--kubeconfig", path)
 	}
 
 	if len(config) > 0 {

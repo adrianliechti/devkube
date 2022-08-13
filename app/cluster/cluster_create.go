@@ -1,6 +1,10 @@
 package cluster
 
 import (
+	"io/ioutil"
+	"os"
+	"path"
+
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/docker"
@@ -45,6 +49,14 @@ func CreateCommand() *cli.Command {
 				return err
 			}
 
+			dir, err := ioutil.TempDir("", "kind")
+
+			if err != nil {
+				return err
+			}
+
+			defer os.RemoveAll(dir)
+
 			config := map[string]any{
 				"kind":       "Cluster",
 				"apiVersion": "kind.x-k8s.io/v1alpha4",
@@ -68,12 +80,12 @@ metricsBindAddress: 0.0.0.0
 				},
 			}
 
-			if err := kind.Create(c.Context, name, config); err != nil {
-				//return err
-			}
-
+			kubeconfig := path.Join(dir, "kubeconfig")
 			namespace := DefaultNamespace
-			kubeconfig := ""
+
+			if err := kind.Create(c.Context, name, config, kubeconfig); err != nil {
+				return err
+			}
 
 			if err := observability.InstallCRD(c.Context, kubeconfig, namespace); err != nil {
 				return err
@@ -88,6 +100,10 @@ metricsBindAddress: 0.0.0.0
 			}
 
 			if err := observability.Install(c.Context, kubeconfig, namespace); err != nil {
+				return err
+			}
+
+			if err := kind.Kubeconfig(c.Context, name, ""); err != nil {
 				return err
 			}
 
