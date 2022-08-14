@@ -15,5 +15,6 @@ brew install adrianliechti/tap/devkube
 [Scoop](https://scoop.sh)
 
 ```shell
-scoop install https://raw.githubusercontent.com/adrianliechti/scoop-bucket/main/devkube.json
+scoop bucket add adrianliechti https://github.com/adrianliechti/scoop-bucket
+scoop install adrianliechti/devkube
 ```
