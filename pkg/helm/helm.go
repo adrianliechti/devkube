@@ -20,15 +20,11 @@ var (
 	errOutdated = errors.New("helm is outdated. see https://helm.sh/docs/intro/install/")
 )
 
-func Tool(ctx context.Context) (string, *semver.Version, error) {
-	if path, version, err := Path(ctx); err == nil {
-		return path, version, err
-	}
-
-	return "", nil, errNotFound
+func Info(ctx context.Context) (string, *semver.Version, error) {
+	return path(ctx)
 }
 
-func Path(ctx context.Context) (string, *semver.Version, error) {
+func path(ctx context.Context) (string, *semver.Version, error) {
 	name := "helm"
 
 	if runtime.GOOS == "windows" {
@@ -69,7 +65,7 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 }
 
 func Install(ctx context.Context, kubeconfig, namespace, release, repo, chart, version string, values map[string]interface{}) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err
@@ -119,7 +115,7 @@ func Install(ctx context.Context, kubeconfig, namespace, release, repo, chart, v
 }
 
 func Uninstall(ctx context.Context, kubeconfig, namespace, release string) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err

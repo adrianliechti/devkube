@@ -18,15 +18,11 @@ var (
 	errOutdated = errors.New("kubectl is outdated. see https://kubernetes.io/docs/tasks/tools/install-kubectl")
 )
 
-func Tool(ctx context.Context) (string, *semver.Version, error) {
-	if path, version, err := Path(ctx); err == nil {
-		return path, version, err
-	}
-
-	return "", nil, errNotFound
+func Info(ctx context.Context) (string, *semver.Version, error) {
+	return path(ctx)
 }
 
-func Path(ctx context.Context) (string, *semver.Version, error) {
+func path(ctx context.Context) (string, *semver.Version, error) {
 	name := "kubectl"
 
 	if runtime.GOOS == "windows" {
@@ -81,7 +77,7 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 }
 
 func Invoke(ctx context.Context, kubeconfig string, arg ...string) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err

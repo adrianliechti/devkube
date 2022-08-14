@@ -21,15 +21,11 @@ var (
 	errOutdated = errors.New("kind is outdated. see https://kind.sigs.k8s.io/docs/user/quick-start/")
 )
 
-func Tool(ctx context.Context) (string, *semver.Version, error) {
-	if path, version, err := Path(ctx); err == nil {
-		return path, version, err
-	}
-
-	return "", nil, errNotFound
+func Info(ctx context.Context) (string, *semver.Version, error) {
+	return path(ctx)
 }
 
-func Path(ctx context.Context) (string, *semver.Version, error) {
+func path(ctx context.Context) (string, *semver.Version, error) {
 	name := "kind"
 
 	if runtime.GOOS == "windows" {
@@ -72,7 +68,7 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 func List(ctx context.Context) ([]string, error) {
 	var list []string
 
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return list, err
@@ -100,7 +96,7 @@ func List(ctx context.Context) ([]string, error) {
 }
 
 func Create(ctx context.Context, name string, config map[string]any, path string) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err
@@ -140,7 +136,7 @@ func Create(ctx context.Context, name string, config map[string]any, path string
 }
 
 func Delete(ctx context.Context, name string) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err
@@ -162,7 +158,7 @@ func Delete(ctx context.Context, name string) error {
 }
 
 func Kubeconfig(ctx context.Context, name, path string) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err
@@ -177,7 +173,7 @@ func Kubeconfig(ctx context.Context, name, path string) error {
 }
 
 func LoadImage(ctx context.Context, name, image string) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err

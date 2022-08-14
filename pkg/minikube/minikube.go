@@ -18,15 +18,11 @@ var (
 	errOutdated = errors.New("minikube is outdated. see https://minikube.sigs.k8s.io/docs/start/")
 )
 
-func Tool(ctx context.Context) (string, *semver.Version, error) {
-	if path, version, err := Path(ctx); err == nil {
-		return path, version, err
-	}
-
-	return "", nil, errNotFound
+func Info(ctx context.Context) (string, *semver.Version, error) {
+	return path(ctx)
 }
 
-func Path(ctx context.Context) (string, *semver.Version, error) {
+func path(ctx context.Context) (string, *semver.Version, error) {
 	name := "minikube"
 
 	if runtime.GOOS == "windows" {
@@ -67,7 +63,7 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 }
 
 func Create(ctx context.Context, profile string) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err
@@ -90,7 +86,7 @@ func Create(ctx context.Context, profile string) error {
 }
 
 func Delete(ctx context.Context, profile string) error {
-	tool, _, err := Tool(ctx)
+	tool, _, err := Info(ctx)
 
 	if err != nil {
 		return err
