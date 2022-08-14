@@ -16,5 +16,5 @@ brew install adrianliechti/tap/devkube
 
 ```shell
 scoop bucket add adrianliechti https://github.com/adrianliechti/scoop-bucket
-scoop install adrianliechti/devkube
+scoop install kind kubectl helm adrianliechti/devkube
 ```
