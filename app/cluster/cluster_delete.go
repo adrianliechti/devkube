@@ -43,7 +43,11 @@ func DeleteCommand() *cli.Command {
 				name = MustCluster(c.Context)
 			}
 
-			return kind.Delete(c.Context, name)
+			if ok, _ := cli.Confirm("Are you sure you want to delete cluster "+name, false); ok {
+				return kind.Delete(c.Context, name)
+			}
+
+			return nil
 		},
 	}
 }

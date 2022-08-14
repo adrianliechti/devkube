@@ -104,14 +104,12 @@ func Confirm(label string, placeholder bool) (bool, error) {
 	}
 
 	_, err := prompt.Run()
-	result := true
 
-	if err == promptui.ErrAbort {
-		err = nil
-		result = false
+	if err != nil {
+		return false, err
 	}
 
-	return result, err
+	return true, nil
 }
 
 func Table(header []string, rows [][]string) {
