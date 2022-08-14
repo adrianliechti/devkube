@@ -22,11 +22,7 @@ func SetupCommand() *cli.Command {
 				name = MustCluster(c.Context)
 			}
 
-			if err := kind.Kubeconfig(c.Context, name, ""); err != nil {
-				return err
-			}
-
-			return nil
+			return kind.ExportConfig(c.Context, name, "")
 		},
 	}
 }

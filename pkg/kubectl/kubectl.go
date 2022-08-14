@@ -77,7 +77,7 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 	return semver.NewVersion(version.ClientVersion.GitVersion)
 }
 
-type KubectlOption func(h *Kubectl)
+type Option func(h *Kubectl)
 
 type Kubectl struct {
 	kubeconfig string
@@ -90,42 +90,42 @@ type Kubectl struct {
 	stderr io.Writer
 }
 
-func New(opts ...KubectlOption) *Kubectl {
+func New(options ...Option) *Kubectl {
 	k := &Kubectl{}
 
-	for _, opt := range opts {
-		opt(k)
+	for _, option := range options {
+		option(k)
 	}
 
 	return k
 }
 
-func WithKubeconfig(kubeconfig string) KubectlOption {
+func WithKubeconfig(kubeconfig string) Option {
 	return func(k *Kubectl) {
 		k.kubeconfig = kubeconfig
 	}
 }
 
-func WithContext(context string) KubectlOption {
+func WithContext(context string) Option {
 	return func(k *Kubectl) {
 		k.context = context
 	}
 }
 
-func WithNamespace(namespace string) KubectlOption {
+func WithNamespace(namespace string) Option {
 	return func(k *Kubectl) {
 		k.namespace = namespace
 	}
 }
 
-func WithOutput(stdout, stderr io.Writer) KubectlOption {
+func WithOutput(stdout, stderr io.Writer) Option {
 	return func(k *Kubectl) {
 		k.stdout = stdout
 		k.stderr = stderr
 	}
 }
 
-func WithDefaultOutput() KubectlOption {
+func WithDefaultOutput() Option {
 	return WithOutput(os.Stdout, os.Stderr)
 }
 
@@ -156,7 +156,7 @@ func (k *Kubectl) Invoke(ctx context.Context, arg ...string) error {
 	return cmd.Run()
 }
 
-func Invoke(ctx context.Context, args []string, opt ...KubectlOption) error {
+func Invoke(ctx context.Context, args []string, opt ...Option) error {
 	k := New(opt...)
 
 	return k.Invoke(ctx, args...)

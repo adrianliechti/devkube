@@ -65,7 +65,7 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 	return semver.NewVersion(lines[0])
 }
 
-type HelmOption func(h *Helm)
+type Option func(h *Helm)
 
 type Helm struct {
 	kubeconfig string
@@ -78,42 +78,42 @@ type Helm struct {
 	stderr io.Writer
 }
 
-func New(opts ...HelmOption) *Helm {
+func New(options ...Option) *Helm {
 	h := &Helm{}
 
-	for _, opt := range opts {
-		opt(h)
+	for _, option := range options {
+		option(h)
 	}
 
 	return h
 }
 
-func WithKubeconfig(kubeconfig string) HelmOption {
+func WithKubeconfig(kubeconfig string) Option {
 	return func(h *Helm) {
 		h.kubeconfig = kubeconfig
 	}
 }
 
-func WithContext(context string) HelmOption {
+func WithContext(context string) Option {
 	return func(h *Helm) {
 		h.context = context
 	}
 }
 
-func WithNamespace(namespace string) HelmOption {
+func WithNamespace(namespace string) Option {
 	return func(h *Helm) {
 		h.namespace = namespace
 	}
 }
 
-func WithOutput(stdout, stderr io.Writer) HelmOption {
+func WithOutput(stdout, stderr io.Writer) Option {
 	return func(h *Helm) {
 		h.stdout = stdout
 		h.stderr = stderr
 	}
 }
 
-func WithDefaultOutput() HelmOption {
+func WithDefaultOutput() Option {
 	return WithOutput(os.Stdout, os.Stderr)
 }
 
@@ -144,7 +144,7 @@ func (h *Helm) Invoke(ctx context.Context, arg ...string) error {
 	return cmd.Run()
 }
 
-func Install(ctx context.Context, release, repo, chart, version string, values map[string]interface{}, opt ...HelmOption) error {
+func Install(ctx context.Context, release, repo, chart, version string, values map[string]interface{}, opt ...Option) error {
 	h := New(opt...)
 
 	args := []string{
@@ -176,7 +176,7 @@ func Install(ctx context.Context, release, repo, chart, version string, values m
 	return h.Invoke(ctx, args...)
 }
 
-func Uninstall(ctx context.Context, release string, opt ...HelmOption) error {
+func Uninstall(ctx context.Context, release string, opt ...Option) error {
 	h := New(opt...)
 
 	args := []string{

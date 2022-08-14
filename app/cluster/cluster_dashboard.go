@@ -40,7 +40,7 @@ func DashboardCommand() *cli.Command {
 			defer os.RemoveAll(dir)
 			kubeconfig := path.Join(dir, "kubeconfig")
 
-			if err := kind.Kubeconfig(c.Context, name, kubeconfig); err != nil {
+			if err := kind.ExportConfig(c.Context, name, kubeconfig); err != nil {
 				return err
 			}
 

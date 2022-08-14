@@ -95,7 +95,7 @@ func List(ctx context.Context) ([]string, error) {
 	return list, nil
 }
 
-func Create(ctx context.Context, name string, config map[string]any, path string) error {
+func Create(ctx context.Context, name string, config map[string]any, kubeconfig string) error {
 	tool, _, err := Info(ctx)
 
 	if err != nil {
@@ -110,8 +110,8 @@ func Create(ctx context.Context, name string, config map[string]any, path string
 		args = append(args, "--name", name)
 	}
 
-	if path != "" {
-		args = append(args, "--kubeconfig", path)
+	if kubeconfig != "" {
+		args = append(args, "--kubeconfig", kubeconfig)
 	}
 
 	if len(config) > 0 {
@@ -157,7 +157,7 @@ func Delete(ctx context.Context, name string) error {
 	return cmd.Run()
 }
 
-func Kubeconfig(ctx context.Context, name, path string) error {
+func ExportConfig(ctx context.Context, name, path string) error {
 	tool, _, err := Info(ctx)
 
 	if err != nil {
@@ -169,28 +169,5 @@ func Kubeconfig(ctx context.Context, name, path string) error {
 	}
 
 	cmd := exec.CommandContext(ctx, tool, args...)
-	return cmd.Run()
-}
-
-func LoadImage(ctx context.Context, name, image string) error {
-	tool, _, err := Info(ctx)
-
-	if err != nil {
-		return err
-	}
-
-	args := []string{
-		"load", "docker-image", image,
-	}
-
-	if name != "" {
-		args = append(args, "--name", name)
-	}
-
-	cmd := exec.CommandContext(ctx, tool, args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
 	return cmd.Run()
 }
