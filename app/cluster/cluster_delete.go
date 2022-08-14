@@ -25,14 +25,6 @@ func DeleteCommand() *cli.Command {
 				return err
 			}
 
-			// if _, _, err := helm.Info(c.Context); err != nil {
-			// 	return err
-			// }
-
-			// if _, _, err := kubectl.Info(c.Context); err != nil {
-			// 	return err
-			// }
-
 			return nil
 		},
 
