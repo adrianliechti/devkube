@@ -42,7 +42,7 @@ func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, loki, grafanaRepo, lokiChart, lokiVersion, values); err != nil {
+	if err := helm.Install(ctx, loki, grafanaRepo, lokiChart, lokiVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -50,11 +50,11 @@ func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 }
 
 func uninstallLoki(ctx context.Context, kubeconfig, namespace string) error {
-	if err := helm.Uninstall(ctx, kubeconfig, namespace, loki); err != nil {
+	if err := helm.Uninstall(ctx, loki, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "-n", namespace, "-l", "release="+loki); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "release=" + loki}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
 		return err
 	}
 

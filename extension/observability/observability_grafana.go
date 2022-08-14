@@ -118,7 +118,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, grafana, grafanaRepo, grafanaChart, grafanaVersion, values); err != nil {
+	if err := helm.Install(ctx, grafana, grafanaRepo, grafanaChart, grafanaVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -126,7 +126,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 }
 
 func uninstallGrafana(ctx context.Context, kubeconfig, namespace string) error {
-	if err := helm.Uninstall(ctx, kubeconfig, namespace, grafana); err != nil {
+	if err := helm.Uninstall(ctx, grafana, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 

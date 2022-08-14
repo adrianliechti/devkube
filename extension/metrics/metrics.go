@@ -34,7 +34,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, metrics, metricsRepo, metricsChart, metricsVersion, values); err != nil {
+	if err := helm.Install(ctx, metrics, metricsRepo, metricsChart, metricsVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -46,7 +46,7 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	if err := helm.Uninstall(ctx, kubeconfig, namespace, metrics); err != nil {
+	if err := helm.Uninstall(ctx, metrics, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 

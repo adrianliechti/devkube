@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -64,21 +65,92 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 	return semver.NewVersion(lines[0])
 }
 
-func Install(ctx context.Context, kubeconfig, namespace, release, repo, chart, version string, values map[string]interface{}) error {
-	tool, _, err := Info(ctx)
+type HelmOption func(h *Helm)
+
+type Helm struct {
+	kubeconfig string
+
+	context   string
+	namespace string
+
+	stdin  io.Reader
+	stdout io.Writer
+	stderr io.Writer
+}
+
+func New(opts ...HelmOption) *Helm {
+	h := &Helm{}
+
+	for _, opt := range opts {
+		opt(h)
+	}
+
+	return h
+}
+
+func WithKubeconfig(kubeconfig string) HelmOption {
+	return func(h *Helm) {
+		h.kubeconfig = kubeconfig
+	}
+}
+
+func WithContext(context string) HelmOption {
+	return func(h *Helm) {
+		h.context = context
+	}
+}
+
+func WithNamespace(namespace string) HelmOption {
+	return func(h *Helm) {
+		h.namespace = namespace
+	}
+}
+
+func WithOutput(stdout, stderr io.Writer) HelmOption {
+	return func(h *Helm) {
+		h.stdout = stdout
+		h.stderr = stderr
+	}
+}
+
+func WithDefaultOutput() HelmOption {
+	return WithOutput(os.Stdout, os.Stderr)
+}
+
+func (h *Helm) Invoke(ctx context.Context, arg ...string) error {
+	path, _, err := Info(ctx)
 
 	if err != nil {
 		return err
 	}
 
+	if h.kubeconfig != "" {
+		arg = append(arg, "--kubeconfig", h.kubeconfig)
+	}
+
+	if h.context != "" {
+		arg = append(arg, "--kube-context", h.context)
+	}
+
+	if h.namespace != "" {
+		arg = append(arg, "--namespace", h.namespace)
+	}
+
+	cmd := exec.CommandContext(ctx, path, arg...)
+	cmd.Stdin = h.stdin
+	cmd.Stdout = h.stdout
+	cmd.Stderr = h.stderr
+
+	return cmd.Run()
+}
+
+func Install(ctx context.Context, release, repo, chart, version string, values map[string]interface{}, opt ...HelmOption) error {
+	h := New(opt...)
+
 	args := []string{
 		"upgrade", "--install", "--create-namespace",
 		release,
 		chart,
-	}
-
-	if kubeconfig != "" {
-		args = append(args, "--kubeconfig", kubeconfig)
 	}
 
 	if repo != "" {
@@ -89,54 +161,28 @@ func Install(ctx context.Context, kubeconfig, namespace, release, repo, chart, v
 		args = append(args, "--version", version)
 	}
 
-	if namespace != "" {
-		args = append(args, "--namespace", namespace)
-	}
-
 	if len(values) > 0 {
 		args = append(args, "-f", "-")
-	}
 
-	cmd := exec.CommandContext(ctx, tool, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if len(values) > 0 {
 		data, err := yaml.Marshal(values)
 
 		if err != nil {
 			return err
 		}
 
-		cmd.Stdin = bytes.NewReader(data)
+		h.stdin = bytes.NewReader(data)
 	}
 
-	return cmd.Run()
+	return h.Invoke(ctx, args...)
 }
 
-func Uninstall(ctx context.Context, kubeconfig, namespace, release string) error {
-	tool, _, err := Info(ctx)
-
-	if err != nil {
-		return err
-	}
+func Uninstall(ctx context.Context, release string, opt ...HelmOption) error {
+	h := New(opt...)
 
 	args := []string{
 		"uninstall",
 		release,
 	}
 
-	if kubeconfig != "" {
-		args = append(args, "--kubeconfig", kubeconfig)
-	}
-
-	if namespace != "" {
-		args = append(args, "--namespace", namespace)
-	}
-
-	cmd := exec.CommandContext(ctx, tool, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return h.Invoke(ctx, args...)
 }

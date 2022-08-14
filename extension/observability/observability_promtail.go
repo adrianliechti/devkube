@@ -23,7 +23,7 @@ func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, promtail, grafanaRepo, promtailChart, promtailVersion, values); err != nil {
+	if err := helm.Install(ctx, promtail, grafanaRepo, promtailChart, promtailVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -31,7 +31,7 @@ func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 }
 
 func uninstallPromtail(ctx context.Context, kubeconfig, namespace string) error {
-	if err := helm.Uninstall(ctx, kubeconfig, namespace, promtail); err != nil {
+	if err := helm.Uninstall(ctx, promtail, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 

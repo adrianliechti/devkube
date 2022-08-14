@@ -51,7 +51,7 @@ func GrafanaCommand() *cli.Command {
 
 			namespace := DefaultNamespace
 
-			if err := kubectl.Invoke(c.Context, kubeconfig, "port-forward", "-n", namespace, "service/grafana", fmt.Sprintf("%d:80", port)); err != nil {
+			if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/grafana", fmt.Sprintf("%d:80", port)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithDefaultOutput()); err != nil {
 				return err
 			}
 

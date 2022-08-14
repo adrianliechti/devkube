@@ -79,11 +79,11 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, prometheus, prometheusRepo, prometheusChart, prometheusVersion, values); err != nil {
+	if err := helm.Install(ctx, prometheus, prometheusRepo, prometheusChart, prometheusVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "configmap", "-n", namespace, prometheus+"-nodes-darwin"); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"delete", "configmap", prometheus + "-nodes-darwin"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
@@ -91,15 +91,15 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 }
 
 func uninstallPrometheus(ctx context.Context, kubeconfig, namespace string) error {
-	if err := helm.Uninstall(ctx, kubeconfig, namespace, prometheus); err != nil {
+	if err := helm.Uninstall(ctx, prometheus, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "pvc", "-n", namespace, "-l", "app.kubernetes.io/instance="+prometheus); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "app.kubernetes.io/instance=" + prometheus}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "secret", "-n", namespace, prometheus+"-admission"); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"delete", "secret", prometheus + "-admission"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
