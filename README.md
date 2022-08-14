@@ -2,7 +2,7 @@
 
 ## Install
 
-#### MacOS
+#### MacOS / Linux
 
 [Homebrew](https://brew.sh)
 
