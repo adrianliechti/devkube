@@ -32,3 +32,12 @@ brews:
     commit_author:
       name: Adrian Liechti
       email: adrian@localhost
+
+scoop:
+  bucket:
+    owner: adrianliechti
+    name: scoop-bucket
+
+  commit_author:
+    name: Adrian Liechti
+    email: adrian@localhost
