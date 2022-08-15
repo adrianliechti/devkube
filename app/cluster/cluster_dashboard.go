@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"time"
@@ -48,7 +47,7 @@ func DashboardCommand() *cli.Command {
 				name = MustCluster(c.Context)
 			}
 
-			dir, err := ioutil.TempDir("", "kind")
+			dir, err := os.MkdirTemp("", "kind")
 
 			if err != nil {
 				return err

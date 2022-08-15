@@ -1,7 +1,6 @@
 package cluster
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -53,7 +52,7 @@ func CreateCommand() *cli.Command {
 				name = "devkube"
 			}
 
-			dir, err := ioutil.TempDir("", "kind")
+			dir, err := os.MkdirTemp("", "kind")
 
 			if err != nil {
 				return err
