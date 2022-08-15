@@ -22,6 +22,10 @@ func (h *Helm) Install(ctx context.Context, release, repo, chart, version string
 		namespace = "default"
 	}
 
+	if version == "" {
+		version = ">0.0.0-0"
+	}
+
 	config := new(action.Configuration)
 	settings := cli.New()
 

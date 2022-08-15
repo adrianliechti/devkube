@@ -7,7 +7,6 @@ import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/docker"
-	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kind"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
@@ -31,10 +30,6 @@ func CreateCommand() *cli.Command {
 			}
 
 			if _, _, err := kind.Info(c.Context); err != nil {
-				return err
-			}
-
-			if _, _, err := helm.Info(c.Context); err != nil {
 				return err
 			}
 
