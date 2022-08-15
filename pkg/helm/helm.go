@@ -1,7 +1,6 @@
 package helm
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"io"
@@ -11,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -147,42 +145,46 @@ func (h *Helm) Invoke(ctx context.Context, arg ...string) error {
 func Install(ctx context.Context, release, repo, chart, version string, values map[string]interface{}, opt ...Option) error {
 	h := New(opt...)
 
-	args := []string{
-		"upgrade", "--install", "--create-namespace",
-		release,
-		chart,
-	}
+	return h.Install(ctx, release, repo, chart, version, values)
 
-	if repo != "" {
-		args = append(args, "--repo", repo)
-	}
+	// args := []string{
+	// 	"upgrade", "--install", "--create-namespace",
+	// 	release,
+	// 	chart,
+	// }
 
-	if version != "" {
-		args = append(args, "--version", version)
-	}
+	// if repo != "" {
+	// 	args = append(args, "--repo", repo)
+	// }
 
-	if len(values) > 0 {
-		args = append(args, "-f", "-")
+	// if version != "" {
+	// 	args = append(args, "--version", version)
+	// }
 
-		data, err := yaml.Marshal(values)
+	// if len(values) > 0 {
+	// 	args = append(args, "-f", "-")
 
-		if err != nil {
-			return err
-		}
+	// 	data, err := yaml.Marshal(values)
 
-		h.stdin = bytes.NewReader(data)
-	}
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-	return h.Invoke(ctx, args...)
+	// 	h.stdin = bytes.NewReader(data)
+	// }
+
+	// return h.Invoke(ctx, args...)
 }
 
 func Uninstall(ctx context.Context, release string, opt ...Option) error {
 	h := New(opt...)
 
-	args := []string{
-		"uninstall",
-		release,
-	}
+	return h.Uninstall(ctx, release)
 
-	return h.Invoke(ctx, args...)
+	// args := []string{
+	// 	"uninstall",
+	// 	release,
+	// }
+
+	// return h.Invoke(ctx, args...)
 }
