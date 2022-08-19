@@ -31,12 +31,14 @@ func DeleteCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			name := c.String("name")
 
+			provider := MustProvider(c.Context)
+
 			if name == "" {
-				name = MustCluster(c.Context)
+				name = MustCluster(c.Context, provider)
 			}
 
 			if ok, _ := cli.Confirm("Are you sure you want to delete cluster "+name, false); ok {
-				return kind.Delete(c.Context, name)
+				return provider.Delete(c.Context, name)
 			}
 
 			return nil

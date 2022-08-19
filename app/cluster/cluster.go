@@ -3,17 +3,25 @@ package cluster
 import (
 	"context"
 	"errors"
+	"os"
+	"path"
 
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/kind"
+	"github.com/adrianliechti/devkube/provider"
+	"github.com/adrianliechti/devkube/provider/kind"
 )
 
 const (
 	DefaultNamespace = "loop"
 )
 
-func SelectCluster(ctx context.Context) (string, error) {
-	list, err := kind.List(ctx)
+func MustProvider(ctx context.Context) provider.Provider {
+	p := kind.New()
+	return p
+}
+
+func SelectCluster(ctx context.Context, provider provider.Provider) (string, error) {
+	list, err := provider.List(ctx)
 
 	var items []string
 
@@ -42,12 +50,36 @@ func SelectCluster(ctx context.Context) (string, error) {
 	return list[i], nil
 }
 
-func MustCluster(ctx context.Context) string {
-	cluster, err := SelectCluster(ctx)
+func MustCluster(ctx context.Context, provider provider.Provider) string {
+	cluster, err := SelectCluster(ctx, provider)
 
 	if err != nil {
 		cli.Fatal(err)
 	}
 
 	return cluster
+}
+
+func MustTempKubeconfig(ctx context.Context, provider provider.Provider, name string) (string, func()) {
+	if name == "" {
+		name = MustCluster(ctx, provider)
+	}
+
+	dir, err := os.MkdirTemp("", "devkube")
+
+	if err != nil {
+		cli.Fatal(err)
+	}
+
+	closer := func() {
+		os.RemoveAll(dir)
+	}
+
+	path := path.Join(dir, "kubeconfig")
+
+	if err := provider.ExportConfig(ctx, name, path); err != nil {
+		cli.Fatal(err)
+	}
+
+	return path, closer
 }

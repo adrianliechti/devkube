@@ -26,7 +26,9 @@ func ListCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			ctx := c.Context
 
-			list, err := kind.List(ctx)
+			provider := MustProvider(c.Context)
+
+			list, err := provider.List(ctx)
 
 			if err != nil {
 				return err

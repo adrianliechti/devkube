@@ -31,11 +31,13 @@ func SetupCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			name := c.String("name")
 
+			provider := MustProvider(c.Context)
+
 			if name == "" {
-				name = MustCluster(c.Context)
+				name = MustCluster(c.Context, provider)
 			}
 
-			return kind.ExportConfig(c.Context, name, "")
+			return provider.ExportConfig(c.Context, name, "")
 		},
 	}
 }

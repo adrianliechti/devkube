@@ -48,11 +48,13 @@ func CreateCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			name := c.String("name")
 
+			provider := MustProvider(c.Context)
+
 			if name == "" {
 				name = "devkube"
 			}
 
-			dir, err := os.MkdirTemp("", "kind")
+			dir, err := os.MkdirTemp("", "devkube")
 
 			if err != nil {
 				return err
@@ -60,53 +62,29 @@ func CreateCommand() *cli.Command {
 
 			defer os.RemoveAll(dir)
 
-			config := map[string]any{
-				"kind":       "Cluster",
-				"apiVersion": "kind.x-k8s.io/v1alpha4",
-
-				"kubeadmConfigPatches": []string{
-					`kind: ClusterConfiguration
-controllerManager:
-  extraArgs:
-    bind-address: 0.0.0.0
-scheduler:
-  extraArgs:
-    bind-address: 0.0.0.0
-etcd:
-  local:
-    extraArgs:
-      listen-metrics-urls: http://0.0.0.0:2381
-`,
-					`kind: KubeProxyConfiguration
-metricsBindAddress: 0.0.0.0
-`,
-				},
-			}
-
 			kubeconfig := path.Join(dir, "kubeconfig")
-			namespace := DefaultNamespace
 
-			if err := kind.Create(c.Context, name, config, kubeconfig); err != nil {
+			if err := provider.Create(c.Context, name, kubeconfig); err != nil {
 				return err
 			}
 
-			if err := observability.InstallCRD(c.Context, kubeconfig, namespace); err != nil {
+			if err := observability.InstallCRD(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := metrics.Install(c.Context, kubeconfig, namespace); err != nil {
+			if err := metrics.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := dashboard.Install(c.Context, kubeconfig, namespace); err != nil {
+			if err := dashboard.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := observability.Install(c.Context, kubeconfig, namespace); err != nil {
+			if err := observability.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
-			return kind.ExportConfig(c.Context, name, "")
+			return provider.ExportConfig(c.Context, name, "")
 		},
 	}
 }

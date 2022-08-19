@@ -118,6 +118,12 @@ func WithNamespace(namespace string) Option {
 	}
 }
 
+func WithInput(stdout, stdin io.Reader) Option {
+	return func(k *Kubectl) {
+		k.stdin = stdin
+	}
+}
+
 func WithOutput(stdout, stderr io.Writer) Option {
 	return func(k *Kubectl) {
 		k.stdout = stdout
