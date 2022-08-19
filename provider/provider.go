@@ -1,6 +1,8 @@
 package provider
 
-import "context"
+import (
+	"context"
+)
 
 type Provider interface {
 	List(ctx context.Context) ([]string, error)
