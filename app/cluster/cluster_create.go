@@ -6,8 +6,6 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/docker"
-	"github.com/adrianliechti/devkube/pkg/kind"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/dashboard"
@@ -21,18 +19,11 @@ func CreateCommand() *cli.Command {
 		Usage: "Create cluster",
 
 		Flags: []cli.Flag{
-			app.NameFlag,
+			app.ProviderFlag,
+			app.ClusterFlag,
 		},
 
 		Before: func(c *cli.Context) error {
-			if _, _, err := docker.Info(c.Context); err != nil {
-				return err
-			}
-
-			if _, _, err := kind.Info(c.Context); err != nil {
-				return err
-			}
-
 			if _, _, err := kubectl.Info(c.Context); err != nil {
 				return err
 			}
@@ -41,13 +32,15 @@ func CreateCommand() *cli.Command {
 		},
 
 		Action: func(c *cli.Context) error {
-			name := c.String("name")
+			provider := app.MustProvider(c)
 
-			if name == "" {
-				name = "devkube"
+			cluster := c.String(app.ClusterFlag.Name)
+
+			if cluster == "" {
+				cluster = "devkube"
 			}
 
-			dir, err := os.MkdirTemp("", "kind")
+			dir, err := os.MkdirTemp("", "devkube")
 
 			if err != nil {
 				return err
@@ -55,53 +48,29 @@ func CreateCommand() *cli.Command {
 
 			defer os.RemoveAll(dir)
 
-			config := map[string]any{
-				"kind":       "Cluster",
-				"apiVersion": "kind.x-k8s.io/v1alpha4",
-
-				"kubeadmConfigPatches": []string{
-					`kind: ClusterConfiguration
-controllerManager:
-  extraArgs:
-    bind-address: 0.0.0.0
-scheduler:
-  extraArgs:
-    bind-address: 0.0.0.0
-etcd:
-  local:
-    extraArgs:
-      listen-metrics-urls: http://0.0.0.0:2381
-`,
-					`kind: KubeProxyConfiguration
-metricsBindAddress: 0.0.0.0
-`,
-				},
-			}
-
 			kubeconfig := path.Join(dir, "kubeconfig")
-			namespace := DefaultNamespace
 
-			if err := kind.Create(c.Context, name, config, kubeconfig); err != nil {
+			if err := provider.Create(c.Context, cluster, kubeconfig); err != nil {
 				return err
 			}
 
-			if err := observability.InstallCRD(c.Context, kubeconfig, namespace); err != nil {
+			if err := observability.InstallCRD(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := metrics.Install(c.Context, kubeconfig, namespace); err != nil {
+			if err := metrics.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := dashboard.Install(c.Context, kubeconfig, namespace); err != nil {
+			if err := dashboard.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := observability.Install(c.Context, kubeconfig, namespace); err != nil {
+			if err := observability.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
-			return kind.ExportConfig(c.Context, name, "")
+			return provider.Export(c.Context, cluster, "")
 		},
 	}
 }
