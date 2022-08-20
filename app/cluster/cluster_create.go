@@ -1,11 +1,12 @@
 package cluster
 
 import (
+	"os"
+	"path"
+
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/docker"
 	"github.com/adrianliechti/devkube/pkg/helm"
-	"github.com/adrianliechti/devkube/pkg/kind"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/dashboard"
@@ -19,80 +20,62 @@ func CreateCommand() *cli.Command {
 		Usage: "Create cluster",
 
 		Flags: []cli.Flag{
-			app.NameFlag,
+			app.ProviderFlag,
+			app.ClusterFlag,
 		},
 
-		Action: func(c *cli.Context) error {
-			name := c.String("name")
-
-			if _, _, err := docker.Tool(c.Context); err != nil {
+		Before: func(c *cli.Context) error {
+			if _, _, err := helm.Info(c.Context); err != nil {
 				return err
 			}
 
-			if _, _, err := kind.Tool(c.Context); err != nil {
-				return err
-			}
-
-			if _, _, err := helm.Tool(c.Context); err != nil {
-				return err
-			}
-
-			if _, _, err := kubectl.Tool(c.Context); err != nil {
-				return err
-			}
-
-			config := map[string]any{
-				"kind":       "Cluster",
-				"apiVersion": "kind.x-k8s.io/v1alpha4",
-
-				"kubeadmConfigPatches": []string{
-					`kind: ClusterConfiguration
-controllerManager:
-  extraArgs:
-    bind-address: 0.0.0.0
-scheduler:
-  extraArgs:
-    bind-address: 0.0.0.0
-etcd:
-  local:
-    extraArgs:
-      listen-metrics-urls: http://0.0.0.0:2381
-`,
-					`kind: KubeProxyConfiguration
-metricsBindAddress: 0.0.0.0
-`,
-				},
-			}
-
-			if err := kind.Create(c.Context, name, config); err != nil {
-				return err
-			}
-
-			for _, image := range append(dashboard.Images, observability.Images...) {
-				docker.Pull(c.Context, image)
-				kind.LoadImage(c.Context, name, image)
-			}
-
-			namespace := "loop"
-			kubeconfig := ""
-
-			if err := observability.InstallCRD(c.Context, kubeconfig, namespace); err != nil {
-				return err
-			}
-
-			if err := metrics.Install(c.Context, kubeconfig, namespace); err != nil {
-				return err
-			}
-
-			if err := dashboard.Install(c.Context, kubeconfig, namespace); err != nil {
-				return err
-			}
-
-			if err := observability.Install(c.Context, kubeconfig, namespace); err != nil {
+			if _, _, err := kubectl.Info(c.Context); err != nil {
 				return err
 			}
 
 			return nil
+		},
+
+		Action: func(c *cli.Context) error {
+			cluster := c.String(app.ClusterFlag.Name)
+
+			provider := app.MustProvider(c)
+
+			if cluster == "" {
+				cluster = "devkube"
+			}
+
+			dir, err := os.MkdirTemp("", "devkube")
+
+			if err != nil {
+				return err
+			}
+
+			defer os.RemoveAll(dir)
+
+			kubeconfig := path.Join(dir, "kubeconfig")
+
+			if err := provider.Create(c.Context, cluster, kubeconfig); err != nil {
+				return err
+			}
+
+			if err := observability.InstallCRD(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := metrics.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := dashboard.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := observability.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			return provider.ExportConfig(c.Context, cluster, "")
 		},
 	}
 }

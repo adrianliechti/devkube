@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -18,15 +19,11 @@ var (
 	errOutdated = errors.New("kubectl is outdated. see https://kubernetes.io/docs/tasks/tools/install-kubectl")
 )
 
-func Tool(ctx context.Context) (string, *semver.Version, error) {
-	if path, version, err := Path(ctx); err == nil {
-		return path, version, err
-	}
-
-	return "", nil, errNotFound
+func Info(ctx context.Context) (string, *semver.Version, error) {
+	return path(ctx)
 }
 
-func Path(ctx context.Context) (string, *semver.Version, error) {
+func path(ctx context.Context) (string, *semver.Version, error) {
 	name := "kubectl"
 
 	if runtime.GOOS == "windows" {
@@ -80,26 +77,93 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 	return semver.NewVersion(version.ClientVersion.GitVersion)
 }
 
-func Invoke(ctx context.Context, kubeconfig string, arg ...string) error {
-	tool, _, err := Tool(ctx)
+type Option func(h *Kubectl)
+
+type Kubectl struct {
+	kubeconfig string
+
+	context   string
+	namespace string
+
+	stdin  io.Reader
+	stdout io.Writer
+	stderr io.Writer
+}
+
+func New(options ...Option) *Kubectl {
+	k := &Kubectl{}
+
+	for _, option := range options {
+		option(k)
+	}
+
+	return k
+}
+
+func WithKubeconfig(kubeconfig string) Option {
+	return func(k *Kubectl) {
+		k.kubeconfig = kubeconfig
+	}
+}
+
+func WithContext(context string) Option {
+	return func(k *Kubectl) {
+		k.context = context
+	}
+}
+
+func WithNamespace(namespace string) Option {
+	return func(k *Kubectl) {
+		k.namespace = namespace
+	}
+}
+
+func WithInput(stdout, stdin io.Reader) Option {
+	return func(k *Kubectl) {
+		k.stdin = stdin
+	}
+}
+
+func WithOutput(stdout, stderr io.Writer) Option {
+	return func(k *Kubectl) {
+		k.stdout = stdout
+		k.stderr = stderr
+	}
+}
+
+func WithDefaultOutput() Option {
+	return WithOutput(os.Stdout, os.Stderr)
+}
+
+func (k *Kubectl) Invoke(ctx context.Context, arg ...string) error {
+	path, _, err := Info(ctx)
 
 	if err != nil {
 		return err
 	}
 
-	env := os.Environ()
-
-	if kubeconfig != "" {
-		env = append(env,
-			"KUBECONFIG="+kubeconfig,
-		)
+	if k.kubeconfig != "" {
+		arg = append(arg, "--kubeconfig", k.kubeconfig)
 	}
 
-	cmd := exec.CommandContext(ctx, tool, arg...)
-	cmd.Env = env
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if k.context != "" {
+		arg = append(arg, "--context", k.context)
+	}
+
+	if k.namespace != "" {
+		arg = append(arg, "--namespace", k.namespace)
+	}
+
+	cmd := exec.CommandContext(ctx, path, arg...)
+	cmd.Stdin = k.stdin
+	cmd.Stdout = k.stdout
+	cmd.Stderr = k.stderr
 
 	return cmd.Run()
+}
+
+func Invoke(ctx context.Context, args []string, opt ...Option) error {
+	k := New(opt...)
+
+	return k.Invoke(ctx, args...)
 }

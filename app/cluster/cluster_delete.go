@@ -3,7 +3,6 @@ package cluster
 import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/kind"
 )
 
 func DeleteCommand() *cli.Command {
@@ -12,17 +11,18 @@ func DeleteCommand() *cli.Command {
 		Usage: "Delete cluster",
 
 		Flags: []cli.Flag{
-			app.NameFlag,
+			app.ProviderFlag,
+			app.ClusterFlag,
 		},
 
 		Action: func(c *cli.Context) error {
-			name := c.String("name")
+			provider, cluster := app.MustCluster(c)
 
-			if name == "" {
-				name = MustCluster(c.Context)
+			if ok, _ := cli.Confirm("Are you sure you want to delete cluster \""+cluster+"\"", false); ok {
+				return provider.Delete(c.Context, cluster)
 			}
 
-			return kind.Delete(c.Context, name)
+			return nil
 		},
 	}
 }

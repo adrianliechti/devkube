@@ -13,21 +13,13 @@ import (
 var (
 	minimalVersion = semver.MustParse("19.0.0")
 
-	errNotFound = errors.New("docker not found. see https://docs.docker.com/get-docker/")
-	errOutdated = errors.New("docker is outdated. see https://docs.docker.com/get-docker/")
+	errNotFound   = errors.New("docker not found. see https://docs.docker.com/get-docker/")
+	errOutdated   = errors.New("docker is outdated. see https://docs.docker.com/get-docker/")
+	errNotRunning = errors.New("docker seems not to be running")
 )
 
-type Container struct {
-	ID string
-
-	Names  []string
-	Labels map[string]string
-
-	Image string `json:"Image"`
-}
-
-func Tool(ctx context.Context) (string, *semver.Version, error) {
-	path, version, err := Path(ctx)
+func Info(ctx context.Context) (string, *semver.Version, error) {
+	path, version, err := path(ctx)
 
 	if err != nil {
 		return path, version, err
@@ -39,10 +31,10 @@ func Tool(ctx context.Context) (string, *semver.Version, error) {
 		return path, version, nil
 	}
 
-	return path, version, errors.New("Docker Daemon seems not to be running")
+	return path, version, errNotRunning
 }
 
-func Path(ctx context.Context) (string, *semver.Version, error) {
+func path(ctx context.Context) (string, *semver.Version, error) {
 	name := "docker"
 
 	if runtime.GOOS == "windows" {

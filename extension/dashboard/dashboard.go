@@ -13,11 +13,6 @@ var (
 	dashboard        = "dashboard"
 	dashboardChart   = "kubernetes-dashboard"
 	dashboardVersion = "5.8.0"
-
-	Images = []string{
-		// "kubernetesui/dashboard:v2.5.1",
-		// "kubernetesui/metrics-scraper:v1.0.7",
-	}
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
@@ -26,7 +21,8 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	values := map[string]any{
-		"nameOverride": dashboard,
+		"nameOverride":     dashboard,
+		"fullnameOverride": dashboard,
 
 		"extraArgs": []string{
 			"--enable-skip-login",
@@ -47,15 +43,19 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		"metricsScraper": map[string]any{
 			"enabled": true,
 		},
+
+		"resources": nil,
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, dashboard, dashboardRepo, dashboardChart, dashboardVersion, values); err != nil {
+	if err := helm.Install(ctx, dashboard, dashboardRepo, dashboardChart, dashboardVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
-	kubectl.Invoke(ctx, kubeconfig, "delete", "clusterrolebinding", dashboard)
+	if err := kubectl.Invoke(ctx, []string{"delete", "clusterrolebinding", dashboard}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
+		// ignore error
+	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "create", "clusterrolebinding", dashboard, "--clusterrole=cluster-admin", "--serviceaccount="+namespace+":"+dashboard); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"create", "clusterrolebinding", dashboard, "--clusterrole=cluster-admin", "--serviceaccount=" + namespace + ":" + dashboard}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
 		return err
 	}
 
@@ -67,11 +67,11 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	if err := kubectl.Invoke(ctx, kubeconfig, "delete", "clusterrolebinding", dashboard); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"delete", "clusterrolebinding", dashboard}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
 		//return err
 	}
 
-	if err := helm.Uninstall(ctx, kubeconfig, namespace, dashboard); err != nil {
+	if err := helm.Uninstall(ctx, dashboard, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 

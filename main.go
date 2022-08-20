@@ -28,6 +28,8 @@ func initApp() cli.App {
 		Version: version,
 		// Usage:   "DevOps Loop",
 
+		Suggest: true,
+
 		HideHelpCommand: true,
 
 		Commands: []*cli.Command{

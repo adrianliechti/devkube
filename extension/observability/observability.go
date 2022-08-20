@@ -12,23 +12,6 @@ const (
 	prometheusRepo = "https://prometheus-community.github.io/helm-charts"
 )
 
-var (
-	Images = []string{
-		// "grafana/loki:2.5.0",
-
-		// "grafana/tempo:1.4.0",
-		// "grafana/tempo-query:1.4.0",
-
-		// "grafana/promtail:2.5.0",
-
-		// "quay.io/prometheus/prometheus:v2.34.0",
-		// "quay.io/prometheus/node-exporter:v1.3.0",
-		// "k8s.gcr.io/kube-state-metrics/kube-state-metrics:v2.4.1",
-
-		// "grafana/grafana:8.5.0",
-	}
-)
-
 func InstallCRD(ctx context.Context, kubeconfig, namespace string) error {
 	crds := []string{
 		"crd-alertmanagerconfigs.yaml",
@@ -44,7 +27,7 @@ func InstallCRD(ctx context.Context, kubeconfig, namespace string) error {
 	for _, crd := range crds {
 		url := "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + prometheusVersion + "/charts/kube-prometheus-stack/crds/" + crd
 
-		if err := kubectl.Invoke(ctx, kubeconfig, "apply", "-n", namespace, "-f", url, "--validate=false", "--server-side=true", "--overwrite=true"); err != nil {
+		if err := kubectl.Invoke(ctx, []string{"apply", "-f", url, "--validate=false", "--server-side=true", "--overwrite=true"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithDefaultOutput()); err != nil {
 			return err
 		}
 	}
@@ -57,11 +40,11 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	if err := installPrometheus(ctx, kubeconfig, namespace); err != nil {
+	if err := installLoki(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
 
-	if err := installLoki(ctx, kubeconfig, namespace); err != nil {
+	if err := installPromtail(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
 
@@ -69,7 +52,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
-	if err := installPromtail(ctx, kubeconfig, namespace); err != nil {
+	if err := installPrometheus(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
 
@@ -93,11 +76,11 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		//return err
 	}
 
-	if err := uninstallPromtail(ctx, kubeconfig, namespace); err != nil {
+	if err := uninstallTempo(ctx, kubeconfig, namespace); err != nil {
 		//return err
 	}
 
-	if err := uninstallTempo(ctx, kubeconfig, namespace); err != nil {
+	if err := uninstallPromtail(ctx, kubeconfig, namespace); err != nil {
 		//return err
 	}
 

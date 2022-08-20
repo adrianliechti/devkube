@@ -3,7 +3,6 @@ package cluster
 import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/kind"
 )
 
 func SetupCommand() *cli.Command {
@@ -12,21 +11,14 @@ func SetupCommand() *cli.Command {
 		Usage: "Setup cluster",
 
 		Flags: []cli.Flag{
-			app.NameFlag,
+			app.ProviderFlag,
+			app.ClusterFlag,
 		},
 
 		Action: func(c *cli.Context) error {
-			name := c.String("name")
+			provider, cluster := app.MustCluster(c)
 
-			if name == "" {
-				name = MustCluster(c.Context)
-			}
-
-			if err := kind.Kubeconfig(c.Context, name, ""); err != nil {
-				return err
-			}
-
-			return nil
+			return provider.ExportConfig(c.Context, cluster, "")
 		},
 	}
 }

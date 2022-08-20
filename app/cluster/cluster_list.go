@@ -1,8 +1,8 @@
 package cluster
 
 import (
+	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/kind"
 )
 
 func ListCommand() *cli.Command {
@@ -11,9 +11,9 @@ func ListCommand() *cli.Command {
 		Usage: "List clusters",
 
 		Action: func(c *cli.Context) error {
-			ctx := c.Context
+			provider := app.MustProvider(c)
 
-			list, err := kind.List(ctx)
+			list, err := provider.List(c.Context)
 
 			if err != nil {
 				return err

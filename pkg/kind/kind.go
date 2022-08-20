@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -21,15 +22,11 @@ var (
 	errOutdated = errors.New("kind is outdated. see https://kind.sigs.k8s.io/docs/user/quick-start/")
 )
 
-func Tool(ctx context.Context) (string, *semver.Version, error) {
-	if path, version, err := Path(ctx); err == nil {
-		return path, version, err
-	}
-
-	return "", nil, errNotFound
+func Info(ctx context.Context) (string, *semver.Version, error) {
+	return path(ctx)
 }
 
-func Path(ctx context.Context) (string, *semver.Version, error) {
+func path(ctx context.Context) (string, *semver.Version, error) {
 	name := "kind"
 
 	if runtime.GOOS == "windows" {
@@ -69,20 +66,70 @@ func version(ctx context.Context, path string) (*semver.Version, error) {
 	return semver.NewVersion(lines[0])
 }
 
-func List(ctx context.Context) ([]string, error) {
-	var list []string
+type Option func(h *Kind)
 
-	tool, _, err := Tool(ctx)
+type Kind struct {
+	stdin  io.Reader
+	stdout io.Writer
+	stderr io.Writer
+}
+
+func New(options ...Option) *Kind {
+	k := &Kind{}
+
+	for _, option := range options {
+		option(k)
+	}
+
+	return k
+}
+
+func WithInput(stdout, stdin io.Reader) Option {
+	return func(k *Kind) {
+		k.stdin = stdin
+	}
+}
+
+func WithOutput(stdout, stderr io.Writer) Option {
+	return func(k *Kind) {
+		k.stdout = stdout
+		k.stderr = stderr
+	}
+}
+
+func WithDefaultOutput() Option {
+	return WithOutput(os.Stdout, os.Stderr)
+}
+
+func (k *Kind) Invoke(ctx context.Context, arg ...string) error {
+	path, _, err := Info(ctx)
 
 	if err != nil {
-		return list, err
+		return err
 	}
+
+	cmd := exec.CommandContext(ctx, path, arg...)
+	cmd.Stdin = k.stdin
+	cmd.Stdout = k.stdout
+	cmd.Stderr = k.stderr
+
+	return cmd.Run()
+}
+
+func List(ctx context.Context) ([]string, error) {
+	path, _, err := Info(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var list []string
 
 	args := []string{
 		"get", "clusters",
 	}
 
-	cmd := exec.CommandContext(ctx, tool, args...)
+	cmd := exec.CommandContext(ctx, path, args...)
 	data, err := cmd.Output()
 
 	if err != nil {
@@ -99,12 +146,8 @@ func List(ctx context.Context) ([]string, error) {
 	return list, nil
 }
 
-func Create(ctx context.Context, name string, config map[string]any) error {
-	tool, _, err := Tool(ctx)
-
-	if err != nil {
-		return err
-	}
+func Create(ctx context.Context, name string, config map[string]any, kubeconfig string, opt ...Option) error {
+	k := New(opt...)
 
 	args := []string{
 		"create", "cluster",
@@ -114,13 +157,9 @@ func Create(ctx context.Context, name string, config map[string]any) error {
 		args = append(args, "--name", name)
 	}
 
-	if len(config) > 0 {
-		args = append(args, "--config", "-")
+	if kubeconfig != "" {
+		args = append(args, "--kubeconfig", kubeconfig)
 	}
-
-	cmd := exec.CommandContext(ctx, tool, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
 	if len(config) > 0 {
 		data, err := yaml.Marshal(config)
@@ -129,18 +168,15 @@ func Create(ctx context.Context, name string, config map[string]any) error {
 			return err
 		}
 
-		cmd.Stdin = bytes.NewReader(data)
+		k.stdin = bytes.NewReader(data)
+		args = append(args, "--config", "-")
 	}
 
-	return cmd.Run()
+	return k.Invoke(ctx, args...)
 }
 
-func Delete(ctx context.Context, name string) error {
-	tool, _, err := Tool(ctx)
-
-	if err != nil {
-		return err
-	}
+func Delete(ctx context.Context, name string, opt ...Option) error {
+	k := New(opt...)
 
 	args := []string{
 		"delete", "cluster",
@@ -150,47 +186,15 @@ func Delete(ctx context.Context, name string) error {
 		args = append(args, "--name", name)
 	}
 
-	cmd := exec.CommandContext(ctx, tool, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return k.Invoke(ctx, args...)
 }
 
-func Kubeconfig(ctx context.Context, name, path string) error {
-	tool, _, err := Tool(ctx)
-
-	if err != nil {
-		return err
-	}
+func ExportConfig(ctx context.Context, name, kubeconfig string, opt ...Option) error {
+	k := New(opt...)
 
 	args := []string{
-		"export", "kubeconfig", "--name", name, "--kubeconfig", path,
+		"export", "kubeconfig", "--name", name, "--kubeconfig", kubeconfig,
 	}
 
-	cmd := exec.CommandContext(ctx, tool, args...)
-	return cmd.Run()
-}
-
-func LoadImage(ctx context.Context, name, image string) error {
-	tool, _, err := Tool(ctx)
-
-	if err != nil {
-		return err
-	}
-
-	args := []string{
-		"load", "docker-image", image,
-	}
-
-	if name != "" {
-		args = append(args, "--name", name)
-	}
-
-	cmd := exec.CommandContext(ctx, tool, args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return k.Invoke(ctx, args...)
 }
