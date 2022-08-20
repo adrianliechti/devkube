@@ -27,14 +27,14 @@ func (p *Provider) List(ctx context.Context) ([]string, error) {
 }
 
 func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) error {
-	return p.ExportConfig(ctx, name, kubeconfig)
+	return p.Export(ctx, name, kubeconfig)
 }
 
 func (p *Provider) Delete(ctx context.Context, name string) error {
 	return nil
 }
 
-func (p *Provider) ExportConfig(ctx context.Context, name, path string) error {
+func (p *Provider) Export(ctx context.Context, name, path string) error {
 	kubeconfig, err := kubeconfig()
 
 	if err != nil {

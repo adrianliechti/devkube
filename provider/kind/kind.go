@@ -53,6 +53,6 @@ func (p *Provider) Delete(ctx context.Context, name string) error {
 	return kind.Delete(ctx, name)
 }
 
-func (p *Provider) ExportConfig(ctx context.Context, name, path string) error {
+func (p *Provider) Export(ctx context.Context, name, path string) error {
 	return kind.ExportConfig(ctx, name, path)
 }

@@ -8,5 +8,5 @@ type Provider interface {
 	Create(ctx context.Context, name string, kubeconfig string) error
 	Delete(ctx context.Context, name string) error
 
-	ExportConfig(ctx context.Context, name, path string) error
+	Export(ctx context.Context, name, path string) error
 }
