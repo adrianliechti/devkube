@@ -6,8 +6,6 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/docker"
-	"github.com/adrianliechti/devkube/pkg/kind"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
 
@@ -17,19 +15,12 @@ func DashboardCommand() *cli.Command {
 		Usage: "Open Dashboard",
 
 		Flags: []cli.Flag{
-			app.NameFlag,
+			app.ProviderFlag,
+			app.ClusterFlag,
 			app.PortFlag,
 		},
 
 		Before: func(c *cli.Context) error {
-			if _, _, err := docker.Info(c.Context); err != nil {
-				return err
-			}
-
-			if _, _, err := kind.Info(c.Context); err != nil {
-				return err
-			}
-
 			if _, _, err := kubectl.Info(c.Context); err != nil {
 				return err
 			}
@@ -39,11 +30,10 @@ func DashboardCommand() *cli.Command {
 
 		Action: func(c *cli.Context) error {
 			port := app.MustPortOrRandom(c, 9090)
-			name := c.String("name")
 
-			provider := MustProvider(c.Context)
+			provider, cluster := app.MustCluster(c)
 
-			kubeconfig, closer := MustTempKubeconfig(c.Context, provider, name)
+			kubeconfig, closer := app.MustClusterKubeconfig(c, provider, cluster)
 			defer closer()
 
 			time.AfterFunc(3*time.Second, func() {

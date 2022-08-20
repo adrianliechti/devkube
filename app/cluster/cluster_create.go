@@ -6,9 +6,7 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/docker"
 	"github.com/adrianliechti/devkube/pkg/helm"
-	"github.com/adrianliechti/devkube/pkg/kind"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/dashboard"
@@ -22,18 +20,11 @@ func CreateCommand() *cli.Command {
 		Usage: "Create cluster",
 
 		Flags: []cli.Flag{
-			app.NameFlag,
+			app.ProviderFlag,
+			app.ClusterFlag,
 		},
 
 		Before: func(c *cli.Context) error {
-			if _, _, err := docker.Info(c.Context); err != nil {
-				return err
-			}
-
-			if _, _, err := kind.Info(c.Context); err != nil {
-				return err
-			}
-
 			if _, _, err := helm.Info(c.Context); err != nil {
 				return err
 			}
@@ -46,12 +37,12 @@ func CreateCommand() *cli.Command {
 		},
 
 		Action: func(c *cli.Context) error {
-			name := c.String("name")
+			cluster := c.String(app.ClusterFlag.Name)
 
-			provider := MustProvider(c.Context)
+			provider := app.MustProvider(c)
 
-			if name == "" {
-				name = "devkube"
+			if cluster == "" {
+				cluster = "devkube"
 			}
 
 			dir, err := os.MkdirTemp("", "devkube")
@@ -64,7 +55,7 @@ func CreateCommand() *cli.Command {
 
 			kubeconfig := path.Join(dir, "kubeconfig")
 
-			if err := provider.Create(c.Context, name, kubeconfig); err != nil {
+			if err := provider.Create(c.Context, cluster, kubeconfig); err != nil {
 				return err
 			}
 
@@ -84,7 +75,7 @@ func CreateCommand() *cli.Command {
 				return err
 			}
 
-			return provider.ExportConfig(c.Context, name, "")
+			return provider.ExportConfig(c.Context, cluster, "")
 		},
 	}
 }
