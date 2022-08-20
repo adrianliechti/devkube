@@ -2,10 +2,12 @@ package app
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
 	"github.com/adrianliechti/devkube/provider/kind"
+	"github.com/adrianliechti/devkube/provider/vultr"
 
 	dockercli "github.com/adrianliechti/devkube/pkg/docker"
 	kindcli "github.com/adrianliechti/devkube/pkg/kind"
@@ -30,6 +32,14 @@ func Provider(c *cli.Context) (provider.Provider, error) {
 		}
 
 		return kind.New(), nil
+	case "vultr":
+		token := os.Getenv("VULTR_API_KEY")
+
+		if token == "" {
+			return nil, fmt.Errorf("VULTR_API_KEY is not set")
+		}
+
+		return vultr.New(token), nil
 	default:
 		return nil, fmt.Errorf("unknown provider %q", provider)
 	}
