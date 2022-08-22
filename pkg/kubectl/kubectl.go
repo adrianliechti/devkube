@@ -30,7 +30,6 @@ func path(ctx context.Context) (string, *semver.Version, error) {
 		name = "kubectl.exe"
 	}
 
-	// verify global tool
 	if path, err := exec.LookPath(name); err == nil {
 		if version, err := version(ctx, path); err == nil {
 			if !version.LessThan(minimalVersion) {

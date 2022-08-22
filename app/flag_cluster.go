@@ -81,7 +81,8 @@ func MustClusterKubeconfig(c *cli.Context, provider provider.Provider, name stri
 
 	path := path.Join(dir, "kubeconfig")
 
-	if err := provider.ExportConfig(c.Context, name, path); err != nil {
+	if err := provider.Export(c.Context, name, path); err != nil {
+		closer()
 		cli.Fatal(err)
 	}
 

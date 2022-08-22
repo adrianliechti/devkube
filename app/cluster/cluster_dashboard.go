@@ -29,12 +29,12 @@ func DashboardCommand() *cli.Command {
 		},
 
 		Action: func(c *cli.Context) error {
-			port := app.MustPortOrRandom(c, 9090)
-
 			provider, cluster := app.MustCluster(c)
 
 			kubeconfig, closer := app.MustClusterKubeconfig(c, provider, cluster)
 			defer closer()
+
+			port := app.MustPortOrRandom(c, 9090)
 
 			time.AfterFunc(3*time.Second, func() {
 				url := fmt.Sprintf("http://127.0.0.1:%d", port)

@@ -7,6 +7,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
 	"github.com/adrianliechti/devkube/provider/kind"
+	"github.com/adrianliechti/devkube/provider/none"
 	"github.com/adrianliechti/devkube/provider/vultr"
 
 	dockercli "github.com/adrianliechti/devkube/pkg/docker"
@@ -22,6 +23,8 @@ func Provider(c *cli.Context) (provider.Provider, error) {
 	provider := c.String(ProviderFlag.Name)
 
 	switch provider {
+	case "none":
+		return none.New(), nil
 	case "kind", "":
 		if _, _, err := dockercli.Info(c.Context); err != nil {
 			return nil, err
