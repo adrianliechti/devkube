@@ -55,11 +55,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	if err := installLoki(ctx, kubeconfig, namespace); err != nil {
-		return err
-	}
-
-	if err := installPromtail(ctx, kubeconfig, namespace); err != nil {
+	if err := installPrometheus(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
 
@@ -67,7 +63,11 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
-	if err := installPrometheus(ctx, kubeconfig, namespace); err != nil {
+	if err := installLoki(ctx, kubeconfig, namespace); err != nil {
+		return err
+	}
+
+	if err := installPromtail(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
 
@@ -87,7 +87,11 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		//return err
 	}
 
-	if err := uninstallPrometheus(ctx, kubeconfig, namespace); err != nil {
+	if err := uninstallPromtail(ctx, kubeconfig, namespace); err != nil {
+		//return err
+	}
+
+	if err := uninstallLoki(ctx, kubeconfig, namespace); err != nil {
 		//return err
 	}
 
@@ -95,11 +99,7 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		//return err
 	}
 
-	if err := uninstallPromtail(ctx, kubeconfig, namespace); err != nil {
-		//return err
-	}
-
-	if err := uninstallLoki(ctx, kubeconfig, namespace); err != nil {
+	if err := uninstallPrometheus(ctx, kubeconfig, namespace); err != nil {
 		//return err
 	}
 
