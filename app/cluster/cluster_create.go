@@ -6,7 +6,6 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/dashboard"
@@ -25,10 +24,6 @@ func CreateCommand() *cli.Command {
 		},
 
 		Before: func(c *cli.Context) error {
-			if _, _, err := helm.Info(c.Context); err != nil {
-				return err
-			}
-
 			if _, _, err := kubectl.Info(c.Context); err != nil {
 				return err
 			}
