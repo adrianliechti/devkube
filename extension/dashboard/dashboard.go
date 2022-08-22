@@ -5,6 +5,10 @@ import (
 
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
+	"github.com/adrianliechti/devkube/pkg/kubernetes"
+
+	rbacv1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -18,6 +22,12 @@ var (
 func Install(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
+	}
+
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
+		return err
 	}
 
 	values := map[string]any{
@@ -51,11 +61,27 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "clusterrolebinding", dashboard}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
-		// ignore error
-	}
+	client.RbacV1().ClusterRoleBindings().Delete(ctx, dashboard, metav1.DeleteOptions{})
 
-	if err := kubectl.Invoke(ctx, []string{"create", "clusterrolebinding", dashboard, "--clusterrole=cluster-admin", "--serviceaccount=" + namespace + ":" + dashboard}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
+	if _, err := client.RbacV1().ClusterRoleBindings().Create(ctx, &rbacv1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: dashboard,
+		},
+
+		Subjects: []rbacv1.Subject{
+			{
+				Kind: rbacv1.ServiceAccountKind,
+
+				Name:      dashboard,
+				Namespace: namespace,
+			},
+		},
+
+		RoleRef: rbacv1.RoleRef{
+			Kind: "ClusterRole",
+			Name: "cluster-admin",
+		},
+	}, metav1.CreateOptions{}); err != nil {
 		return err
 	}
 
