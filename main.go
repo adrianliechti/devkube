@@ -25,10 +25,10 @@ func main() {
 
 func initApp() cli.App {
 	return cli.App{
-		Version: version,
-		// Usage:   "DevOps Loop",
+		Usage: "DevKube",
 
 		Suggest: true,
+		Version: version,
 
 		HideHelpCommand: true,
 

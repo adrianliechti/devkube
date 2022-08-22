@@ -37,9 +37,9 @@ func CreateCommand() *cli.Command {
 		},
 
 		Action: func(c *cli.Context) error {
-			cluster := c.String(app.ClusterFlag.Name)
-
 			provider := app.MustProvider(c)
+
+			cluster := c.String(app.ClusterFlag.Name)
 
 			if cluster == "" {
 				cluster = "devkube"
@@ -75,7 +75,7 @@ func CreateCommand() *cli.Command {
 				return err
 			}
 
-			return provider.ExportConfig(c.Context, cluster, "")
+			return provider.Export(c.Context, cluster, "")
 		},
 	}
 }
