@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/devkube/app"
+	"github.com/adrianliechti/devkube/extension/falco"
 	"github.com/adrianliechti/devkube/extension/trivy"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
@@ -43,6 +44,13 @@ func EnableCommand() *cli.Command {
 			switch strings.ToLower(feature) {
 			case "trivy":
 				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "falco":
+				if err := falco.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 

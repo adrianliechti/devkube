@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/devkube/app"
+	"github.com/adrianliechti/devkube/extension/falco"
 	"github.com/adrianliechti/devkube/extension/trivy"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
@@ -47,6 +48,14 @@ func DisableCommand() *cli.Command {
 				}
 
 				return nil
+
+			case "falco":
+				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
 			default:
 				cli.Fatal("inavlid feature: %s", feature)
 			}
