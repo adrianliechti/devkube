@@ -6,7 +6,6 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/devkube/pkg/helm"
 
 	"github.com/adrianliechti/devkube/extension/dashboard"
 	"github.com/adrianliechti/devkube/extension/metrics"
@@ -21,14 +20,6 @@ func CreateCommand() *cli.Command {
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 			app.ClusterFlag,
-		},
-
-		Before: func(c *cli.Context) error {
-			if _, _, err := helm.Info(c.Context); err != nil {
-				return err
-			}
-
-			return nil
 		},
 
 		Action: func(c *cli.Context) error {

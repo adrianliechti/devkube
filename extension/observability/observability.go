@@ -10,23 +10,40 @@ const (
 	prometheusRepo = "https://prometheus-community.github.io/helm-charts"
 )
 
+func manifests() []string {
+	result := []string{
+		"crd-alertmanagerconfigs.yaml",
+		"crd-alertmanagers.yaml",
+		"crd-podmonitors.yaml",
+		"crd-probes.yaml",
+		"crd-prometheuses.yaml",
+		"crd-prometheusrules.yaml",
+		"crd-servicemonitors.yaml",
+		"crd-thanosrulers.yaml",
+	}
+
+	for i := range result {
+		name := result[i]
+		result[i] = "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + prometheusVersion + "/charts/kube-prometheus-stack/crds/" + name
+	}
+
+	return result
+}
+
 // func InstallCRD(ctx context.Context, kubeconfig, namespace string) error {
-// 	crds := []string{
-// 		"crd-alertmanagerconfigs.yaml",
-// 		"crd-alertmanagers.yaml",
-// 		"crd-podmonitors.yaml",
-// 		"crd-probes.yaml",
-// 		"crd-prometheuses.yaml",
-// 		"crd-prometheusrules.yaml",
-// 		"crd-servicemonitors.yaml",
-// 		"crd-thanosrulers.yaml",
+// 	for _, manifest := range manifests() {
+// 		if err := kubectl.Invoke(ctx, []string{"apply", "-f", manifest, "--validate=false", "--server-side=true", "--overwrite=true"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithDefaultOutput()); err != nil {
+// 			return err
+// 		}
 // 	}
 
-// 	for _, crd := range crds {
-// 		url := "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + prometheusVersion + "/charts/kube-prometheus-stack/crds/" + crd
+// 	return nil
+// }
 
-// 		if err := kubectl.Invoke(ctx, []string{"apply", "-f", url, "--validate=false", "--server-side=true", "--overwrite=true"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithDefaultOutput()); err != nil {
-// 			return err
+// func UninstallCRD(ctx context.Context, kubeconfig, namespace string) error {
+// 	for _, manifest := range manifests() {
+// 		if err := kubectl.Invoke(ctx, []string{"delete", "-f", manifest}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
+// 			// return err
 // 		}
 // 	}
 

@@ -30,18 +30,19 @@ func DeleteCommand() *cli.Command {
 			defer closer()
 
 			if err := dashboard.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
-				return err
+				//return err
 			}
 
 			if err := metrics.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
-				return err
+				//return err
 			}
 
 			if err := observability.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
-				return err
+				//return err
 			}
 
 			return provider.Delete(c.Context, cluster)
+
 		},
 	}
 }
