@@ -12,7 +12,6 @@ import (
 	"github.com/adrianliechti/devkube/provider/vultr"
 
 	dockercli "github.com/adrianliechti/devkube/pkg/docker"
-	kindcli "github.com/adrianliechti/devkube/pkg/kind"
 )
 
 var ProviderFlag = &cli.StringFlag{
@@ -29,10 +28,6 @@ func Provider(c *cli.Context) (provider.Provider, error) {
 
 	case "kind", "":
 		if _, _, err := dockercli.Info(c.Context); err != nil {
-			return nil, err
-		}
-
-		if _, _, err := kindcli.Info(c.Context); err != nil {
 			return nil, err
 		}
 
