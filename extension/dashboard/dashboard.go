@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/adrianliechti/devkube/pkg/helm"
-	"github.com/adrianliechti/devkube/pkg/kubectl"
 	"github.com/adrianliechti/devkube/pkg/kubernetes"
 
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -93,7 +92,13 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "clusterrolebinding", dashboard}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
+		return err
+	}
+
+	if err := client.RbacV1().ClusterRoleBindings().Delete(ctx, dashboard, metav1.DeleteOptions{}); err != nil {
 		//return err
 	}
 

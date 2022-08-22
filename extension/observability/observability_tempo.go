@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/adrianliechti/devkube/pkg/helm"
-	"github.com/adrianliechti/devkube/pkg/kubectl"
+	"github.com/adrianliechti/devkube/pkg/kubernetes"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -33,13 +35,19 @@ func installTempo(ctx context.Context, kubeconfig, namespace string) error {
 }
 
 func uninstallTempo(ctx context.Context, kubeconfig, namespace string) error {
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
+		return err
+	}
+
 	if err := helm.Uninstall(ctx, tempo, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "app.kubernetes.io/instance=" + tempo}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
-		return err
-	}
+	client.CoreV1().PersistentVolumeClaims(namespace).DeleteCollection(ctx, metav1.DeleteOptions{}, metav1.ListOptions{
+		LabelSelector: "app.kubernetes.io/instance=" + tempo,
+	})
 
 	return nil
 }

@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/adrianliechti/devkube/pkg/helm"
-	"github.com/adrianliechti/devkube/pkg/kubectl"
+	"github.com/adrianliechti/devkube/pkg/kubernetes"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -14,6 +16,12 @@ const (
 )
 
 func installPrometheus(ctx context.Context, kubeconfig, namespace string) error {
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
+		return err
+	}
+
 	values := map[string]any{
 		"nameOverride":     prometheus,
 		"fullnameOverride": prometheus,
@@ -83,25 +91,27 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 		return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "configmap", prometheus + "-nodes-darwin"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
-		//return err
-	}
+	client.CoreV1().ConfigMaps(namespace).Delete(ctx, prometheus+"-nodes-darwin", metav1.DeleteOptions{})
 
 	return nil
 }
 
 func uninstallPrometheus(ctx context.Context, kubeconfig, namespace string) error {
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
+		return err
+	}
+
 	if err := helm.Uninstall(ctx, prometheus, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "app.kubernetes.io/instance=" + prometheus}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
-		//return err
-	}
+	client.CoreV1().Secrets(namespace).Delete(ctx, prometheus+"-admission", metav1.DeleteOptions{})
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "secret", prometheus + "-admission"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
-		//return err
-	}
+	client.CoreV1().PersistentVolumeClaims(namespace).DeleteCollection(ctx, metav1.DeleteOptions{}, metav1.ListOptions{
+		LabelSelector: "app.kubernetes.io/instance=" + prometheus,
+	})
 
 	return nil
 }

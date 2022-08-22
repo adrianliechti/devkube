@@ -2,8 +2,6 @@ package observability
 
 import (
 	"context"
-
-	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
 
 const (
@@ -12,28 +10,28 @@ const (
 	prometheusRepo = "https://prometheus-community.github.io/helm-charts"
 )
 
-func InstallCRD(ctx context.Context, kubeconfig, namespace string) error {
-	crds := []string{
-		"crd-alertmanagerconfigs.yaml",
-		"crd-alertmanagers.yaml",
-		"crd-podmonitors.yaml",
-		"crd-probes.yaml",
-		"crd-prometheuses.yaml",
-		"crd-prometheusrules.yaml",
-		"crd-servicemonitors.yaml",
-		"crd-thanosrulers.yaml",
-	}
+// func InstallCRD(ctx context.Context, kubeconfig, namespace string) error {
+// 	crds := []string{
+// 		"crd-alertmanagerconfigs.yaml",
+// 		"crd-alertmanagers.yaml",
+// 		"crd-podmonitors.yaml",
+// 		"crd-probes.yaml",
+// 		"crd-prometheuses.yaml",
+// 		"crd-prometheusrules.yaml",
+// 		"crd-servicemonitors.yaml",
+// 		"crd-thanosrulers.yaml",
+// 	}
 
-	for _, crd := range crds {
-		url := "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + prometheusVersion + "/charts/kube-prometheus-stack/crds/" + crd
+// 	for _, crd := range crds {
+// 		url := "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + prometheusVersion + "/charts/kube-prometheus-stack/crds/" + crd
 
-		if err := kubectl.Invoke(ctx, []string{"apply", "-f", url, "--validate=false", "--server-side=true", "--overwrite=true"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithDefaultOutput()); err != nil {
-			return err
-		}
-	}
+// 		if err := kubectl.Invoke(ctx, []string{"apply", "-f", url, "--validate=false", "--server-side=true", "--overwrite=true"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithDefaultOutput()); err != nil {
+// 			return err
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {

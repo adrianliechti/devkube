@@ -1,11 +1,13 @@
 package kubernetes
 
 import (
+	"context"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -17,6 +19,16 @@ type Client interface {
 	ConfigPath() string
 	Config() *rest.Config
 	Namespace() string
+
+	ServicePods(ctx context.Context, namespace, name string) ([]corev1.Pod, error)
+	ServicePod(ctx context.Context, namespace, name string) (*corev1.Pod, error)
+	ServiceAddress(ctx context.Context, namespace, name string) (string, error)
+	ServicePortForward(ctx context.Context, namespace, name, address string, ports map[int]int, readyChan chan struct{}) error
+
+	PodPortForward(ctx context.Context, namespace, name, address string, ports map[int]int, readyChan chan struct{}) error
+
+	WaitForPod(ctx context.Context, namespace, name string) (*corev1.Pod, error)
+	WaitForService(ctx context.Context, namespace, name string) (*corev1.Service, error)
 }
 
 func New() (Client, error) {

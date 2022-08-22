@@ -7,7 +7,6 @@ import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
-	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/dashboard"
 	"github.com/adrianliechti/devkube/extension/metrics"
@@ -26,10 +25,6 @@ func CreateCommand() *cli.Command {
 
 		Before: func(c *cli.Context) error {
 			if _, _, err := helm.Info(c.Context); err != nil {
-				return err
-			}
-
-			if _, _, err := kubectl.Info(c.Context); err != nil {
 				return err
 			}
 
@@ -59,7 +54,7 @@ func CreateCommand() *cli.Command {
 				return err
 			}
 
-			if err := observability.InstallCRD(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			if err := observability.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
@@ -68,10 +63,6 @@ func CreateCommand() *cli.Command {
 			}
 
 			if err := dashboard.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
-				return err
-			}
-
-			if err := observability.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
