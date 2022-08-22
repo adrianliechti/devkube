@@ -56,10 +56,6 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
-	if err := installFalco(ctx, kubeconfig, namespace); err != nil {
-		return err
-	}
-
 	if err := installGrafana(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
