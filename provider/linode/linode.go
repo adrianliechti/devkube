@@ -114,7 +114,7 @@ func (p *Provider) Delete(ctx context.Context, name string) error {
 	return p.client.DeleteLKECluster(ctx, id)
 }
 
-func (p *Provider) ExportConfig(ctx context.Context, name, kubeconfig string) error {
+func (p *Provider) Export(ctx context.Context, name, kubeconfig string) error {
 	id, err := p.clusterID(ctx, name)
 
 	if err != nil {
