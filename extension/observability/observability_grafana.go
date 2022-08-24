@@ -33,18 +33,26 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 		"sidecar": map[string]any{
 			"dashboards": map[string]any{
 				"enabled": true,
+
+				"searchNamespace": "ALL",
 			},
 
 			"datasources": map[string]any{
 				"enabled": true,
+
+				"searchNamespace": "ALL",
 			},
 
 			"plugins": map[string]any{
 				"enabled": true,
+
+				"searchNamespace": "ALL",
 			},
 
 			"notifiers": map[string]any{
 				"enabled": true,
+
+				"searchNamespace": "ALL",
 			},
 		},
 
