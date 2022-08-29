@@ -93,18 +93,9 @@ func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) e
 
 	cluster, err := p.client.CreateLKECluster(ctx, opts)
 
-	// _ = opts
-	// clusterID, err := p.clusterID(ctx, name)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// cluster, err := p.client.GetLKECluster(ctx, clusterID)
-
-	// if err != nil {
-	// 	return err
-	// }
+	if err != nil {
+		return err
+	}
 
 	config, err := p.client.GetLKEClusterKubeconfig(ctx, cluster.ID)
 
