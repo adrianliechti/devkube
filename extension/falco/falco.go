@@ -2,6 +2,7 @@ package falco
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -27,6 +28,10 @@ const (
 func Install(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
+	}
+
+	if err := verifyNodes(ctx, kubeconfig); err != nil {
+		return err
 	}
 
 	falcoValues := map[string]any{
@@ -89,6 +94,31 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	return nil
+}
+
+func verifyNodes(ctx context.Context, kubeconfig string) error {
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
+		return err
+	}
+
+	nodes, err := client.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	for _, node := range nodes.Items {
+		os := node.Labels["kubernetes.io/os"]
+		arch := node.Labels["kubernetes.io/arch"]
+
+		if os == "linux" && arch == "amd64" {
+			return nil
+		}
+	}
+
+	return errors.New("falco is currently only supported on linux/amd64 nodes")
 }
 
 func installDashboard(ctx context.Context, kubeconfig, namespace string) error {
