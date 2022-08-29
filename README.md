@@ -23,13 +23,29 @@ scoop install kind kubectl helm adrianliechti/devkube
 
 ## Setup Cluster
 
-### Using Kubernetes-in-Docker
+### Using local Docker Engine
 
 ```shell
 devkube create
 ```
 
-## Open Kubernetes Dashboard
+### Using [Linode](https://www.linode.com/) Cloud Provider
+
+```shell
+export LINODE_TOKEN=...
+devkube create --provider linode
+```
+
+### Using [Vultr](https://www.vultr.com/) Cloud Provider
+
+```shell
+export VULTR_API_KEY=...
+devkube create --provider vultr
+```
+
+## Administration Consoles
+
+#### Kubernetes Dashboard
 
 ```shell
 devkube dashboard
@@ -37,8 +53,23 @@ devkube dashboard
 
 > Press "Skip" on the login page to access the dashboard as admin
 
-## Open Observability Stack
+#### Observability Stack
 
 ```shell
 devkube grafana
+```
+
+
+## Optional Features
+
+#### Trivy
+
+```shell
+devkube enable trivy
+```
+
+#### Falco
+
+```shell
+devkube enable falco
 ```
