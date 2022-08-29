@@ -147,7 +147,7 @@ func Install(ctx context.Context, release, repo, chart, version string, values m
 	h := New(opt...)
 
 	args := []string{
-		"upgrade", "--install", "--create-namespace",
+		"upgrade", "--install", "--create-namespace", "--timeout", "10m0s",
 		release,
 		chart,
 	}
