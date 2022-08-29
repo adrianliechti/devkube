@@ -17,7 +17,7 @@ var (
 
 	trivy        = "trivy"
 	trivyChart   = "trivy-operator"
-	trivyVersion = "0.1.6"
+	trivyVersion = "0.1.9"
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
@@ -25,6 +25,47 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
+	values := map[string]any{
+		"nameOverride":     "trivy",
+		"fullnameOverride": "trivy",
+
+		"trivy": map[string]any{
+			"ignoreUnfixed": true,
+		},
+
+		"serviceMonitor": map[string]any{
+			"enabled": true,
+		},
+	}
+
+	if err := helm.Install(ctx, trivy, trivyRepo, trivyChart, trivyVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	if err := installDashboard(ctx, kubeconfig, namespace); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
+	if namespace == "" {
+		namespace = "default"
+	}
+
+	if err := helm.Uninstall(ctx, trivy, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
+		//return err
+	}
+
+	if err := uninstallDashboard(ctx, kubeconfig, namespace); err != nil {
+		//return err
+	}
+
+	return nil
+}
+
+func installDashboard(ctx context.Context, kubeconfig, namespace string) error {
 	resp, err := http.Get("https://grafana.com/api/dashboards/16652/revisions/1/download")
 
 	if err != nil {
@@ -72,31 +113,10 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
-	values := map[string]any{
-		"nameOverride":     "trivy",
-		"fullnameOverride": "trivy",
-
-		"trivy": map[string]any{
-			"ignoreUnfixed": true,
-		},
-
-		"serviceMonitor": map[string]any{
-			"enabled": true,
-		},
-	}
-
-	if err := helm.Install(ctx, trivy, trivyRepo, trivyChart, trivyVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
-		return err
-	}
-
 	return nil
 }
 
-func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
-	if namespace == "" {
-		namespace = "default"
-	}
-
+func uninstallDashboard(ctx context.Context, kubeconfig, namespace string) error {
 	client, err := kubernetes.NewFromConfig(kubeconfig)
 
 	if err != nil {
@@ -106,10 +126,6 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	dashboardName := "trivy-dashboard"
 
 	if err := client.CoreV1().ConfigMaps(namespace).Delete(ctx, dashboardName, metav1.DeleteOptions{}); err != nil {
-		//return err
-	}
-
-	if err := helm.Uninstall(ctx, trivy, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
