@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adrianliechti/devkube/provider"
 	"github.com/digitalocean/godo"
+
+	"github.com/adrianliechti/devkube/provider"
 )
 
 type Provider struct {
@@ -91,9 +92,12 @@ func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) e
 				Name: "default",
 
 				Size:  "s-4vcpu-8gb",
-				Count: 1,
+				Count: 2,
 			},
 		},
+
+		AutoUpgrade:  true,
+		SurgeUpgrade: true,
 	})
 
 	if err != nil {
