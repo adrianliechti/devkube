@@ -20,8 +20,16 @@ type Provider struct {
 }
 
 func NewFromEnvironment() (provider.Provider, error) {
-	// tenantID := os.Getenv("AZURE_TENANT_ID")
+	tenantID := os.Getenv("AZURE_TENANT_ID")
 	subscriptionID := os.Getenv("AZURE_SUBSCRIPTION_ID")
+
+	if tenantID == "" {
+		return nil, errors.New("AZURE_TENANT_ID is not set")
+	}
+
+	if subscriptionID == "" {
+		return nil, errors.New("AZURE_SUBSCRIPTION_ID is not set")
+	}
 
 	// clientID := os.Getenv("AZURE_CLIENT_ID")
 	// clientSecret := os.Getenv("AZURE_CLIENT_SECRET")
