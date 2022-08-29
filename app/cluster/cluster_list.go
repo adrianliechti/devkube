@@ -10,10 +10,12 @@ func ListCommand() *cli.Command {
 		Name:  "list",
 		Usage: "List clusters",
 
-		Action: func(c *cli.Context) error {
-			provider := app.MustProvider(c)
+		Flags: []cli.Flag{
+			app.ProviderFlag,
+		},
 
-			list, err := provider.List(c.Context)
+		Action: func(c *cli.Context) error {
+			list, err := app.ListClusters(c)
 
 			if err != nil {
 				return err
