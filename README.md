@@ -42,3 +42,12 @@ devkube dashboard
 ```shell
 devkube grafana
 ```
+
+
+## Optional Features
+
+### Trivy
+
+```shell
+devkube enable trivy
+```
