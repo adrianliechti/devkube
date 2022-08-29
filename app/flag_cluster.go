@@ -32,7 +32,7 @@ func ListClusters(c *cli.Context) ([]string, error) {
 
 		providers[strings.ToLower(name)] = p
 	} else {
-		providers["kind"] = kind.New()
+		providers["local"] = kind.New()
 
 		if p, err := linode.NewFromEnvironment(); err == nil {
 			providers["linode"] = p
@@ -61,7 +61,7 @@ func ListClusters(c *cli.Context) ([]string, error) {
 	return result, nil
 }
 
-func SelectCluster1(c *cli.Context) (provider.Provider, string, error) {
+func SelectCluster(c *cli.Context) (provider.Provider, string, error) {
 	list, err := ListClusters(c)
 
 	if err != nil {
@@ -91,7 +91,9 @@ func SelectCluster1(c *cli.Context) (provider.Provider, string, error) {
 		return nil, "", errors.New("no cluster found")
 	}
 
-	if len(items) > 1 {
+	skipPrompt := len(items) == 1 && filterProvider != "" && filterCluster != ""
+
+	if !skipPrompt {
 		i, _, err := cli.Select("Select cluster", items)
 
 		if err != nil {
@@ -115,7 +117,7 @@ func SelectCluster1(c *cli.Context) (provider.Provider, string, error) {
 }
 
 func MustCluster(c *cli.Context) (provider.Provider, string) {
-	provider, cluster, err := SelectCluster1(c)
+	provider, cluster, err := SelectCluster(c)
 
 	if err != nil {
 		cli.Fatal(err)
