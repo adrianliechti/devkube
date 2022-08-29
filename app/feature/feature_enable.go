@@ -1,6 +1,7 @@
 package feature
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/adrianliechti/devkube/app"
@@ -34,12 +35,16 @@ func EnableCommand() *cli.Command {
 		},
 
 		Action: func(c *cli.Context) error {
+			feature := c.Args().First()
+
+			if feature == "" {
+				return errors.New("feature name is required")
+			}
+
 			provider, cluster := app.MustCluster(c)
 
 			kubeconfig, closer := app.MustClusterKubeconfig(c, provider, cluster)
 			defer closer()
-
-			feature := c.Args().First()
 
 			switch strings.ToLower(feature) {
 			case "trivy":
