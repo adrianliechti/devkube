@@ -9,6 +9,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/docker"
 
 	"github.com/adrianliechti/devkube/provider"
+	"github.com/adrianliechti/devkube/provider/azure"
 	"github.com/adrianliechti/devkube/provider/kind"
 	"github.com/adrianliechti/devkube/provider/linode"
 	"github.com/adrianliechti/devkube/provider/none"
@@ -23,6 +24,7 @@ var ProviderFlag = &cli.StringFlag{
 func ListProviders() []string {
 	return []string{
 		"local",
+		"azure",
 		"linode",
 		"vultr",
 	}
@@ -70,6 +72,9 @@ func ProviderFromName(ctx context.Context, name string) (provider.Provider, erro
 		}
 
 		return kind.New(), nil
+
+	case "azure":
+		return azure.NewFromEnvironment()
 
 	case "linode":
 		return linode.NewFromEnvironment()

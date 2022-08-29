@@ -4,12 +4,12 @@ import (
 	"errors"
 	"os"
 	"path"
-	"sort"
 	"strings"
 
 	"github.com/adrianliechti/devkube/pkg/cli"
 
 	"github.com/adrianliechti/devkube/provider"
+	"github.com/adrianliechti/devkube/provider/azure"
 	"github.com/adrianliechti/devkube/provider/kind"
 	"github.com/adrianliechti/devkube/provider/linode"
 	"github.com/adrianliechti/devkube/provider/vultr"
@@ -34,6 +34,10 @@ func ListClusters(c *cli.Context) ([]string, error) {
 	} else {
 		providers["local"] = kind.New()
 
+		if p, err := azure.NewFromEnvironment(); err == nil {
+			providers["azure"] = p
+		}
+
 		if p, err := linode.NewFromEnvironment(); err == nil {
 			providers["linode"] = p
 		}
@@ -57,7 +61,6 @@ func ListClusters(c *cli.Context) ([]string, error) {
 		}
 	}
 
-	sort.Strings(result)
 	return result, nil
 }
 
