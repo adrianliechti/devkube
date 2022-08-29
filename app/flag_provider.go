@@ -7,6 +7,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
 	"github.com/adrianliechti/devkube/provider/kind"
+	"github.com/adrianliechti/devkube/provider/linode"
 	"github.com/adrianliechti/devkube/provider/none"
 	"github.com/adrianliechti/devkube/provider/vultr"
 
@@ -24,12 +25,14 @@ func Provider(c *cli.Context) (provider.Provider, error) {
 	switch provider {
 	case "none":
 		return none.New(), nil
+
 	case "kind", "":
 		if _, _, err := dockercli.Info(c.Context); err != nil {
 			return nil, err
 		}
 
 		return kind.New(), nil
+
 	case "vultr":
 		token := os.Getenv("VULTR_API_KEY")
 
@@ -38,6 +41,16 @@ func Provider(c *cli.Context) (provider.Provider, error) {
 		}
 
 		return vultr.New(token), nil
+
+	case "linode":
+		token := os.Getenv("LINODE_TOKEN")
+
+		if token == "" {
+			return nil, fmt.Errorf("LINODE_TOKEN is not set")
+		}
+
+		return linode.New(token), nil
+
 	default:
 		return nil, fmt.Errorf("unknown provider %q", provider)
 	}
