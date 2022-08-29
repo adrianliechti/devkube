@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path"
@@ -31,6 +32,16 @@ func New(token string) provider.Provider {
 	return &Provider{
 		client: &c,
 	}
+}
+
+func NewFromEnvironment() (provider.Provider, error) {
+	token := os.Getenv("LINODE_TOKEN")
+
+	if token == "" {
+		return nil, fmt.Errorf("LINODE_TOKEN is not set")
+	}
+
+	return New(token), nil
 }
 
 func (p *Provider) List(ctx context.Context) ([]string, error) {

@@ -1,8 +1,8 @@
 package app
 
 import (
+	"context"
 	"fmt"
-	"os"
 
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
@@ -19,41 +19,40 @@ var ProviderFlag = &cli.StringFlag{
 	Usage: "Cluster provider",
 }
 
-func Provider(c *cli.Context) (provider.Provider, error) {
-	provider := c.String(ProviderFlag.Name)
+func ListProviders() []string {
+	return []string{
+		"kind",
+		"linode",
+		"vultr",
+	}
+}
 
-	switch provider {
+func ProviderFromName(ctx context.Context, name string) (provider.Provider, error) {
+	switch name {
 	case "none":
-		return none.New(), nil
+		return none.NewFromEnvironment()
 
 	case "kind", "":
-		if _, _, err := dockercli.Info(c.Context); err != nil {
+		if _, _, err := dockercli.Info(ctx); err != nil {
 			return nil, err
 		}
 
 		return kind.New(), nil
 
-	case "vultr":
-		token := os.Getenv("VULTR_API_KEY")
-
-		if token == "" {
-			return nil, fmt.Errorf("VULTR_API_KEY is not set")
-		}
-
-		return vultr.New(token), nil
-
 	case "linode":
-		token := os.Getenv("LINODE_TOKEN")
+		return linode.NewFromEnvironment()
 
-		if token == "" {
-			return nil, fmt.Errorf("LINODE_TOKEN is not set")
-		}
-
-		return linode.New(token), nil
+	case "vultr":
+		return vultr.NewFromEnvironment()
 
 	default:
-		return nil, fmt.Errorf("unknown provider %q", provider)
+		return nil, fmt.Errorf("unknown provider %q", name)
 	}
+}
+
+func Provider(c *cli.Context) (provider.Provider, error) {
+	name := c.String(ProviderFlag.Name)
+	return ProviderFromName(c.Context, name)
 }
 
 func MustProvider(c *cli.Context) provider.Provider {

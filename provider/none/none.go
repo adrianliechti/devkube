@@ -10,20 +10,41 @@ import (
 )
 
 type Provider struct {
+	kubeconfig string
 }
 
-func New() provider.Provider {
-	return new(Provider)
+func New(kubeconfig string) provider.Provider {
+	return &Provider{
+		kubeconfig: kubeconfig,
+	}
 }
 
-func (p *Provider) List(ctx context.Context) ([]string, error) {
-	_, err := kubeconfig()
+func NewFromEnvironment() (provider.Provider, error) {
+	path := os.Getenv("KUBECONFIG")
 
-	if err != nil {
+	if path == "" {
+		dir, err := os.UserHomeDir()
+
+		if err != nil {
+			return nil, err
+		}
+
+		path = filepath.Join(dir, ".kube", "config")
+	}
+
+	if _, err := os.Stat(path); err != nil {
 		return nil, err
 	}
 
-	return []string{"Current"}, nil
+	return New(path), nil
+}
+
+func (p *Provider) List(ctx context.Context) ([]string, error) {
+	if _, err := os.Stat(p.kubeconfig); err != nil {
+		return nil, err
+	}
+
+	return []string{"current"}, nil
 }
 
 func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) error {
@@ -35,38 +56,15 @@ func (p *Provider) Delete(ctx context.Context, name string) error {
 }
 
 func (p *Provider) Export(ctx context.Context, name, path string) error {
-	kubeconfig, err := kubeconfig()
-
-	if err != nil {
-		return err
-	}
-
 	if path == "" {
-		path = kubeconfig
+		path = p.kubeconfig
 	}
 
-	data, err := ioutil.ReadFile(kubeconfig)
+	data, err := ioutil.ReadFile(p.kubeconfig)
 
 	if err != nil {
 		return err
 	}
 
 	return ioutil.WriteFile(path, data, 0600)
-}
-
-func kubeconfig() (string, error) {
-	path := os.Getenv("KUBECONFIG")
-
-	if path == "" {
-		dir, err := os.UserHomeDir()
-
-		if err != nil {
-			return "", err
-		}
-
-		path = filepath.Join(dir, ".kube", "config")
-	}
-
-	_, err := os.Stat(path)
-	return path, err
 }
