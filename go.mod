@@ -24,6 +24,7 @@ require (
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/digitalocean/godo v1.83.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
