@@ -23,7 +23,6 @@ brews:
   - dependencies:
       - name: kubernetes-cli
       - name: helm
-      - name: kind
 
     tap:
       owner: adrianliechti
