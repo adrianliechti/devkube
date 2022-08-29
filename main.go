@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/adrianliechti/devkube/app/cluster"
+	"github.com/adrianliechti/devkube/app/feature"
 	"github.com/adrianliechti/devkube/pkg/cli"
 )
 
@@ -41,6 +42,9 @@ func initApp() cli.App {
 
 			cluster.GrafanaCommand(),
 			cluster.DashboardCommand(),
+
+			feature.EnableCommand(),
+			feature.DisableCommand(),
 		},
 	}
 }
