@@ -84,7 +84,7 @@ func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) e
 	cluster, _, err := p.client.Kubernetes.Create(ctx, &godo.KubernetesClusterCreateRequest{
 		Name: name,
 
-		RegionSlug:  "fra1",
+		RegionSlug:  "ams3",
 		VersionSlug: version,
 
 		NodePools: []*godo.KubernetesNodePoolCreateRequest{
@@ -107,7 +107,7 @@ func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) e
 	for {
 		println("waiting for cluster to be ready")
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(20 * time.Second)
 
 		cluster, _, err := p.client.Kubernetes.Get(ctx, cluster.ID)
 
