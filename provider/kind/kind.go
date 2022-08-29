@@ -54,5 +54,5 @@ func (p *Provider) Delete(ctx context.Context, name string) error {
 }
 
 func (p *Provider) Export(ctx context.Context, name, path string) error {
-	return kind.ExportConfig(ctx, name, path)
+	return kind.Export(ctx, name, path)
 }

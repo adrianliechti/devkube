@@ -1,15 +1,17 @@
 package app
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
 	"github.com/adrianliechti/devkube/provider/kind"
+	"github.com/adrianliechti/devkube/provider/linode"
 	"github.com/adrianliechti/devkube/provider/none"
+	"github.com/adrianliechti/devkube/provider/vultr"
 
 	dockercli "github.com/adrianliechti/devkube/pkg/docker"
-	kindcli "github.com/adrianliechti/devkube/pkg/kind"
 )
 
 var ProviderFlag = &cli.StringFlag{
@@ -17,25 +19,40 @@ var ProviderFlag = &cli.StringFlag{
 	Usage: "Cluster provider",
 }
 
-func Provider(c *cli.Context) (provider.Provider, error) {
-	provider := c.String(ProviderFlag.Name)
+func ListProviders() []string {
+	return []string{
+		"kind",
+		"linode",
+		"vultr",
+	}
+}
 
-	switch provider {
+func ProviderFromName(ctx context.Context, name string) (provider.Provider, error) {
+	switch name {
 	case "none":
-		return none.New(), nil
-	case "kind", "":
-		if _, _, err := dockercli.Info(c.Context); err != nil {
-			return nil, err
-		}
+		return none.NewFromEnvironment()
 
-		if _, _, err := kindcli.Info(c.Context); err != nil {
+	case "kind", "":
+		if _, _, err := dockercli.Info(ctx); err != nil {
 			return nil, err
 		}
 
 		return kind.New(), nil
+
+	case "linode":
+		return linode.NewFromEnvironment()
+
+	case "vultr":
+		return vultr.NewFromEnvironment()
+
 	default:
-		return nil, fmt.Errorf("unknown provider %q", provider)
+		return nil, fmt.Errorf("unknown provider %q", name)
 	}
+}
+
+func Provider(c *cli.Context) (provider.Provider, error) {
+	name := c.String(ProviderFlag.Name)
+	return ProviderFromName(c.Context, name)
 }
 
 func MustProvider(c *cli.Context) provider.Provider {
