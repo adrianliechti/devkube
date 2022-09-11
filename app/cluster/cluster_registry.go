@@ -64,7 +64,7 @@ func RegistryCommand() *cli.Command {
 			cli.Info()
 			cli.Info()
 
-			if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/registry", fmt.Sprintf("%d:80", port)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(DefaultNamespace), kubectl.WithDefaultOutput()); err != nil {
+			if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/registry", fmt.Sprintf("%d:5000", port)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(DefaultNamespace), kubectl.WithDefaultOutput()); err != nil {
 				return err
 			}
 
