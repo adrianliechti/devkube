@@ -48,6 +48,14 @@ export AZURE_SUBSCRIPTION_ID=...
 devkube create --provider azure
 ```
 
+### Using [DigitalOcean](https://www.digitalocean.com/products/kubernetes) Cloud Provider
+
+```shell
+export DIGITALOCEAN_TOKEN=...
+
+devkube create --provider digitalocean
+```
+
 ### Using [Linode](https://www.linode.com/) Cloud Provider
 
 ```shell
