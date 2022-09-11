@@ -39,7 +39,7 @@ spec:
     app: registry
   ports:
     - name: http
-      port: 80
+      port: 5000
       targetPort: 5000
 ---
 kind: PersistentVolumeClaim
@@ -70,12 +70,30 @@ spec:
       labels:
         app: registry-proxy
     spec:
+      initContainers:
+        - name: hosts-patcher
+          image: busybox
+          securityContext:
+            privileged: true
+          command:
+            [
+              "sh",
+              "-c",
+              "grep -q 'registry' /mnt/hosts || echo 127.0.0.1 registry registry.loop >> /mnt/hosts",
+            ]
+          volumeMounts:
+            - name: hosts
+              mountPath: /mnt/hosts
       containers:
         - name: proxy
           image: adrianliechti/loop-proxy
-          args: ["-port", "5000", "-target", "http://registry"]
+          args: ["-port", "5000", "-target", "http://registry:5000"]
           ports:
             - containerPort: 5000
               hostIP: 127.0.0.1
               hostPort: 5000
           resources: {}
+      volumes:
+        - name: hosts
+          hostPath:
+            path: /etc/hosts
