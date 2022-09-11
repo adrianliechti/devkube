@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/adrianliechti/devkube/pkg/to"
 	"github.com/adrianliechti/devkube/provider"
@@ -14,6 +15,8 @@ import (
 )
 
 type Provider struct {
+	location string
+
 	credential *azidentity.DefaultAzureCredential
 
 	managedclusters *armcontainerservice.ManagedClustersClient
@@ -31,10 +34,13 @@ func NewFromEnvironment() (provider.Provider, error) {
 		return nil, errors.New("AZURE_SUBSCRIPTION_ID is not set")
 	}
 
-	// clientID := os.Getenv("AZURE_CLIENT_ID")
-	// clientSecret := os.Getenv("AZURE_CLIENT_SECRET")
+	//group := os.Getenv("AZURE_DEFAULTS_GROUP")
 
-	// resourceGroup := os.Getenv("AZURE_RESOURCE_GROUP")
+	location := os.Getenv("AZURE_DEFAULTS_LOCATION")
+
+	if location == "" {
+		location = "westeurope"
+	}
 
 	credential, err := azidentity.NewDefaultAzureCredential(nil)
 
@@ -49,6 +55,7 @@ func NewFromEnvironment() (provider.Provider, error) {
 	}
 
 	return &Provider{
+		location:   location,
 		credential: credential,
 
 		managedclusters: mcclient,
@@ -78,10 +85,7 @@ func (p *Provider) List(ctx context.Context) ([]string, error) {
 }
 
 func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) error {
-	//resourcegroup := os.Getenv("AZURE_RESOURCE_GROUP")
-
-	location := "westeurope"
-	resourcegroup := "devkube"
+	resourcegroup := groupName(name)
 
 	identityType := armcontainerservice.ResourceIdentityTypeSystemAssigned
 
@@ -92,7 +96,7 @@ func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) e
 	agentpoolSize := 1
 
 	parameters := armcontainerservice.ManagedCluster{
-		Location: to.StringPtr(location),
+		Location: to.StringPtr(p.location),
 
 		Identity: &armcontainerservice.ManagedClusterIdentity{
 			Type: &identityType,
@@ -113,7 +117,7 @@ func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) e
 			DNSPrefix: to.StringPtr(name),
 
 			ServicePrincipalProfile: &armcontainerservice.ManagedClusterServicePrincipalProfile{
-				ClientID: to.StringPtr("devkube-" + name),
+				ClientID: to.StringPtr(resourcegroup),
 			},
 		},
 
@@ -140,7 +144,7 @@ func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) e
 }
 
 func (p *Provider) Delete(ctx context.Context, name string) error {
-	resourcegroup := "devkube"
+	resourcegroup := groupName(name)
 
 	poller, err := p.managedclusters.BeginDelete(ctx, resourcegroup, name, nil)
 
@@ -175,7 +179,7 @@ func (p *Provider) Export(ctx context.Context, name, kubeconfig string) error {
 		kubeconfig = path.Join(home, ".kube", "config")
 	}
 
-	resourcegroup := "devkube"
+	resourcegroup := groupName(name)
 
 	result, err := p.managedclusters.ListClusterAdminCredentials(ctx, resourcegroup, name, nil)
 
@@ -190,4 +194,14 @@ func (p *Provider) Export(ctx context.Context, name, kubeconfig string) error {
 	data := result.Kubeconfigs[0].Value
 
 	return os.WriteFile(kubeconfig, data, 0600)
+}
+
+func groupName(name string) string {
+	name = strings.ToLower(name)
+
+	if strings.EqualFold(name, "devkube") || strings.HasPrefix(name, "devkube-") {
+		return name
+	}
+
+	return "devkube-" + name
 }
