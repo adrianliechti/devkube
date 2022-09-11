@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	manifest = "https://github.com/adrianliechti/loop-registry/blob/main/kubernetes/install.yaml"
+	manifest = "https://raw.githubusercontent.com/adrianliechti/loop-registry/main/kubernetes/install.yaml"
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
