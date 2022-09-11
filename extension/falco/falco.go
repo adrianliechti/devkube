@@ -16,7 +16,7 @@ import (
 const (
 	falco        = "falco"
 	falcoChart   = "falco"
-	falcoVersion = "2.0.16"
+	falcoVersion = "2.0.17"
 
 	exporter        = "falco-exporter"
 	exporterChart   = "falco-exporter"

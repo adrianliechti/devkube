@@ -10,7 +10,7 @@ import (
 const (
 	loki        = "loki"
 	lokiChart   = "loki"
-	lokiVersion = "2.14.0"
+	lokiVersion = "2.16.0"
 )
 
 func installLoki(ctx context.Context, kubeconfig, namespace string) error {

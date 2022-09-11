@@ -10,7 +10,7 @@ import (
 const (
 	tempo        = "tempo"
 	tempoChart   = "tempo"
-	tempoVersion = "0.15.8"
+	tempoVersion = "0.16.1"
 )
 
 func installTempo(ctx context.Context, kubeconfig, namespace string) error {

@@ -9,7 +9,7 @@ import (
 const (
 	promtail        = "promtail"
 	promtailChart   = "promtail"
-	promtailVersion = "6.2.2"
+	promtailVersion = "6.4.0"
 )
 
 func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
