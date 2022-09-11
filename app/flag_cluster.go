@@ -10,6 +10,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/cli"
 
 	"github.com/adrianliechti/devkube/provider"
+	"github.com/adrianliechti/devkube/provider/aws"
 	"github.com/adrianliechti/devkube/provider/digitalocean"
 	"github.com/adrianliechti/devkube/provider/kind"
 	"github.com/adrianliechti/devkube/provider/linode"
@@ -34,6 +35,10 @@ func ListClusters(c *cli.Context) ([]string, error) {
 		providers[strings.ToLower(name)] = p
 	} else {
 		providers["local"] = kind.New()
+
+		if p, err := aws.NewFromEnvironment(); err == nil {
+			providers["aws"] = p
+		}
 
 		if p, err := digitalocean.NewFromEnvironment(); err == nil {
 			providers["digitalocean"] = p
