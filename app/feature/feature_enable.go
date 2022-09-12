@@ -61,7 +61,7 @@ func EnableCommand() *cli.Command {
 
 				return nil
 			default:
-				cli.Fatal("inavlid feature: %s", feature)
+				cli.Fatalf("inavlid feature: %s", feature)
 			}
 
 			return nil

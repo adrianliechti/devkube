@@ -117,7 +117,7 @@ func WithNamespace(namespace string) Option {
 	}
 }
 
-func WithInput(stdout, stdin io.Reader) Option {
+func WithInput(stdin io.Reader) Option {
 	return func(k *Kubectl) {
 		k.stdin = stdin
 	}
