@@ -1,24 +1,21 @@
 package registry
 
 import (
-	"bytes"
 	"context"
 
 	"github.com/adrianliechti/devkube/pkg/kubectl"
-
-	_ "embed"
 )
 
-//go:embed registry.yaml
-var manifest string
+const (
+	manifest = "https://raw.githubusercontent.com/adrianliechti/loop-registry/v0.1.0/kubernetes/install.yaml"
+)
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
 	}
 
-	data := bytes.NewReader([]byte(manifest))
-	return kubectl.Invoke(ctx, []string{"apply", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(data), kubectl.WithDefaultOutput())
+	return kubectl.Invoke(ctx, []string{"apply", "-f", manifest}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithDefaultOutput())
 }
 
 func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
@@ -26,6 +23,5 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	data := bytes.NewReader([]byte(manifest))
-	return kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(data), kubectl.WithDefaultOutput())
+	return kubectl.Invoke(ctx, []string{"delete", "-f", manifest}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithDefaultOutput())
 }
