@@ -1,4 +1,27 @@
-# DevKube
+# devkube
+
+devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a specified cloud provider on top of their managed Kubernetes offering.
+
+Batteries included
+
+- [Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) - web-based user interface
+- [Grafana](https://grafana.com/grafana/) - data observability
+- [Prometheus](https://prometheus-operator.dev) - monitoring system
+- [Loki](https://grafana.com/oss/loki/) - log aggregation system
+- [Tempo](https://grafana.com/oss/tempo/) - distributed tracing backend
+
+Optional Add-ons
+
+- [Falco](https://falco.org) - Kubernetes threat detection engine
+- [Trivy](https://aquasecurity.github.io/trivy-operator/latest/) - Kubernetse workload vulnerability scanning
+
+Cloud providers
+
+- [Amazon](https://aws.amazon.com/eks/)
+- [Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/)
+- [DigitalOcean](https://www.digitalocean.com/products/kubernetes)
+- [Linode](https://www.linode.com/products/kubernetes/)
+- [Vultr](https://www.vultr.com/kubernetes/)
 
 
 ## Install
