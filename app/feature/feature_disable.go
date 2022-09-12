@@ -5,11 +5,14 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/extension/falco"
-	"github.com/adrianliechti/devkube/extension/trivy"
+
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
+
+	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/linkerd"
+	"github.com/adrianliechti/devkube/extension/trivy"
 )
 
 func DisableCommand() *cli.Command {
@@ -56,6 +59,13 @@ func DisableCommand() *cli.Command {
 
 			case "falco":
 				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "linkerd":
+				if err := linkerd.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 

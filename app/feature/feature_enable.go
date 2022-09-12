@@ -5,11 +5,14 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/extension/falco"
-	"github.com/adrianliechti/devkube/extension/trivy"
+
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
+
+	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/linkerd"
+	"github.com/adrianliechti/devkube/extension/trivy"
 )
 
 func EnableCommand() *cli.Command {
@@ -60,6 +63,14 @@ func EnableCommand() *cli.Command {
 				}
 
 				return nil
+
+			case "linkerd":
+				if err := linkerd.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
 			default:
 				cli.Fatalf("inavlid feature: %s", feature)
 			}
