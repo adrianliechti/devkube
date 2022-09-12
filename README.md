@@ -1,6 +1,6 @@
 # devkube
 
-devkube bootraps a feature-rich Kubernetse cluster locally using Docker, or on a specified cloud provider on top of their managed Kubernetes offering.
+devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a specified cloud provider on top of their managed Kubernetes offering.
 
 Batteries included
 
