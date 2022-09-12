@@ -169,19 +169,26 @@ func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) e
 func (p *Provider) Delete(ctx context.Context, name string) error {
 	resourcegroup := groupName(name)
 
-	poller, err := p.managedclusters.BeginDelete(ctx, resourcegroup, name, nil)
+	mcPoller, err := p.managedclusters.BeginDelete(ctx, resourcegroup, name, nil)
 
 	if err != nil {
 		return err
 	}
 
-	result, err := poller.PollUntilDone(ctx, nil)
+	if _, err := mcPoller.PollUntilDone(ctx, nil); err != nil {
+		return err
+	}
+
+	rgPoller, err := p.resourcegroups.BeginDelete(ctx, resourcegroup, nil)
 
 	if err != nil {
 		return err
 	}
 
-	_ = result
+	if _, err := rgPoller.PollUntilDone(ctx, nil); err != nil {
+		return err
+	}
+
 	return nil
 }
 
