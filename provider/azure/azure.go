@@ -12,6 +12,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 )
 
 type Provider struct {
@@ -19,6 +20,7 @@ type Provider struct {
 
 	credential *azidentity.DefaultAzureCredential
 
+	resourcegroups  *armresources.ResourceGroupsClient
 	managedclusters *armcontainerservice.ManagedClustersClient
 }
 
@@ -48,6 +50,12 @@ func NewFromEnvironment() (provider.Provider, error) {
 		return nil, err
 	}
 
+	rgClient, err := armresources.NewResourceGroupsClient(subscriptionID, credential, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
 	mcclient, err := armcontainerservice.NewManagedClustersClient(subscriptionID, credential, nil)
 
 	if err != nil {
@@ -58,6 +66,7 @@ func NewFromEnvironment() (provider.Provider, error) {
 		location:   location,
 		credential: credential,
 
+		resourcegroups:  rgClient,
 		managedclusters: mcclient,
 	}, nil
 }
@@ -86,6 +95,20 @@ func (p *Provider) List(ctx context.Context) ([]string, error) {
 
 func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) error {
 	resourcegroup := groupName(name)
+
+	exists, err := p.resourcegroups.CheckExistence(ctx, resourcegroup, nil)
+
+	if err != nil {
+		return err
+	}
+
+	if exists.Success {
+		return errors.New("resource group already exists")
+	}
+
+	if _, err := p.resourcegroups.CreateOrUpdate(ctx, resourcegroup, armresources.ResourceGroup{Location: to.StringPtr(p.location)}, nil); err != nil {
+		return err
+	}
 
 	identityType := armcontainerservice.ResourceIdentityTypeSystemAssigned
 
