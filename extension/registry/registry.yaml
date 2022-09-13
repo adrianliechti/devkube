@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: registry
-          image: adrianliechti/loop-registry
+          image: registry:2
           ports:
             - containerPort: 5000
           volumeMounts:
