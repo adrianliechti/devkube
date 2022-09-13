@@ -12,6 +12,7 @@ data:
     elif [ -d "/etc/pki/ca-trust/source/anchors" ]; then
       echo "$TRUSTED_CERT" > /etc/pki/ca-trust/source/anchors/ca.crt && update-ca-trust
     fi
+    systemctl restart containerd
 ---
 apiVersion: apps/v1
 kind: DaemonSet
