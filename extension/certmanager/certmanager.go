@@ -7,6 +7,10 @@ import (
 
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
+	"github.com/adrianliechti/devkube/pkg/kubernetes"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -30,6 +34,18 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 
 	namespace = certmanagerNamespace1
 
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
+		return err
+	}
+
+	nodes, err := client.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+
+	if err != nil {
+		return err
+	}
+
 	values := map[string]any{
 		"installCRDs": true,
 
@@ -38,6 +54,13 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 				"enabled": true,
 			},
 		},
+	}
+
+	if isAWS(nodes.Items) {
+		values["webhook"] = map[string]any{
+			"securePort":  10260,
+			"hostNetwork": true,
+		}
 	}
 
 	if err := helm.Install(ctx, certmanager, certmanagerRepo, certmanagerChart, certmanagerVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithWait(true), helm.WithDefaultOutput()); err != nil {
@@ -67,4 +90,14 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	return nil
+}
+
+func isAWS(nodes []corev1.Node) bool {
+	for _, node := range nodes {
+		if strings.HasPrefix(node.Spec.ProviderID, "aws://") {
+			return true
+		}
+	}
+
+	return false
 }
