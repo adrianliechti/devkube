@@ -72,6 +72,8 @@ type Helm struct {
 	context   string
 	namespace string
 
+	wait bool
+
 	stdin  io.Reader
 	stdout io.Writer
 	stderr io.Writer
@@ -102,6 +104,12 @@ func WithContext(context string) Option {
 func WithNamespace(namespace string) Option {
 	return func(h *Helm) {
 		h.namespace = namespace
+	}
+}
+
+func WithWait(wait bool) Option {
+	return func(h *Helm) {
+		h.wait = wait
 	}
 }
 
@@ -160,6 +168,10 @@ func Install(ctx context.Context, release, repo, chart, version string, values m
 		args = append(args, "--version", version)
 	}
 
+	if h.wait {
+		args = append(args, "--wait")
+	}
+
 	if len(values) > 0 {
 		args = append(args, "-f", "-")
 
@@ -181,6 +193,10 @@ func Uninstall(ctx context.Context, release string, opt ...Option) error {
 	args := []string{
 		"uninstall",
 		release,
+	}
+
+	if h.wait {
+		args = append(args, "--wait")
 	}
 
 	return h.Invoke(ctx, args...)

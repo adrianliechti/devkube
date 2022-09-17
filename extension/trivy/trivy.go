@@ -12,7 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var (
+const (
 	trivyRepo = "https://aquasecurity.github.io/helm-charts"
 
 	trivy        = "trivy"

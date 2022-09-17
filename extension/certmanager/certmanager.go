@@ -5,40 +5,46 @@ import (
 	_ "embed"
 	"strings"
 
+	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
 
-//go:embed ca.yaml
-var manifestCA string
-
-//go:embed ca-trust.yaml
-var manifestDaemonSet string
-
 const (
-	certmanagerVersion   = "v1.9.1"
-	certmanagerNamespace = "cert-manager"
+	certmanagerRepo       = "https://charts.jetstack.io"
+	certmanagerNamespace1 = "cert-manager"
+
+	certmanager        = "cert-manager"
+	certmanagerChart   = "cert-manager"
+	certmanagerVersion = "v1.9.1"
+)
+
+var (
+	//go:embed manifest.yaml
+	manifest string
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
-	if namespace == "" {
-		namespace = "default"
+	// if namespace == "" {
+	// 	namespace = "default"
+	// }
+
+	namespace = certmanagerNamespace1
+
+	values := map[string]any{
+		"installCRDs": true,
+
+		"prometheus": map[string]any{
+			"servicemonitor": map[string]any{
+				"enabled": true,
+			},
+		},
 	}
 
-	url := "https://github.com/cert-manager/cert-manager/releases/download/" + certmanagerVersion + "/cert-manager.yaml"
-
-	if err := kubectl.Invoke(ctx, []string{"apply", "-f", url, "--validate=false", "--server-side=true", "--overwrite=true"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithDefaultOutput()); err != nil {
+	if err := helm.Install(ctx, certmanager, certmanagerRepo, certmanagerChart, certmanagerVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithWait(true), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"wait", "deployments", "-n", certmanagerNamespace, "--all", "--for", "condition=Available", "--timeout", "300s"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithDefaultOutput()); err != nil {
-		return err
-	}
-
-	if err := kubectl.Invoke(ctx, []string{"apply", "--validate=false", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithInput(strings.NewReader(manifestCA)), kubectl.WithDefaultOutput()); err != nil {
-		return err
-	}
-
-	if err := kubectl.Invoke(ctx, []string{"apply", "--validate=false", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithInput(strings.NewReader(manifestDaemonSet)), kubectl.WithDefaultOutput()); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"apply", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -46,14 +52,18 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 }
 
 func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
-	if namespace == "" {
-		namespace = "default"
+	// if namespace == "" {
+	// 	namespace = "default"
+	// }
+
+	namespace = certmanagerNamespace1
+
+	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
+		// return err
 	}
 
-	url := "https://github.com/cert-manager/cert-manager/releases/download/" + certmanagerVersion + "/cert-manager.yaml"
-
-	if err := kubectl.Invoke(ctx, []string{"delete", "-f", url}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithDefaultOutput()); err != nil {
-		return err
+	if err := helm.Uninstall(ctx, certmanager, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
+		//return err
 	}
 
 	return nil
