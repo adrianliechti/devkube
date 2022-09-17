@@ -2,6 +2,8 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: registry
+  labels:
+    app: registry
 spec:
   secretName: registry-tls
   dnsNames:
@@ -9,7 +11,7 @@ spec:
     - registry
     - localhost
   issuerRef:
-    name: root
+    name: platform
     kind: ClusterIssuer
     group: cert-manager.io
 ---
@@ -54,7 +56,7 @@ spec:
     app: registry
   ports:
     - name: http
-      port: 5000
+      port: 80
       targetPort: 5000
 ---
 kind: PersistentVolumeClaim
@@ -85,36 +87,35 @@ spec:
       labels:
         app: registry-proxy
     spec:
+      hostPID: true
       initContainers:
-        - name: hosts-patcher
+        - name: init
           image: busybox
+          securityContext:
+            privileged: true
           command:
-            [
-              "sh",
-              "-c",
-              "grep -q 'registry' /mnt/hosts || echo 127.0.0.1 registry registry.loop >> /mnt/hosts",
-            ]
-          volumeMounts:
-            - name: hosts
-              mountPath: /mnt/hosts
+            - nsenter
+            - --mount=/proc/1/ns/mnt
+            - --
+            - sh
+            - -c
+            - "grep -q 'registry' /etc/hosts || echo 127.88.0.10 registry registry.loop >> /etc/hosts"
       containers:
         - name: proxy
-          image: adrianliechti/loop-proxy:test
+          image: adrianliechti/loop-proxy
           args:
-            [
-              "-port",
-              "5000",
-              "-target",
-              "http://registry:5000",
-              "-key-file",
-              "certs/tls.key",
-              "-cert-file",
-              "certs/tls.crt",
-            ]
+            - "-port"
+            - "443"
+            - "-target"
+            - "http://registry"
+            - "-key-file"
+            - "certs/tls.key"
+            - "-cert-file"
+            - "certs/tls.crt"
           ports:
-            - containerPort: 5000
-              hostIP: 127.0.0.1
-              hostPort: 5000
+            - containerPort: 443
+              hostIP: 127.88.0.10
+              hostPort: 443
           volumeMounts:
             - name: certs
               mountPath: "/app/certs"
@@ -123,6 +124,3 @@ spec:
         - name: certs
           secret:
             secretName: registry-tls
-        - name: hosts
-          hostPath:
-            path: /etc/hosts
