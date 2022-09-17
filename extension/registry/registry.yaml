@@ -2,7 +2,6 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: registry
-  namespace: loop
 spec:
   secretName: registry-tls
   dnsNames:
@@ -18,7 +17,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: registry
-  namespace: loop
   labels:
     app: registry
 spec:
@@ -48,7 +46,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: registry
-  namespace: loop
   labels:
     app: registry
 spec:
@@ -64,7 +61,6 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: registry
-  namespace: loop
   labels:
     app: registry
 spec:
@@ -78,7 +74,6 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: registry-proxy
-  namespace: loop
   labels:
     app: registry-proxy
 spec:
