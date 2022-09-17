@@ -71,3 +71,4 @@ spec:
               elif [ -d "/etc/pki/ca-trust/source/anchors" ]; then
                 echo "$$(PLATFORM_CA)" > /etc/pki/ca-trust/source/anchors/platform-ca.crt && update-ca-trust
               fi
+              systemctl restart containerd
