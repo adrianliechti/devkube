@@ -9,6 +9,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
+	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/dashboard"
 	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/observability"
@@ -60,6 +61,10 @@ func CreateCommand() *cli.Command {
 			}
 
 			if err := observability.InstallCRD(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := certmanager.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
