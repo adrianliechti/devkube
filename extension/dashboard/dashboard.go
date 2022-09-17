@@ -7,7 +7,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
 
-var (
+const (
 	dashboardRepo = "https://kubernetes.github.io/dashboard"
 
 	dashboard        = "dashboard"
