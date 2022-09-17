@@ -53,7 +53,7 @@ spec:
           securityContext:
             privileged: true
           env:
-            - name: PLATFORM_CA
+            - name: ROOTCA
               valueFrom:
                 secretKeyRef:
                   name: platform-ca
@@ -65,9 +65,10 @@ spec:
             - sh
             - -c
             - |
-              echo "$PLATFORM_CA"
+              echo "$ROOTCA"
               if [ -d "/usr/local/share/ca-certificates" ]; then
-                echo "$$(PLATFORM_CA)" > /usr/local/share/ca-certificates/platform-ca.crt && update-ca-certificates
+                echo "$ROOTCA" > /usr/local/share/ca-certificates/platform-ca.crt && update-ca-certificates
               elif [ -d "/etc/pki/ca-trust/source/anchors" ]; then
-                echo "$$(PLATFORM_CA)" > /etc/pki/ca-trust/source/anchors/platform-ca.crt && update-ca-trust
+                echo "$ROOTCA" > /etc/pki/ca-trust/source/anchors/platform-ca.crt && update-ca-trust
               fi
+              systemctl restart containerd
