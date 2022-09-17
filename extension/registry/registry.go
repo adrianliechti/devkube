@@ -8,8 +8,10 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
 
-//go:embed registry.yaml
-var manifest string
+var (
+	//go:embed registry.yaml
+	manifest string
+)
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {
