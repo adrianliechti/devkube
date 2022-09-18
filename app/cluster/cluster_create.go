@@ -2,7 +2,7 @@ package cluster
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
@@ -54,7 +54,7 @@ func CreateCommand() *cli.Command {
 
 			defer os.RemoveAll(dir)
 
-			kubeconfig := path.Join(dir, "kubeconfig")
+			kubeconfig := filepath.Join(dir, "kubeconfig")
 
 			if err := provider.Create(c.Context, cluster, kubeconfig); err != nil {
 				return err
