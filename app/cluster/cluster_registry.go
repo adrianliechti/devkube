@@ -12,7 +12,7 @@ import (
 func RegistryCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "registry",
-		Usage: "Connect Grafana",
+		Usage: "Connect Registry",
 
 		Flags: []cli.Flag{
 			app.ProviderFlag,
