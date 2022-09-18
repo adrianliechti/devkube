@@ -38,7 +38,9 @@ func initApp() cli.App {
 
 			cluster.CreateCommand(),
 			cluster.DeleteCommand(),
+
 			cluster.SetupCommand(),
+			cluster.TrustCommand(),
 
 			cluster.GrafanaCommand(),
 			cluster.DashboardCommand(),

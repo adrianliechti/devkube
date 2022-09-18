@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -150,13 +150,13 @@ func (p *Provider) Export(ctx context.Context, name, kubeconfig string) error {
 			return err
 		}
 
-		dir := path.Join(home, ".kube")
+		dir := filepath.Join(home, ".kube")
 
 		if err := os.MkdirAll(dir, 0700); err != nil {
 			return err
 		}
 
-		kubeconfig = path.Join(home, ".kube", "config")
+		kubeconfig = filepath.Join(home, ".kube", "config")
 	}
 
 	id, err := p.clusterID(ctx, name)
