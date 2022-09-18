@@ -2,10 +2,15 @@ package cluster
 
 import (
 	"context"
+	"crypto/sha1"
+	"crypto/x509"
+	"encoding/hex"
+	"encoding/pem"
 	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
@@ -72,17 +77,57 @@ func TrustCommand() *cli.Command {
 }
 
 func installCertificate(ctx context.Context, name string) error {
-	home, err := os.UserHomeDir()
+	keychain, err := userKeychain()
 
 	if err != nil {
 		return err
 	}
-
-	keychain := filepath.Join(home, "/Library/Keychains/login.keychain")
 
 	if err := exec.CommandContext(ctx, "security", "add-trusted-cert", "-r", "trustRoot", "-k", keychain, name).Run(); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func uninstallCertificate(ctx context.Context, name string) error {
+	keychain, err := userKeychain()
+
+	if err != nil {
+		return err
+	}
+
+	data, err := os.ReadFile(name)
+
+	if err != nil {
+		return err
+	}
+
+	block, _ := pem.Decode(data)
+	cert, err := x509.ParseCertificate(block.Bytes)
+
+	if err != nil {
+		return err
+	}
+
+	hash := sha1.Sum(cert.Raw)
+	fingerprint := strings.ToUpper(hex.EncodeToString(hash[:]))
+
+	if err := exec.CommandContext(ctx, "security", "delete-certificate", "-t", "-Z", fingerprint, keychain).Run(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func userKeychain() (string, error) {
+	home, err := os.UserHomeDir()
+
+	if err != nil {
+		return "", err
+	}
+
+	keychain := filepath.Join(home, "/Library/Keychains/login.keychain")
+
+	return keychain, nil
 }
