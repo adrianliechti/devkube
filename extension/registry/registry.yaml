@@ -12,7 +12,7 @@ spec:
     - localhost
   issuerRef:
     name: platform
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
 ---
 apiVersion: apps/v1
