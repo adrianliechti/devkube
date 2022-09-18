@@ -27,6 +27,10 @@ func TrustCommand() *cli.Command {
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 			app.ClusterFlag,
+			&cli.BoolFlag{
+				Name:  "uninstall",
+				Usage: "Uninstall Cluster Root CA",
+			},
 		},
 
 		Action: func(c *cli.Context) error {
@@ -67,67 +71,76 @@ func TrustCommand() *cli.Command {
 				return err
 			}
 
-			if err := installCertificate(c.Context, file); err != nil {
-				return err
+			if c.Bool("uninstall") {
+				return uninstallCertificate(c.Context, file)
 			}
 
-			return nil
+			return installCertificate(c.Context, file)
 		},
 	}
 }
 
 func installCertificate(ctx context.Context, name string) error {
-	keychain, err := userKeychain()
+	store, err := certStore()
 
 	if err != nil {
 		return err
 	}
 
-	if err := exec.CommandContext(ctx, "security", "add-trusted-cert", "-r", "trustRoot", "-k", keychain, name).Run(); err != nil {
-		return err
-	}
+	cmd := exec.CommandContext(ctx, "security", "add-trusted-cert", "-r", "trustRoot", "-k", store, name)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	return nil
+	return cmd.Run()
 }
 
 func uninstallCertificate(ctx context.Context, name string) error {
-	keychain, err := userKeychain()
+	store, err := certStore()
 
 	if err != nil {
 		return err
 	}
 
-	data, err := os.ReadFile(name)
+	fingerprint, err := certFingerprint(name)
 
 	if err != nil {
 		return err
 	}
 
-	block, _ := pem.Decode(data)
-	cert, err := x509.ParseCertificate(block.Bytes)
+	cmd := exec.CommandContext(ctx, "security", "delete-certificate", "-t", "-Z", fingerprint, store)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	if err != nil {
-		return err
-	}
-
-	hash := sha1.Sum(cert.Raw)
-	fingerprint := strings.ToUpper(hex.EncodeToString(hash[:]))
-
-	if err := exec.CommandContext(ctx, "security", "delete-certificate", "-t", "-Z", fingerprint, keychain).Run(); err != nil {
-		return err
-	}
-
-	return nil
+	return cmd.Run()
 }
 
-func userKeychain() (string, error) {
+func certStore() (string, error) {
 	home, err := os.UserHomeDir()
 
 	if err != nil {
 		return "", err
 	}
 
-	keychain := filepath.Join(home, "/Library/Keychains/login.keychain")
+	store := filepath.Join(home, "/Library/Keychains/login.keychain")
 
-	return keychain, nil
+	return store, nil
+}
+
+func certFingerprint(path string) (string, error) {
+	data, err := os.ReadFile(path)
+
+	if err != nil {
+		return "", err
+	}
+
+	block, _ := pem.Decode(data)
+	cert, err := x509.ParseCertificate(block.Bytes)
+
+	if err != nil {
+		return "", err
+	}
+
+	hash := sha1.Sum(cert.Raw)
+
+	return strings.ToUpper(hex.EncodeToString(hash[:])), nil
 }
