@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	certmanagerRepo       = "https://charts.jetstack.io"
-	certmanagerNamespace1 = "cert-manager"
+	certmanagerRepo      = "https://charts.jetstack.io"
+	certmanagerNamespace = "cert-manager"
 
 	certmanager        = "cert-manager"
 	certmanagerChart   = "cert-manager"
@@ -28,11 +28,9 @@ var (
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
-	// if namespace == "" {
-	// 	namespace = "default"
-	// }
-
-	namespace = certmanagerNamespace1
+	if namespace == "" {
+		namespace = "default"
+	}
 
 	client, err := kubernetes.NewFromConfig(kubeconfig)
 
@@ -63,7 +61,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		}
 	}
 
-	if err := helm.Install(ctx, certmanager, certmanagerRepo, certmanagerChart, certmanagerVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithWait(true), helm.WithDefaultOutput()); err != nil {
+	if err := helm.Install(ctx, certmanager, certmanagerRepo, certmanagerChart, certmanagerVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(certmanagerNamespace), helm.WithWait(true), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -75,17 +73,15 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 }
 
 func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
-	// if namespace == "" {
-	// 	namespace = "default"
-	// }
-
-	namespace = certmanagerNamespace1
+	if namespace == "" {
+		namespace = "default"
+	}
 
 	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
 		// return err
 	}
 
-	if err := helm.Uninstall(ctx, certmanager, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
+	if err := helm.Uninstall(ctx, certmanager, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(certmanagerNamespace)); err != nil {
 		//return err
 	}
 

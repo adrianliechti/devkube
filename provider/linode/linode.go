@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/linode/linodego"
@@ -158,13 +158,13 @@ func writeKubeconfig(kubeconfig string, config *linodego.LKEClusterKubeconfig) e
 			return err
 		}
 
-		dir := path.Join(home, ".kube")
+		dir := filepath.Join(home, ".kube")
 
 		if err := os.MkdirAll(dir, 0700); err != nil {
 			return err
 		}
 
-		kubeconfig = path.Join(home, ".kube", "config")
+		kubeconfig = filepath.Join(home, ".kube", "config")
 	}
 
 	data, err := base64.StdEncoding.DecodeString(config.KubeConfig)
