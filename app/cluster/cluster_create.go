@@ -60,6 +60,8 @@ func CreateCommand() *cli.Command {
 				return err
 			}
 
+			kubectl.Invoke(c.Context, []string{"create", "namespace", DefaultNamespace}, kubectl.WithKubeconfig(kubeconfig))
+
 			if err := observability.InstallCRD(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
