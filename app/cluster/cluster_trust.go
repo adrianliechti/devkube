@@ -45,7 +45,7 @@ func TrustCommand() *cli.Command {
 				return err
 			}
 
-			secret, err := client.CoreV1().Secrets("cert-manager").Get(c.Context, "platform-ca", metav1.GetOptions{})
+			secret, err := client.CoreV1().Secrets(DefaultNamespace).Get(c.Context, "platform-ca", metav1.GetOptions{})
 
 			if err != nil {
 				return err
