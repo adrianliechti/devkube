@@ -1,18 +1,12 @@
 package cluster
 
 import (
-	"context"
-	"crypto/sha1"
-	"crypto/x509"
-	"encoding/hex"
-	"encoding/pem"
 	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/adrianliechti/devkube/app"
+	"github.com/adrianliechti/devkube/pkg/certstore"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/kubernetes"
 
@@ -72,75 +66,10 @@ func TrustCommand() *cli.Command {
 			}
 
 			if c.Bool("uninstall") {
-				return uninstallCertificate(c.Context, file)
+				return certstore.RemoveRootCA(c.Context, file)
 			}
 
-			return installCertificate(c.Context, file)
+			return certstore.AddRootCA(c.Context, file)
 		},
 	}
-}
-
-func installCertificate(ctx context.Context, name string) error {
-	store, err := certStore()
-
-	if err != nil {
-		return err
-	}
-
-	cmd := exec.CommandContext(ctx, "security", "add-trusted-cert", "-r", "trustRoot", "-k", store, name)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
-}
-
-func uninstallCertificate(ctx context.Context, name string) error {
-	store, err := certStore()
-
-	if err != nil {
-		return err
-	}
-
-	fingerprint, err := certFingerprint(name)
-
-	if err != nil {
-		return err
-	}
-
-	cmd := exec.CommandContext(ctx, "security", "delete-certificate", "-t", "-Z", fingerprint, store)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
-}
-
-func certStore() (string, error) {
-	home, err := os.UserHomeDir()
-
-	if err != nil {
-		return "", err
-	}
-
-	store := filepath.Join(home, "/Library/Keychains/login.keychain")
-
-	return store, nil
-}
-
-func certFingerprint(path string) (string, error) {
-	data, err := os.ReadFile(path)
-
-	if err != nil {
-		return "", err
-	}
-
-	block, _ := pem.Decode(data)
-	cert, err := x509.ParseCertificate(block.Bytes)
-
-	if err != nil {
-		return "", err
-	}
-
-	hash := sha1.Sum(cert.Raw)
-
-	return strings.ToUpper(hex.EncodeToString(hash[:])), nil
 }
