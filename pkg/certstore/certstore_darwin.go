@@ -2,6 +2,13 @@
 
 package certstore
 
+import (
+	"context"
+	"os"
+	"os/exec"
+	"path/filepath"
+)
+
 func AddRootCA(ctx context.Context, name string) error {
 	store, err := certStore()
 
@@ -16,7 +23,7 @@ func AddRootCA(ctx context.Context, name string) error {
 	return cmd.Run()
 }
 
-func RemoveRootCA(ctx.Context, name string) error {
+func RemoveRootCA(ctx context.Context, name string) error {
 	store, err := certStore()
 
 	if err != nil {
