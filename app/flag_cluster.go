@@ -3,7 +3,7 @@ package app
 import (
 	"errors"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/adrianliechti/devkube/pkg/cli"
@@ -150,7 +150,7 @@ func MustClusterKubeconfig(c *cli.Context, provider provider.Provider, name stri
 		os.RemoveAll(dir)
 	}
 
-	path := path.Join(dir, "kubeconfig")
+	path := filepath.Join(dir, "kubeconfig")
 
 	if err := provider.Export(c.Context, name, path); err != nil {
 		closer()
