@@ -13,6 +13,7 @@ import (
 	"github.com/adrianliechti/devkube/extension/dashboard"
 	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/observability"
+	"github.com/adrianliechti/devkube/extension/registry"
 )
 
 func CreateCommand() *cli.Command {
@@ -75,6 +76,10 @@ func CreateCommand() *cli.Command {
 			}
 
 			if err := dashboard.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := registry.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
