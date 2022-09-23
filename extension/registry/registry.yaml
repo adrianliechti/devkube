@@ -12,7 +12,7 @@ spec:
     - localhost
   issuerRef:
     name: platform
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
 ---
 apiVersion: apps/v1
@@ -33,16 +33,39 @@ spec:
       containers:
         - name: registry
           image: registry:2
+          env:
+            - name: REGISTRY_HTTP_ADDR
+              value: 0.0.0.0:80
           ports:
-            - containerPort: 5000
+            - containerPort: 80
           volumeMounts:
             - name: data
               mountPath: /var/lib/registry
+          resources: {}
+        - name: proxy
+          image: adrianliechti/loop-proxy
+          args:
+            - "-port"
+            - "443"
+            - "-target"
+            - "http://localhost"
+            - "-key-file"
+            - "certs/tls.key"
+            - "-cert-file"
+            - "certs/tls.crt"
+          ports:
+            - containerPort: 443
+          volumeMounts:
+            - name: certs
+              mountPath: "/app/certs"
           resources: {}
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: registry
+        - name: certs
+          secret:
+            secretName: registry-tls
 ---
 apiVersion: v1
 kind: Service
@@ -57,7 +80,10 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 5000
+      targetPort: 80
+    - name: https
+      port: 443
+      targetPort: 443
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
