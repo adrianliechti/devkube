@@ -18,18 +18,23 @@ func Create(ctx context.Context, name string, config map[string]any, kubeconfig 
 		//runtime.GetDefault(logger),
 	)
 
-	data, err := yaml.Marshal(config)
-
-	if err != nil {
-		return err
-	}
-
-	return provider.Create(
-		name,
-		cluster.CreateWithRawConfig(data),
+	opts := []cluster.CreateOption{
 		cluster.CreateWithWaitForReady(time.Duration(0)),
 		cluster.CreateWithKubeconfigPath(kubeconfig),
 		//cluster.CreateWithDisplayUsage(true),
 		//cluster.CreateWithDisplaySalutation(true),
-	)
+	}
+
+	if config != nil {
+		data, err := yaml.Marshal(config)
+
+		if err != nil {
+			return err
+		}
+
+		opts = append(opts, cluster.CreateWithRawConfig(data))
+
+	}
+
+	return provider.Create(name, opts...)
 }

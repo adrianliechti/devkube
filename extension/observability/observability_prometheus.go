@@ -21,9 +21,19 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 		"cleanPrometheusOperatorObjectNames": true,
 
 		"kubeEtcd": map[string]any{
-			"service": map[string]any{
-				"targetPort": 2381,
-			},
+			"enabled": false,
+		},
+
+		"kubeProxy": map[string]any{
+			"enabled": false,
+		},
+
+		"kubeScheduler": map[string]any{
+			"enabled": false,
+		},
+
+		"kubeControllerManager": map[string]any{
+			"enabled": false,
 		},
 
 		"grafana": map[string]any{
