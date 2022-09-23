@@ -10,34 +10,24 @@ import (
 const (
 	loki        = "loki"
 	lokiChart   = "loki"
-	lokiVersion = "2.16.0"
+	lokiVersion = "3.1.0"
 )
 
 func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
-		"rbac": map[string]any{
-			"pspEnabled": false,
-		},
+		"loki": map[string]any{
+			"commonConfig": map[string]any{
+				"replication_factor": 1,
+			},
 
-		"persistence": map[string]any{
-			"enabled": true,
-			"size":    "10Gi",
-		},
-
-		"ruler": map[string]any{
 			"storage": map[string]any{
-				"type": "local",
-				"local": map[string]any{
-					"directory": "/rules",
-				},
-				"rule_path":        "/tmp/scratch",
-				"alertmanager_url": "http://" + prometheus + "-alertmanager:9093",
-				"ring": map[string]any{
-					"kvstore": map[string]any{
-						"store": "inmemory",
-					},
-				},
-				"enable_api": true,
+				"type": "filesystem",
+			},
+		},
+
+		"singleBinary": map[string]any{
+			"persistence": map[string]any{
+				"size": "10Gi",
 			},
 		},
 	}
