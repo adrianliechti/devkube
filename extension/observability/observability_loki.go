@@ -20,6 +20,8 @@ func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 				"replication_factor": 1,
 			},
 
+			"auth_enabled": false,
+
 			"storage": map[string]any{
 				"type": "filesystem",
 			},
@@ -28,6 +30,28 @@ func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 		"singleBinary": map[string]any{
 			"persistence": map[string]any{
 				"size": "10Gi",
+			},
+		},
+
+		"gateway": map[string]any{
+			"enabled": false,
+		},
+
+		"monitoring": map[string]any{
+			"serviceMonitor": map[string]any{
+				"enabled": true,
+			},
+
+			"selfMonitoring": map[string]any{
+				"enabled": false,
+
+				"lokiCanary": map[string]any{
+					"enabled": false,
+				},
+
+				"grafanaAgent": map[string]any{
+					"installOperator": false,
+				},
 			},
 		},
 	}
