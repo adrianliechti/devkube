@@ -9,7 +9,7 @@ import (
 const (
 	grafana        = "grafana"
 	grafanaChart   = "grafana"
-	grafanaVersion = "6.37.3"
+	grafanaVersion = "6.38.6"
 )
 
 func installGrafana(ctx context.Context, kubeconfig, namespace string) error {

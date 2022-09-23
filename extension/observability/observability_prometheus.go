@@ -10,7 +10,7 @@ import (
 const (
 	prometheus        = "monitoring"
 	prometheusChart   = "kube-prometheus-stack"
-	prometheusVersion = "39.12.0"
+	prometheusVersion = "40.1.1"
 )
 
 func installPrometheus(ctx context.Context, kubeconfig, namespace string) error {
@@ -20,10 +20,28 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 
 		"cleanPrometheusOperatorObjectNames": true,
 
+		"coreDns": map[string]any{
+			"enabled": false,
+		},
+
+		"kubeDns": map[string]any{
+			"enabled": false,
+		},
+
 		"kubeEtcd": map[string]any{
-			"service": map[string]any{
-				"targetPort": 2381,
-			},
+			"enabled": false,
+		},
+
+		"kubeScheduler": map[string]any{
+			"enabled": false,
+		},
+
+		"kubeProxy": map[string]any{
+			"enabled": false,
+		},
+
+		"kubeControllerManager": map[string]any{
+			"enabled": false,
 		},
 
 		"grafana": map[string]any{
