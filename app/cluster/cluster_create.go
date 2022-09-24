@@ -2,16 +2,18 @@ package cluster
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
+	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/dashboard"
 	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/observability"
+	"github.com/adrianliechti/devkube/extension/registry"
 )
 
 func CreateCommand() *cli.Command {
@@ -53,13 +55,19 @@ func CreateCommand() *cli.Command {
 
 			defer os.RemoveAll(dir)
 
-			kubeconfig := path.Join(dir, "kubeconfig")
+			kubeconfig := filepath.Join(dir, "kubeconfig")
 
 			if err := provider.Create(c.Context, cluster, kubeconfig); err != nil {
 				return err
 			}
 
+			kubectl.Invoke(c.Context, []string{"create", "namespace", DefaultNamespace}, kubectl.WithKubeconfig(kubeconfig))
+
 			if err := observability.InstallCRD(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := certmanager.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
@@ -68,6 +76,10 @@ func CreateCommand() *cli.Command {
 			}
 
 			if err := dashboard.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := registry.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 

@@ -12,12 +12,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var (
+const (
 	trivyRepo = "https://aquasecurity.github.io/helm-charts"
 
 	trivy        = "trivy"
 	trivyChart   = "trivy-operator"
-	trivyVersion = "0.1.9"
+	trivyVersion = "0.2.1"
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {

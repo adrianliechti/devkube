@@ -4,7 +4,9 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 
 Batteries included
 
+- [Registry](https://github.com/distribution/distribution) - image distribution
 - [Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) - web-based user interface
+- [Cert-Manager](https://cert-manager.io)- certificate management
 - [Grafana](https://grafana.com/grafana/) - data observability
 - [Prometheus](https://prometheus-operator.dev) - monitoring system
 - [Loki](https://grafana.com/oss/loki/) - log aggregation system
