@@ -23,6 +23,10 @@ const (
 	linkerd        = "linkerd-control-plane"
 	linkerdChart   = "linkerd-control-plane"
 	linkerdVersion = "1.9.3"
+
+	viz        = "linkerd-viz"
+	vizChart   = "linkerd-viz"
+	vizVersion = "30.3.3"
 )
 
 var (
@@ -75,7 +79,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
-	values := map[string]any{
+	cpvalues := map[string]any{
 		"identity": map[string]any{
 			"externalCA": true,
 
@@ -85,7 +89,26 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, linkerd, linkerdRepo, linkerdChart, linkerdVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+	if err := helm.Install(ctx, linkerd, linkerdRepo, linkerdChart, linkerdVersion, cpvalues, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	vizvalues := map[string]any{
+		"linkerdNamespace": namespace,
+
+		"jaegerUrl":     "loki.loop:16686",
+		"prometheusUrl": "monitoring-prometheus.loop:9090",
+
+		"grafana": map[string]any{
+			"url": "grafana.loop",
+		},
+
+		"prometheus": map[string]any{
+			"enabled": false,
+		},
+	}
+
+	if err := helm.Install(ctx, viz, linkerdRepo, vizChart, vizVersion, vizvalues, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -102,8 +125,6 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	if err != nil {
 		return err
 	}
-
-	_ = client
 
 	if err := helm.Uninstall(ctx, linkerd, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		// return err
