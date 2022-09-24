@@ -1,18 +1,33 @@
 package linkerd
 
 import (
-	"bytes"
 	"context"
-	"errors"
-	"io"
-	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
+	_ "embed"
+	"strings"
 
-	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
+	"github.com/adrianliechti/devkube/pkg/kubernetes"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const (
+	linkerdRepo = "https://helm.linkerd.io/stable"
+
+	crds        = "linkerd-crds"
+	crdsChart   = "linkerd-crds"
+	crdsVersion = "1.4.0"
+
+	linkerd        = "linkerd-control-plane"
+	linkerdChart   = "linkerd-control-plane"
+	linkerdVersion = "1.9.3"
+)
+
+var (
+	//go:embed linkerd.yaml
+	manifest string
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
@@ -20,32 +35,57 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	cli.Info("Downloading Linkerd CLI...")
-	cli, closer, err := downloadCLI(ctx)
+	client, err := kubernetes.NewFromConfig(kubeconfig)
 
 	if err != nil {
 		return err
 	}
 
-	defer closer()
+	if err := kubectl.Invoke(ctx, []string{"apply", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
+		return err
+	}
 
-	crdManifest, err := exec.Command(cli, "install", "--crds", "--kubeconfig", kubeconfig).Output()
+	secret, err := client.CoreV1().Secrets(namespace).Get(ctx, "linkerd-identity-issuer", metav1.GetOptions{})
 
 	if err != nil {
 		return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"apply", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithInput(bytes.NewReader(crdManifest)), kubectl.WithDefaultOutput()); err != nil {
+	configmap := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "linkerd-identity-trust-roots",
+
+			Labels: map[string]string{
+				"linkerd.io/control-plane-component": "identity",
+				"linkerd.io/control-plane-ns":        namespace,
+			},
+		},
+		Data: map[string]string{
+			"ca-bundle.crt": string(secret.Data["ca.crt"]),
+		},
+	}
+
+	client.CoreV1().ConfigMaps(namespace).Delete(ctx, "linkerd-identity-trust-roots", metav1.DeleteOptions{})
+
+	if _, err := client.CoreV1().ConfigMaps(namespace).Create(ctx, &configmap, metav1.CreateOptions{}); err != nil {
 		return err
 	}
 
-	installManifest, err := exec.Command(cli, "install", "--kubeconfig", kubeconfig).Output()
-
-	if err != nil {
+	if err := helm.Install(ctx, crds, linkerdRepo, crdsChart, crdsVersion, nil, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"apply", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithInput(bytes.NewReader(installManifest)), kubectl.WithDefaultOutput()); err != nil {
+	values := map[string]any{
+		"identity": map[string]any{
+			"externalCA": true,
+
+			"issuer": map[string]any{
+				"scheme": "kubernetes.io/tls",
+			},
+		},
+	}
+
+	if err := helm.Install(ctx, linkerd, linkerdRepo, linkerdChart, linkerdVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -57,100 +97,29 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	cli.Info("Downloading Linkerd CLI...")
-	cli, closer, err := downloadCLI(ctx)
+	client, err := kubernetes.NewFromConfig(kubeconfig)
 
 	if err != nil {
 		return err
 	}
 
-	defer closer()
+	_ = client
 
-	uninstallManifest, err := exec.Command(cli, "uninstall", "--kubeconfig", kubeconfig).Output()
-
-	if err != nil {
-		return err
+	if err := helm.Uninstall(ctx, linkerd, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+		// return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithInput(bytes.NewReader(uninstallManifest)), kubectl.WithDefaultOutput()); err != nil {
-		return err
+	if err := helm.Uninstall(ctx, crds, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+		// return err
+	}
+
+	if err := client.CoreV1().ConfigMaps(namespace).Delete(ctx, "linkerd-identity-trust-roots", metav1.DeleteOptions{}); err != nil {
+		// return err
+	}
+
+	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
+		// return err
 	}
 
 	return nil
-}
-
-func downloadCLI(ctx context.Context) (string, func(), error) {
-	var name string
-
-	if runtime.GOOS == "windows" {
-		name = "linkerd2-cli-stable-2.12.0-windows.exe"
-	}
-
-	if runtime.GOOS == "darwin" {
-		name = "linkerd2-cli-stable-2.12.0-darwin"
-
-		if runtime.GOARCH == "arm64" {
-			name = "linkerd2-cli-stable-2.12.0-darwin-arm64"
-		}
-	}
-
-	if runtime.GOOS == "linux" {
-		if runtime.GOARCH == "amd64" {
-			name = "linkerd2-cli-stable-2.12.0-linux-amd64"
-		}
-
-		if runtime.GOARCH == "arm" {
-			name = "linkerd2-cli-stable-2.12.0-linux-arm"
-		}
-
-		if runtime.GOARCH == "arm64" {
-			name = "linkerd2-cli-stable-2.12.0-linux-arm64"
-		}
-	}
-
-	if name == "" {
-		return "", nil, errors.New("unsupported platform")
-	}
-
-	dir, err := os.MkdirTemp("", "devkube")
-
-	if err != nil {
-		return "", nil, err
-	}
-
-	closer := func() {
-		os.RemoveAll(dir)
-	}
-
-	resp, err := http.Get("https://github.com/linkerd/linkerd2/releases/download/stable-2.12.0/" + name)
-
-	if err != nil {
-		closer()
-		return "", nil, err
-	}
-
-	defer resp.Body.Close()
-
-	path := filepath.Join(dir, name)
-
-	out, err := os.Create(path)
-
-	if err != nil {
-		closer()
-		return "", nil, err
-	}
-
-	defer out.Close()
-
-	if _, err := io.Copy(out, resp.Body); err != nil {
-		closer()
-		return "", nil, err
-	}
-
-	if err := os.Chmod(path, 0755); err != nil {
-		closer()
-		return "", nil, err
-	}
-
-	return path, closer, nil
 }
