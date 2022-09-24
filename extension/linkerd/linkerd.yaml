@@ -1,11 +1,16 @@
 apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: linkerd-trust-anchor
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: linkerd-identity-issuer
 spec:
   secretName: linkerd-identity-issuer
-  duration: 24h
-  renewBefore: 1h
   commonName: identity.linkerd.cluster.local
   isCA: true
   privateKey:
@@ -16,6 +21,6 @@ spec:
     - server auth
     - client auth
   issuerRef:
-    name: platform
+    name: linkerd-trust-anchor
     kind: Issuer
     group: cert-manager.io
