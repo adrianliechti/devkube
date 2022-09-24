@@ -15,13 +15,26 @@ const (
 
 func installTempo(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
-		"persistence": map[string]any{
-			"enabled": true,
-			"size":    "10Gi",
+		"tempo": map[string]any{
+			"searchEnabled": true,
+
+			"metricsGenerator": map[string]any{
+				"enabled":        true,
+				"remoteWriteUrl": "http://" + prometheus + "-prometheus:9090/api/v1/write",
+			},
 		},
 
 		"tempoQuery": map[string]any{
 			"enabled": false,
+		},
+
+		"serviceMonitor": map[string]any{
+			"enabled": true,
+		},
+
+		"persistence": map[string]any{
+			"enabled": true,
+			"size":    "10Gi",
 		},
 	}
 

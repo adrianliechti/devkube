@@ -69,6 +69,9 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 
 		"prometheus": map[string]any{
 			"prometheusSpec": map[string]any{
+				"enableAdminAPI":            true,
+				"enableRemoteWriteReceiver": true,
+
 				"serviceMonitorSelector":                  nil,
 				"serviceMonitorSelectorNilUsesHelmValues": false,
 
