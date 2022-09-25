@@ -82,7 +82,7 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := helm.Uninstall(ctx, certmanager, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(certmanagerNamespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

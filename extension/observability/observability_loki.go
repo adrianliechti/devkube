@@ -65,7 +65,7 @@ func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 
 func uninstallLoki(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, loki, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "release=" + loki}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {

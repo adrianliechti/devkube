@@ -61,7 +61,7 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := helm.Uninstall(ctx, metrics, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

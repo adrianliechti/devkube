@@ -68,11 +68,11 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := kubectl.Invoke(ctx, []string{"delete", "clusterrolebinding", dashboard}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := helm.Uninstall(ctx, dashboard, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

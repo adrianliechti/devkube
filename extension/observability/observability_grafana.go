@@ -158,7 +158,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 
 func uninstallGrafana(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, grafana, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

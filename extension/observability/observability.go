@@ -69,23 +69,23 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := uninstallGrafana(ctx, kubeconfig, namespace); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := uninstallPrometheus(ctx, kubeconfig, namespace); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := uninstallTempo(ctx, kubeconfig, namespace); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := uninstallPromtail(ctx, kubeconfig, namespace); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := uninstallLoki(ctx, kubeconfig, namespace); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil
