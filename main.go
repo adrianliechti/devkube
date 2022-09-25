@@ -40,6 +40,8 @@ func initApp() cli.App {
 			cluster.DeleteCommand(),
 
 			cluster.SetupCommand(),
+			cluster.TrustCommand(),
+
 			cluster.RegistryCommand(),
 
 			cluster.GrafanaCommand(),
