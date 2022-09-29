@@ -5,11 +5,14 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/extension/falco"
-	"github.com/adrianliechti/devkube/extension/trivy"
+
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
+
+	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/ingress"
+	"github.com/adrianliechti/devkube/extension/trivy"
 )
 
 func DisableCommand() *cli.Command {
@@ -47,15 +50,23 @@ func DisableCommand() *cli.Command {
 			defer closer()
 
 			switch strings.ToLower(feature) {
-			case "trivy":
-				if err := trivy.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+
+			case "falco":
+				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 
 				return nil
 
-			case "falco":
-				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			case "ingress":
+				if err := ingress.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "trivy":
+				if err := trivy.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 

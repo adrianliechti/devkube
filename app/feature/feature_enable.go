@@ -5,11 +5,14 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/extension/falco"
-	"github.com/adrianliechti/devkube/extension/trivy"
+
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
+
+	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/ingress"
+	"github.com/adrianliechti/devkube/extension/trivy"
 )
 
 func EnableCommand() *cli.Command {
@@ -47,12 +50,6 @@ func EnableCommand() *cli.Command {
 			defer closer()
 
 			switch strings.ToLower(feature) {
-			case "trivy":
-				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
-					return err
-				}
-
-				return nil
 
 			case "falco":
 				if err := falco.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
@@ -60,6 +57,21 @@ func EnableCommand() *cli.Command {
 				}
 
 				return nil
+
+			case "ingress":
+				if err := ingress.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "trivy":
+				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
 			default:
 				cli.Fatalf("inavlid feature: %s", feature)
 			}

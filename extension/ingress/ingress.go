@@ -11,7 +11,7 @@ var (
 
 	ingress        = "ingress-nginx"
 	ingressChart   = "ingress-nginx"
-	ingressVersion = "4.2.1"
+	ingressVersion = "4.2.5"
 
 	Images = []string{}
 )
@@ -24,7 +24,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
 		"controller": map[string]any{
 			"service": map[string]any{
-				"type": "NodePort",
+				"type": "ClusterIP",
 			},
 
 			"metrics": map[string]any{
@@ -37,7 +37,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, kubeconfig, namespace, ingress, ingressRepo, ingressChart, ingressVersion, values); err != nil {
+	if err := helm.Install(ctx, ingress, ingressRepo, ingressChart, ingressVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
@@ -49,7 +49,7 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	if err := helm.Uninstall(ctx, kubeconfig, namespace, ingress); err != nil {
+	if err := helm.Uninstall(ctx, ingress, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
 		//return err
 	}
 
