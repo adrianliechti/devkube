@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/adrianliechti/devkube/app/cluster"
+	"github.com/adrianliechti/devkube/app/feature"
 	"github.com/adrianliechti/devkube/pkg/cli"
 )
 
@@ -25,10 +26,10 @@ func main() {
 
 func initApp() cli.App {
 	return cli.App{
-		Version: version,
-		// Usage:   "DevOps Loop",
+		Usage: "DevKube",
 
 		Suggest: true,
+		Version: version,
 
 		HideHelpCommand: true,
 
@@ -37,10 +38,17 @@ func initApp() cli.App {
 
 			cluster.CreateCommand(),
 			cluster.DeleteCommand(),
+
 			cluster.SetupCommand(),
+			cluster.TrustCommand(),
+
+			cluster.RegistryCommand(),
 
 			cluster.GrafanaCommand(),
 			cluster.DashboardCommand(),
+
+			feature.EnableCommand(),
+			feature.DisableCommand(),
 		},
 	}
 }

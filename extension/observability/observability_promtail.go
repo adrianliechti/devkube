@@ -9,7 +9,7 @@ import (
 const (
 	promtail        = "promtail"
 	promtailChart   = "promtail"
-	promtailVersion = "6.2.2"
+	promtailVersion = "6.4.0"
 )
 
 func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
@@ -32,7 +32,7 @@ func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 
 func uninstallPromtail(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, promtail, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

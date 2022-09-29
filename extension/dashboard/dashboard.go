@@ -7,12 +7,12 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
 
-var (
+const (
 	dashboardRepo = "https://kubernetes.github.io/dashboard"
 
 	dashboard        = "dashboard"
 	dashboardChart   = "kubernetes-dashboard"
-	dashboardVersion = "5.8.0"
+	dashboardVersion = "5.10.0"
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
@@ -68,11 +68,11 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := kubectl.Invoke(ctx, []string{"delete", "clusterrolebinding", dashboard}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := helm.Uninstall(ctx, dashboard, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

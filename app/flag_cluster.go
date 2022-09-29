@@ -2,13 +2,19 @@ package app
 
 import (
 	"errors"
-	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/adrianliechti/devkube/pkg/cli"
+
 	"github.com/adrianliechti/devkube/provider"
+	"github.com/adrianliechti/devkube/provider/aws"
+	"github.com/adrianliechti/devkube/provider/azure"
+	"github.com/adrianliechti/devkube/provider/digitalocean"
+	"github.com/adrianliechti/devkube/provider/kind"
+	"github.com/adrianliechti/devkube/provider/linode"
+	"github.com/adrianliechti/devkube/provider/vultr"
 )
 
 var ClusterFlag = &cli.StringFlag{
@@ -16,19 +22,78 @@ var ClusterFlag = &cli.StringFlag{
 	Usage: "Cluster name",
 }
 
-func SelectCluster(c *cli.Context, provider provider.Provider) (string, error) {
-	cluster := c.String(ClusterFlag.Name)
+func ListClusters(c *cli.Context) ([]string, error) {
+	providers := map[string]provider.Provider{}
 
-	list, err := provider.List(c.Context)
+	if name := c.String(ProviderFlag.Name); name != "" {
+		p, err := ProviderFromName(c.Context, name)
+
+		if err != nil {
+			return nil, err
+		}
+
+		providers[strings.ToLower(name)] = p
+	} else {
+		providers["local"] = kind.New()
+
+		if p, err := aws.NewFromEnvironment(); err == nil {
+			providers["aws"] = p
+		}
+
+		if p, err := azure.NewFromEnvironment(); err == nil {
+			providers["azure"] = p
+		}
+
+		if p, err := digitalocean.NewFromEnvironment(); err == nil {
+			providers["digitalocean"] = p
+		}
+
+		if p, err := linode.NewFromEnvironment(); err == nil {
+			providers["linode"] = p
+		}
+
+		if p, err := vultr.NewFromEnvironment(); err == nil {
+			providers["vultr"] = p
+		}
+	}
+
+	var result []string
+
+	for name, p := range providers {
+		list, err := p.List(c.Context)
+
+		if err != nil {
+			continue
+		}
+
+		for _, c := range list {
+			result = append(result, name+"/"+c)
+		}
+	}
+
+	return result, nil
+}
+
+func SelectCluster(c *cli.Context) (provider.Provider, string, error) {
+	list, err := ListClusters(c)
+
+	if err != nil {
+		return nil, "", err
+	}
 
 	var items []string
 
-	if err != nil {
-		return "", err
-	}
+	filterProvider := c.String(ProviderFlag.Name)
+	filterCluster := c.String(ClusterFlag.Name)
 
 	for _, c := range list {
-		if cluster != "" && !strings.EqualFold(c, cluster) {
+		pair := strings.Split(c, "/")
+
+		if filterProvider != "" && !strings.EqualFold(pair[0], filterProvider) {
+			continue
+		}
+
+		if filterCluster != "" && !strings.EqualFold(pair[1], filterCluster) {
 			continue
 		}
 
@@ -36,30 +101,36 @@ func SelectCluster(c *cli.Context, provider provider.Provider) (string, error) {
 	}
 
 	if len(items) == 0 {
-		if cluster != "" {
-			return "", fmt.Errorf("cluster %q not found", cluster)
+		return nil, "", errors.New("no cluster found")
+	}
+
+	skipPrompt := len(items) == 1 && filterProvider != "" && filterCluster != ""
+
+	if !skipPrompt {
+		i, _, err := cli.Select("Select cluster", items)
+
+		if err != nil {
+			return nil, "", err
 		}
 
-		return "", errors.New("no cluster found")
+		items = []string{items[i]}
 	}
 
-	if len(items) == 1 {
-		return items[0], nil
-	}
+	pair := strings.Split(items[0], "/")
 
-	i, _, err := cli.Select("Select cluster", items)
+	provider, err := ProviderFromName(c.Context, pair[0])
 
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	return list[i], nil
+	cluster := pair[1]
+
+	return provider, cluster, nil
 }
 
 func MustCluster(c *cli.Context) (provider.Provider, string) {
-	provider := MustProvider(c)
-
-	cluster, err := SelectCluster(c, provider)
+	provider, cluster, err := SelectCluster(c)
 
 	if err != nil {
 		cli.Fatal(err)
@@ -79,9 +150,10 @@ func MustClusterKubeconfig(c *cli.Context, provider provider.Provider, name stri
 		os.RemoveAll(dir)
 	}
 
-	path := path.Join(dir, "kubeconfig")
+	path := filepath.Join(dir, "kubeconfig")
 
-	if err := provider.ExportConfig(c.Context, name, path); err != nil {
+	if err := provider.Export(c.Context, name, path); err != nil {
+		closer()
 		cli.Fatal(err)
 	}
 

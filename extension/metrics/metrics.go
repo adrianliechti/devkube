@@ -4,9 +4,12 @@ import (
 	"context"
 
 	"github.com/adrianliechti/devkube/pkg/helm"
+	"github.com/adrianliechti/devkube/pkg/kubernetes"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var (
+const (
 	metricsRepo = "https://kubernetes-sigs.github.io/metrics-server"
 
 	metrics        = "metrics-server"
@@ -17,6 +20,17 @@ var (
 func Install(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
+	}
+
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := client.RbacV1().ClusterRoles().Get(ctx, "system:metrics-server", metav1.GetOptions{}); err == nil {
+		println("metrics-server already installed")
+		return nil
 	}
 
 	values := map[string]any{
@@ -47,7 +61,7 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := helm.Uninstall(ctx, metrics, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

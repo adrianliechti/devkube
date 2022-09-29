@@ -30,7 +30,6 @@ func path(ctx context.Context) (string, *semver.Version, error) {
 		name = "kubectl.exe"
 	}
 
-	// verify global tool
 	if path, err := exec.LookPath(name); err == nil {
 		if version, err := version(ctx, path); err == nil {
 			if !version.LessThan(minimalVersion) {
@@ -118,7 +117,7 @@ func WithNamespace(namespace string) Option {
 	}
 }
 
-func WithInput(stdout, stdin io.Reader) Option {
+func WithInput(stdin io.Reader) Option {
 	return func(k *Kubectl) {
 		k.stdin = stdin
 	}

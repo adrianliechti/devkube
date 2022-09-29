@@ -18,11 +18,7 @@ func DeleteCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			provider, cluster := app.MustCluster(c)
 
-			if ok, _ := cli.Confirm("Are you sure you want to delete cluster \""+cluster+"\"", false); ok {
-				return provider.Delete(c.Context, cluster)
-			}
-
-			return nil
+			return provider.Delete(c.Context, cluster)
 		},
 	}
 }

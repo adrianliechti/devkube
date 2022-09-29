@@ -32,7 +32,6 @@ func path(ctx context.Context) (string, *semver.Version, error) {
 		name = "helm.exe"
 	}
 
-	// verify global tool
 	if path, err := exec.LookPath(name); err == nil {
 		if version, err := version(ctx, path); err == nil {
 			if !version.LessThan(minimalVersion) {
@@ -73,6 +72,8 @@ type Helm struct {
 	context   string
 	namespace string
 
+	wait bool
+
 	stdin  io.Reader
 	stdout io.Writer
 	stderr io.Writer
@@ -103,6 +104,12 @@ func WithContext(context string) Option {
 func WithNamespace(namespace string) Option {
 	return func(h *Helm) {
 		h.namespace = namespace
+	}
+}
+
+func WithWait(wait bool) Option {
+	return func(h *Helm) {
+		h.wait = wait
 	}
 }
 
@@ -148,7 +155,7 @@ func Install(ctx context.Context, release, repo, chart, version string, values m
 	h := New(opt...)
 
 	args := []string{
-		"upgrade", "--install", "--create-namespace",
+		"upgrade", "--install", "--create-namespace", "--timeout", "10m0s",
 		release,
 		chart,
 	}
@@ -159,6 +166,10 @@ func Install(ctx context.Context, release, repo, chart, version string, values m
 
 	if version != "" {
 		args = append(args, "--version", version)
+	}
+
+	if h.wait {
+		args = append(args, "--wait")
 	}
 
 	if len(values) > 0 {
@@ -182,6 +193,10 @@ func Uninstall(ctx context.Context, release string, opt ...Option) error {
 	args := []string{
 		"uninstall",
 		release,
+	}
+
+	if h.wait {
+		args = append(args, "--wait")
 	}
 
 	return h.Invoke(ctx, args...)

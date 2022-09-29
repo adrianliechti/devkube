@@ -10,7 +10,7 @@ import (
 const (
 	prometheus        = "monitoring"
 	prometheusChart   = "kube-prometheus-stack"
-	prometheusVersion = "39.6.0"
+	prometheusVersion = "40.1.1"
 )
 
 func installPrometheus(ctx context.Context, kubeconfig, namespace string) error {
@@ -20,10 +20,28 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 
 		"cleanPrometheusOperatorObjectNames": true,
 
+		"coreDns": map[string]any{
+			"enabled": false,
+		},
+
+		"kubeDns": map[string]any{
+			"enabled": false,
+		},
+
 		"kubeEtcd": map[string]any{
-			"service": map[string]any{
-				"targetPort": 2381,
-			},
+			"enabled": false,
+		},
+
+		"kubeScheduler": map[string]any{
+			"enabled": false,
+		},
+
+		"kubeProxy": map[string]any{
+			"enabled": false,
+		},
+
+		"kubeControllerManager": map[string]any{
+			"enabled": false,
 		},
 
 		"grafana": map[string]any{
@@ -51,6 +69,9 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 
 		"prometheus": map[string]any{
 			"prometheusSpec": map[string]any{
+				"enableAdminAPI":            true,
+				"enableRemoteWriteReceiver": true,
+
 				"serviceMonitorSelector":                  nil,
 				"serviceMonitorSelectorNilUsesHelmValues": false,
 
@@ -84,7 +105,7 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 	}
 
 	if err := kubectl.Invoke(ctx, []string{"delete", "configmap", prometheus + "-nodes-darwin"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil
@@ -92,15 +113,15 @@ func installPrometheus(ctx context.Context, kubeconfig, namespace string) error 
 
 func uninstallPrometheus(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, prometheus, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "app.kubernetes.io/instance=" + prometheus}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := kubectl.Invoke(ctx, []string{"delete", "secret", prometheus + "-admission"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

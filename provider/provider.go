@@ -1,6 +1,8 @@
 package provider
 
-import "context"
+import (
+	"context"
+)
 
 type Provider interface {
 	List(ctx context.Context) ([]string, error)
@@ -8,5 +10,5 @@ type Provider interface {
 	Create(ctx context.Context, name string, kubeconfig string) error
 	Delete(ctx context.Context, name string) error
 
-	ExportConfig(ctx context.Context, name, path string) error
+	Export(ctx context.Context, name, path string) error
 }
