@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/adrianliechti/devkube/pkg/helm"
+	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
 
 const (
@@ -35,17 +36,50 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		"server": map[string]any{
 			"enabled": true,
 
-			"dev": map[string]any{
+			"standalone": map[string]any{
 				"enabled": true,
+			},
+
+			"extraContainers": []any{
+				map[string]any{
+					"name":  "vault-unsealer",
+					"image": "adrianliechti/vault-unsealer",
+					"env": []any{
+						map[string]any{
+							"name":  "VAULT_ADDR",
+							"value": "http://localhost:8200",
+						},
+						map[string]any{
+							"name":  "UNSEALER_PATH_TOKEN",
+							"value": "/data/vault.token",
+						},
+						map[string]any{
+							"name":  "UNSEALER_PATH_SHARDS",
+							"value": "/data/vault.shards",
+						},
+					},
+					"volumeMounts": []any{
+						map[string]any{
+							"name":      "data",
+							"mountPath": "/data",
+						},
+					},
+				},
 			},
 		},
 
 		"csi": map[string]any{
-			"enabled": true,
+			"enabled": false,
 		},
 
 		"injector": map[string]any{
 			"enabled": false,
+		},
+
+		"serverTelemetry": map[string]any{
+			"serviceMonitor": map[string]any{
+				"enabled": true,
+			},
 		},
 	}
 
@@ -62,11 +96,15 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := helm.Uninstall(ctx, vault, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
+	}
+
+	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "app.kubernetes.io/instance=" + vault}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
+		// return err
 	}
 
 	// if err := helm.Uninstall(ctx, csi, helm.WithKubeconfig(kubeconfig), helm.WithNamespace("kube-system")); err != nil {
-	// 	//return err
+	// 	// return err
 	// }
 
 	return nil
