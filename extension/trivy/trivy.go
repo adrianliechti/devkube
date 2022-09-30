@@ -17,7 +17,7 @@ const (
 
 	trivy        = "trivy"
 	trivyChart   = "trivy-operator"
-	trivyVersion = "0.1.9"
+	trivyVersion = "0.2.1"
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {

@@ -10,34 +10,48 @@ import (
 const (
 	loki        = "loki"
 	lokiChart   = "loki"
-	lokiVersion = "2.16.0"
+	lokiVersion = "3.1.0"
 )
 
 func installLoki(ctx context.Context, kubeconfig, namespace string) error {
 	values := map[string]any{
-		"rbac": map[string]any{
-			"pspEnabled": false,
-		},
+		"loki": map[string]any{
+			"commonConfig": map[string]any{
+				"replication_factor": 1,
+			},
 
-		"persistence": map[string]any{
-			"enabled": true,
-			"size":    "10Gi",
-		},
+			"auth_enabled": false,
 
-		"ruler": map[string]any{
 			"storage": map[string]any{
-				"type": "local",
-				"local": map[string]any{
-					"directory": "/rules",
+				"type": "filesystem",
+			},
+		},
+
+		"singleBinary": map[string]any{
+			"persistence": map[string]any{
+				"size": "10Gi",
+			},
+		},
+
+		"gateway": map[string]any{
+			"enabled": false,
+		},
+
+		"monitoring": map[string]any{
+			"serviceMonitor": map[string]any{
+				"enabled": true,
+			},
+
+			"selfMonitoring": map[string]any{
+				"enabled": false,
+
+				"lokiCanary": map[string]any{
+					"enabled": false,
 				},
-				"rule_path":        "/tmp/scratch",
-				"alertmanager_url": "http://" + prometheus + "-alertmanager:9093",
-				"ring": map[string]any{
-					"kvstore": map[string]any{
-						"store": "inmemory",
-					},
+
+				"grafanaAgent": map[string]any{
+					"installOperator": false,
 				},
-				"enable_api": true,
 			},
 		},
 	}
