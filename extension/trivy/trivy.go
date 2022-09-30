@@ -55,11 +55,11 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	}
 
 	if err := helm.Uninstall(ctx, trivy, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := uninstallDashboard(ctx, kubeconfig, namespace); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil
@@ -126,7 +126,7 @@ func uninstallDashboard(ctx context.Context, kubeconfig, namespace string) error
 	dashboardName := "trivy-dashboard"
 
 	if err := client.CoreV1().ConfigMaps(namespace).Delete(ctx, dashboardName, metav1.DeleteOptions{}); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

@@ -47,7 +47,7 @@ func installTempo(ctx context.Context, kubeconfig, namespace string) error {
 
 func uninstallTempo(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, tempo, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "app.kubernetes.io/instance=" + tempo}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
