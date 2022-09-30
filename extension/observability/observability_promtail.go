@@ -32,7 +32,7 @@ func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 
 func uninstallPromtail(ctx context.Context, kubeconfig, namespace string) error {
 	if err := helm.Uninstall(ctx, promtail, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil

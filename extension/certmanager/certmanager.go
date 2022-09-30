@@ -77,12 +77,12 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest))); err != nil {
 		// return err
 	}
 
 	if err := helm.Uninstall(ctx, certmanager, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(certmanagerNamespace)); err != nil {
-		//return err
+		// return err
 	}
 
 	return nil
