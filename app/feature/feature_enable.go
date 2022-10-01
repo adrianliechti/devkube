@@ -6,6 +6,7 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/tekton"
 	"github.com/adrianliechti/devkube/extension/trivy"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
@@ -47,12 +48,6 @@ func EnableCommand() *cli.Command {
 			defer closer()
 
 			switch strings.ToLower(feature) {
-			case "trivy":
-				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
-					return err
-				}
-
-				return nil
 
 			case "falco":
 				if err := falco.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
@@ -60,6 +55,21 @@ func EnableCommand() *cli.Command {
 				}
 
 				return nil
+
+			case "tekton":
+				if err := tekton.Install(c.Context, kubeconfig); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "trivy":
+				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
 			default:
 				cli.Fatalf("inavlid feature: %s", feature)
 			}

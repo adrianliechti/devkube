@@ -6,6 +6,7 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/tekton"
 	"github.com/adrianliechti/devkube/extension/trivy"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
@@ -47,15 +48,23 @@ func DisableCommand() *cli.Command {
 			defer closer()
 
 			switch strings.ToLower(feature) {
-			case "trivy":
-				if err := trivy.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+
+			case "falco":
+				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 
 				return nil
 
-			case "falco":
-				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			case "tekton":
+				if err := tekton.Uninstall(c.Context, kubeconfig); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "trivy":
+				if err := trivy.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 
