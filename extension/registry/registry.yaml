@@ -133,7 +133,7 @@ spec:
             - "-port"
             - "443"
             - "-target"
-            - "http:// registry"
+            - "http://registry"
             - "-key-file"
             - "certs/tls.key"
             - "-cert-file"

@@ -10,7 +10,7 @@ import (
 const (
 	prometheus        = "monitoring"
 	prometheusChart   = "kube-prometheus-stack"
-	prometheusVersion = "40.1.1"
+	prometheusVersion = "40.3.1"
 )
 
 func installPrometheus(ctx context.Context, kubeconfig, namespace string) error {
