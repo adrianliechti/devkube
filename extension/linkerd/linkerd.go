@@ -26,6 +26,11 @@ const (
 	linkerdVersion   = "1.9.3"
 	linkerdNamespace = "linkerd"
 
+	smi          = "linkerd-smi"
+	smiChart     = "linkerd-smi"
+	smiVersion   = "1.0.0"
+	smiNamespace = "linkerd-smi"
+
 	viz          = "linkerd-viz"
 	vizChart     = "linkerd-viz"
 	vizVersion   = "30.3.3"
@@ -61,6 +66,10 @@ func Install(ctx context.Context, kubeconfig string) error {
 		return err
 	}
 
+	if err := installSMI(ctx, kubeconfig); err != nil {
+		return err
+	}
+
 	if err := installJaeger(ctx, kubeconfig); err != nil {
 		return err
 	}
@@ -86,6 +95,10 @@ func Uninstall(ctx context.Context, kubeconfig string) error {
 	}
 
 	if err := uninstallJaeger(ctx, kubeconfig); err != nil {
+		// return err
+	}
+
+	if err := uninstallSMI(ctx, kubeconfig); err != nil {
 		// return err
 	}
 
@@ -209,6 +222,26 @@ func uninstallLinkerd(ctx context.Context, kubeconfig string) error {
 	}
 
 	kubectl.Invoke(ctx, []string{"delete", "namespace", linkerdNamespace}, kubectl.WithKubeconfig(kubeconfig))
+
+	return nil
+}
+
+func installSMI(ctx context.Context, kubeconfig string) error {
+	values := map[string]any{}
+
+	if err := helm.Install(ctx, smi, linkerdRepo, smiChart, smiVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(smiNamespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func uninstallSMI(ctx context.Context, kubeconfig string) error {
+	if err := helm.Uninstall(ctx, smi, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(smiNamespace)); err != nil {
+		// return err
+	}
+
+	kubectl.Invoke(ctx, []string{"delete", "namespace", smiNamespace}, kubectl.WithKubeconfig(kubeconfig))
 
 	return nil
 }
