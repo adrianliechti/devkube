@@ -86,8 +86,8 @@ func installDashboard(ctx context.Context, kubeconfig, namespace string) error {
 			},
 		},
 
-		BinaryData: map[string][]byte{
-			"dashboard.json": []byte(dashboard),
+		Data: map[string]string{
+			"dashboard.json": dashboard,
 		},
 	}
 
