@@ -50,12 +50,6 @@ func DisableCommand() *cli.Command {
 			defer closer()
 
 			switch strings.ToLower(feature) {
-			case "trivy":
-				if err := trivy.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
-					return err
-				}
-
-				return nil
 
 			case "falco":
 				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
@@ -66,6 +60,13 @@ func DisableCommand() *cli.Command {
 
 			case "linkerd":
 				if err := linkerd.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "trivy":
+				if err := trivy.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 

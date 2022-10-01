@@ -50,12 +50,6 @@ func EnableCommand() *cli.Command {
 			defer closer()
 
 			switch strings.ToLower(feature) {
-			case "trivy":
-				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
-					return err
-				}
-
-				return nil
 
 			case "falco":
 				if err := falco.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
@@ -66,6 +60,13 @@ func EnableCommand() *cli.Command {
 
 			case "linkerd":
 				if err := linkerd.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "trivy":
+				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 
