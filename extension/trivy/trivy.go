@@ -69,27 +69,6 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 }
 
 func installDashboard(ctx context.Context, kubeconfig, namespace string) error {
-	// resp, err := http.Get("https://grafana.com/api/dashboards/16652/revisions/1/download")
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// defer resp.Body.Close()
-
-	// data, err := io.ReadAll(resp.Body)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// // replace prometheus source
-	// text := string(data)
-	// text = strings.ReplaceAll(text, "${DS_PROMETHEUS}", "prometheus")
-	//data = []byte(text)
-
-	data := []byte(dashboard)
-
 	client, err := kubernetes.NewFromConfig(kubeconfig)
 
 	if err != nil {
@@ -108,7 +87,7 @@ func installDashboard(ctx context.Context, kubeconfig, namespace string) error {
 		},
 
 		BinaryData: map[string][]byte{
-			"dashboard.json": data,
+			"dashboard.json": []byte(dashboard),
 		},
 	}
 

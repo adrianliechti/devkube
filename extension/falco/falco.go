@@ -2,10 +2,8 @@ package falco
 
 import (
 	"context"
+	_ "embed"
 	"errors"
-	"io"
-	"net/http"
-	"strings"
 
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubernetes"
@@ -25,6 +23,11 @@ const (
 	falcoRepo = "https://falcosecurity.github.io/charts"
 )
 
+var (
+	//go:embed dashboard.json
+	dashboard string
+)
+
 func Install(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
@@ -34,38 +37,11 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
-	falcoValues := map[string]any{
-		"falco": map[string]any{
-			"grpc": map[string]any{
-				"enabled": true,
-			},
-
-			"grpc_output": map[string]any{
-				"enabled": true,
-			},
-		},
-	}
-
-	if err := helm.Install(ctx, falco, falcoRepo, falcoChart, falcoVersion, falcoValues, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+	if err := installFalco(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
 
-	exporterValues := map[string]any{
-		"serviceMonitor": map[string]any{
-			"enabled": true,
-		},
-
-		"grafanaDashboard": map[string]any{
-			"enabled":   true,
-			"namespace": nil,
-		},
-
-		"prometheusRules": map[string]any{
-			"enabled": true,
-		},
-	}
-
-	if err := helm.Install(ctx, exporter, falcoRepo, exporterChart, exporterVersion, exporterValues, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+	if err := installExporter(ctx, kubeconfig, namespace); err != nil {
 		return err
 	}
 
@@ -81,11 +57,11 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 		namespace = "default"
 	}
 
-	if err := helm.Uninstall(ctx, falco, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
+	if err := uninstallFalco(ctx, kubeconfig, namespace); err != nil {
 		// return err
 	}
 
-	if err := helm.Uninstall(ctx, exporter, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
+	if err := uninstallExporter(ctx, kubeconfig, namespace); err != nil {
 		// return err
 	}
 
@@ -121,26 +97,66 @@ func verifyNodes(ctx context.Context, kubeconfig string) error {
 	return errors.New("falco is currently only supported on linux/amd64 nodes")
 }
 
+func installFalco(ctx context.Context, kubeconfig, namespace string) error {
+	values := map[string]any{
+		"falco": map[string]any{
+			"grpc": map[string]any{
+				"enabled": true,
+			},
+
+			"grpc_output": map[string]any{
+				"enabled": true,
+			},
+		},
+	}
+
+	if err := helm.Install(ctx, falco, falcoRepo, falcoChart, falcoVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func uninstallFalco(ctx context.Context, kubeconfig, namespace string) error {
+	if err := helm.Uninstall(ctx, falco, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
+		// return err
+	}
+
+	return nil
+}
+
+func installExporter(ctx context.Context, kubeconfig, namespace string) error {
+	values := map[string]any{
+		"serviceMonitor": map[string]any{
+			"enabled": true,
+		},
+
+		"grafanaDashboard": map[string]any{
+			"enabled":   true,
+			"namespace": nil,
+		},
+
+		"prometheusRules": map[string]any{
+			"enabled": true,
+		},
+	}
+
+	if err := helm.Install(ctx, exporter, falcoRepo, exporterChart, exporterVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func uninstallExporter(ctx context.Context, kubeconfig, namespace string) error {
+	if err := helm.Uninstall(ctx, exporter, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
+		// return err
+	}
+
+	return nil
+}
+
 func installDashboard(ctx context.Context, kubeconfig, namespace string) error {
-	resp, err := http.Get("https://raw.githubusercontent.com/falcosecurity/falco-exporter/master/grafana/dashboard.json")
-
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return err
-	}
-
-	// replace prometheus source
-	text := string(data)
-	text = strings.ReplaceAll(text, "${DS_PROMETHEUS}", "prometheus")
-	data = []byte(text)
-
 	client, err := kubernetes.NewFromConfig(kubeconfig)
 
 	if err != nil {
@@ -159,7 +175,7 @@ func installDashboard(ctx context.Context, kubeconfig, namespace string) error {
 		},
 
 		BinaryData: map[string][]byte{
-			"dashboard.json": data,
+			"dashboard.json": []byte(dashboard),
 		},
 	}
 
