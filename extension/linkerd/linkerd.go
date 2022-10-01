@@ -15,15 +15,30 @@ import (
 
 const (
 	linkerdRepo = "https://helm.linkerd.io/stable"
+	grafanaRepo = "https://grafana.github.io/helm-charts"
 
 	crds        = "linkerd-crds"
 	crdsChart   = "linkerd-crds"
 	crdsVersion = "1.4.0"
 
 	linkerd          = "linkerd-control-plane"
-	linkerdNamespace = "linkerd"
 	linkerdChart     = "linkerd-control-plane"
 	linkerdVersion   = "1.9.3"
+	linkerdNamespace = "linkerd"
+
+	viz          = "linkerd-viz"
+	vizChart     = "linkerd-viz"
+	vizVersion   = "30.3.3"
+	vizNamespace = "linkerd-viz"
+
+	jaeger          = "linkerd-jaeger"
+	jaegerChart     = "linkerd-jaeger"
+	jaegerVersion   = "30.4.3"
+	jaegerNamespace = "linkerd-jaeger"
+
+	grafana        = "grafana"
+	grafanaChart   = "grafana"
+	grafanaVersion = "6.40.0"
 )
 
 var (
@@ -31,20 +46,89 @@ var (
 	manifest string
 )
 
-func Install(ctx context.Context, kubeconfig, namespace string) error {
-	if namespace == "" {
-		namespace = "default"
+func Install(ctx context.Context, kubeconfig string) error {
+	kubectl.Invoke(ctx, []string{"create", "namespace", linkerdNamespace}, kubectl.WithKubeconfig(kubeconfig))
+
+	if err := installCRDs(ctx, kubeconfig); err != nil {
+		return err
 	}
 
+	if err := installCA(ctx, kubeconfig); err != nil {
+		return err
+	}
+
+	if err := installLinkerd(ctx, kubeconfig); err != nil {
+		return err
+	}
+
+	if err := installJaeger(ctx, kubeconfig); err != nil {
+		return err
+	}
+
+	if err := installGrafana(ctx, kubeconfig); err != nil {
+		return err
+	}
+
+	if err := installViz(ctx, kubeconfig); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Uninstall(ctx context.Context, kubeconfig string) error {
+	if err := uninstallViz(ctx, kubeconfig); err != nil {
+		// return err
+	}
+
+	if err := uninstallGrafana(ctx, kubeconfig); err != nil {
+		// return err
+	}
+
+	if err := uninstallJaeger(ctx, kubeconfig); err != nil {
+		// return err
+	}
+
+	if err := uninstallLinkerd(ctx, kubeconfig); err != nil {
+		// return err
+	}
+
+	if err := uninstallCA(ctx, kubeconfig); err != nil {
+		// return err
+	}
+
+	if err := uninstallCRDs(ctx, kubeconfig); err != nil {
+		// return err
+	}
+
+	return nil
+}
+
+func installCRDs(ctx context.Context, kubeconfig string) error {
+	if err := helm.Install(ctx, crds, linkerdRepo, crdsChart, crdsVersion, nil, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(linkerdNamespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func uninstallCRDs(ctx context.Context, kubeconfig string) error {
+	if err := helm.Uninstall(ctx, crds, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(linkerdNamespace)); err != nil {
+		// return err
+	}
+
+	return nil
+}
+
+func installCA(ctx context.Context, kubeconfig string) error {
 	client, err := kubernetes.NewFromConfig(kubeconfig)
 
 	if err != nil {
 		return err
 	}
 
-	kubectl.Invoke(ctx, []string{"create", "namespace", linkerdNamespace}, kubectl.WithKubeconfig(kubeconfig))
-
 	client.CoreV1().Secrets(linkerdNamespace).Delete(ctx, "linkerd-identity-issuer", metav1.DeleteOptions{})
+	client.CoreV1().ConfigMaps(linkerdNamespace).Delete(ctx, "linkerd-identity-trust-roots", metav1.DeleteOptions{})
 
 	if err := kubectl.Invoke(ctx, []string{"apply", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(linkerdNamespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
 		return err
@@ -60,7 +144,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
-	configmap := corev1.ConfigMap{
+	if _, err := client.CoreV1().ConfigMaps(linkerdNamespace).Create(ctx, &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "linkerd-identity-trust-roots",
 
@@ -72,19 +156,37 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		Data: map[string]string{
 			"ca-bundle.crt": string(secret.Data["ca.crt"]),
 		},
-	}
-
-	client.CoreV1().ConfigMaps(linkerdNamespace).Delete(ctx, configmap.Name, metav1.DeleteOptions{})
-
-	if _, err := client.CoreV1().ConfigMaps(linkerdNamespace).Create(ctx, &configmap, metav1.CreateOptions{}); err != nil {
+	}, metav1.CreateOptions{}); err != nil {
 		return err
 	}
 
-	if err := helm.Install(ctx, crds, linkerdRepo, crdsChart, crdsVersion, nil, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(linkerdNamespace), helm.WithDefaultOutput()); err != nil {
+	return nil
+}
+
+func uninstallCA(ctx context.Context, kubeconfig string) error {
+	client, err := kubernetes.NewFromConfig(kubeconfig)
+
+	if err != nil {
 		return err
 	}
 
-	cpvalues := map[string]any{
+	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(linkerdNamespace), kubectl.WithInput(strings.NewReader(manifest))); err != nil {
+		// return err
+	}
+
+	if err := client.CoreV1().ConfigMaps(linkerdNamespace).Delete(ctx, "linkerd-identity-trust-roots", metav1.DeleteOptions{}); err != nil {
+		// return err
+	}
+
+	if err := client.CoreV1().Secrets(linkerdNamespace).Delete(ctx, "linkerd-identity-issuer", metav1.DeleteOptions{}); err != nil {
+		// return err
+	}
+
+	return nil
+}
+
+func installLinkerd(ctx context.Context, kubeconfig string) error {
+	values := map[string]any{
 		"identity": map[string]any{
 			"externalCA": true,
 
@@ -94,41 +196,95 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		},
 	}
 
-	if err := helm.Install(ctx, linkerd, linkerdRepo, linkerdChart, linkerdVersion, cpvalues, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(linkerdNamespace), helm.WithDefaultOutput()); err != nil {
+	if err := helm.Install(ctx, linkerd, linkerdRepo, linkerdChart, linkerdVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(linkerdNamespace), helm.WithWait(true), helm.WithDefaultOutput()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
-	if namespace == "" {
-		namespace = "default"
-	}
-
-	client, err := kubernetes.NewFromConfig(kubeconfig)
-
-	if err != nil {
-		return err
-	}
-
+func uninstallLinkerd(ctx context.Context, kubeconfig string) error {
 	if err := helm.Uninstall(ctx, linkerd, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(linkerdNamespace)); err != nil {
 		// return err
 	}
 
-	if err := helm.Uninstall(ctx, crds, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(linkerdNamespace)); err != nil {
+	kubectl.Invoke(ctx, []string{"delete", "namespace", linkerdNamespace}, kubectl.WithKubeconfig(kubeconfig))
+
+	return nil
+}
+
+func installJaeger(ctx context.Context, kubeconfig string) error {
+	values := map[string]any{}
+
+	if err := helm.Install(ctx, jaeger, linkerdRepo, jaegerChart, jaegerVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(jaegerNamespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func uninstallJaeger(ctx context.Context, kubeconfig string) error {
+	if err := helm.Uninstall(ctx, jaeger, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(jaegerNamespace)); err != nil {
 		// return err
 	}
 
-	if err := client.CoreV1().ConfigMaps(linkerdNamespace).Delete(ctx, "linkerd-identity-trust-roots", metav1.DeleteOptions{}); err != nil {
+	kubectl.Invoke(ctx, []string{"delete", "namespace", jaegerNamespace}, kubectl.WithKubeconfig(kubeconfig))
+
+	return nil
+}
+
+func installGrafana(ctx context.Context, kubeconfig string) error {
+	h := helm.New(helm.WithKubeconfig(kubeconfig), helm.WithNamespace(vizNamespace), helm.WithDefaultOutput())
+
+	args := []string{
+		"upgrade", "--install", "--create-namespace", "--timeout", "10m0s",
+		grafana,
+		grafanaChart,
+		"--repo", grafanaRepo,
+		"--version", grafanaVersion,
+		"--set", "rbac.create=false",
+		"--set", "service.port=3000",
+		"--set", "serviceAccount.create=false",
+		"-f", "https://raw.githubusercontent.com/linkerd/linkerd2/main/grafana/values.yaml",
+	}
+
+	if err := h.Invoke(ctx, args...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func uninstallGrafana(ctx context.Context, kubeconfig string) error {
+	if err := helm.Uninstall(ctx, grafana, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(vizNamespace)); err != nil {
 		// return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(linkerdNamespace), kubectl.WithInput(strings.NewReader(manifest))); err != nil {
+	return nil
+}
+
+func installViz(ctx context.Context, kubeconfig string) error {
+	values := map[string]any{
+		"jaegerUrl": "jaeger." + jaegerNamespace + ":16686",
+
+		"grafana": map[string]any{
+			"url": "grafana." + vizNamespace + ":3000",
+		},
+	}
+
+	if err := helm.Install(ctx, viz, linkerdRepo, vizChart, vizVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(vizNamespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func uninstallViz(ctx context.Context, kubeconfig string) error {
+	if err := helm.Uninstall(ctx, viz, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(vizNamespace)); err != nil {
 		// return err
 	}
 
-	client.CoreV1().Secrets(linkerdNamespace).Delete(ctx, "linkerd-identity-issuer", metav1.DeleteOptions{})
+	kubectl.Invoke(ctx, []string{"delete", "namespace", vizNamespace}, kubectl.WithKubeconfig(kubeconfig))
 
 	return nil
 }

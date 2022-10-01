@@ -59,7 +59,7 @@ func DisableCommand() *cli.Command {
 				return nil
 
 			case "linkerd":
-				if err := linkerd.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := linkerd.Uninstall(c.Context, kubeconfig); err != nil {
 					return err
 				}
 

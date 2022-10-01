@@ -59,7 +59,7 @@ func EnableCommand() *cli.Command {
 				return nil
 
 			case "linkerd":
-				if err := linkerd.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := linkerd.Install(c.Context, kubeconfig); err != nil {
 					return err
 				}
 
