@@ -2,9 +2,7 @@ package trivy
 
 import (
 	"context"
-	"io"
-	"net/http"
-	"strings"
+	_ "embed"
 
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubernetes"
@@ -17,7 +15,12 @@ const (
 
 	trivy        = "trivy"
 	trivyChart   = "trivy-operator"
-	trivyVersion = "0.2.1"
+	trivyVersion = "0.3.0"
+)
+
+var (
+	//go:embed dashboard.json
+	dashboard string
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {
@@ -66,24 +69,26 @@ func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 }
 
 func installDashboard(ctx context.Context, kubeconfig, namespace string) error {
-	resp, err := http.Get("https://grafana.com/api/dashboards/16652/revisions/1/download")
+	// resp, err := http.Get("https://grafana.com/api/dashboards/16652/revisions/1/download")
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	defer resp.Body.Close()
+	// defer resp.Body.Close()
 
-	data, err := io.ReadAll(resp.Body)
+	// data, err := io.ReadAll(resp.Body)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	// replace prometheus source
-	text := string(data)
-	text = strings.ReplaceAll(text, "${DS_PROMETHEUS}", "prometheus")
-	data = []byte(text)
+	// // replace prometheus source
+	// text := string(data)
+	// text = strings.ReplaceAll(text, "${DS_PROMETHEUS}", "prometheus")
+	//data = []byte(text)
+
+	data := []byte(dashboard)
 
 	client, err := kubernetes.NewFromConfig(kubeconfig)
 
