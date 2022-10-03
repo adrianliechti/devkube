@@ -30,26 +30,18 @@ func path(ctx context.Context) (string, *semver.Version, error) {
 		name = "kubectl.exe"
 	}
 
-	println(runtime.GOOS)
-
 	if path, err := exec.LookPath(name); err == nil {
-		println("kubecl found found", path)
-
 		if version, err := version(ctx, path); err == nil {
-
 			if !version.LessThan(minimalVersion) {
 				return path, version, nil
 			}
 
-			println("kubectl outdated", path, version)
 			return path, version, errOutdated
 		}
 
-		println("unable to read kubectl version")
 		return path, nil, errOutdated
 	}
 
-	println("kubecl not found")
 	return "", nil, errNotFound
 }
 
