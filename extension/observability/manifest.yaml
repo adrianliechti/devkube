@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemetry
+  labels:
+    app: telemetry
+spec:
+  selector:
+    matchLabels:
+      app: telemetry
+  template:
+    metadata:
+      labels:
+        app: telemetry
+    spec:
+      securityContext: {}
+      containers:
+        - name: collector
+          image: "otel/opentelemetry-collector-contrib:0.61.0"
+          imagePullPolicy: IfNotPresent
+          securityContext: {}
+          command:
+            - /otelcol-contrib
+            - --config=/conf/config.yaml
+          ports:
+            - name: otlp
+              containerPort: 4317
+              protocol: TCP
+            - name: otlp-http
+              containerPort: 4318
+              protocol: TCP
+            - name: jaeger-compact
+              containerPort: 6831
+              protocol: UDP
+            - name: jaeger-grpc
+              containerPort: 14250
+              protocol: TCP
+            - name: jaeger-thrift
+              containerPort: 14268
+              protocol: TCP
+            - name: zipkin
+              containerPort: 9411
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - mountPath: /conf
+              name: config
+      volumes:
+        - name: config
+          configMap:
+            name: telemetry
+            items:
+              - key: config
+                path: config.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telemetry
+  labels:
+    app: telemetry
+spec:
+  type: ClusterIP
+  selector:
+    app: telemetry
+  ports:
+    - name: otlp
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+    - name: jaeger-compact
+      port: 6831
+      targetPort: 6831
+      protocol: UDP
+    - name: jaeger-grpc
+      port: 14250
+      targetPort: 14250
+      protocol: TCP
+    - name: jaeger-thrift
+      port: 14268
+      targetPort: 14268
+      protocol: TCP
+    - name: zipkin
+      port: 9411
+      targetPort: 9411
+      protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telemetry
+  labels:
+    app: telemetry
+data:
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+      jaeger:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:14250
+          thrift_compact:
+            endpoint: 0.0.0.0:6831
+          thrift_http:
+            endpoint: 0.0.0.0:14268
+
+      zipkin:
+        endpoint: 0.0.0.0:9411
+
+    processors:
+      batch:
+
+    exporters:
+      logging:
+
+      otlp:
+        endpoint: tempo:4317
+        tls:
+          insecure: true
+
+      loki:
+        endpoint: http://loki:3100/loki/api/v1/push
+      
+      prometheusremotewrite:
+        endpoint: http://monitoring-prometheus:9090/api/v1/write
+
+    service:
+      pipelines:
+        traces:
+          receivers:  [otlp, jaeger, zipkin]
+          processors: [batch]
+          exporters:  [logging, otlp]
+        
+        metrics:
+          receivers:  [otlp]
+          processors: [batch]
+          exporters:  [logging, prometheusremotewrite]
+
+        logs:
+          receivers:  [otlp]
+          processors: [batch]
+          exporters:  [logging, loki]

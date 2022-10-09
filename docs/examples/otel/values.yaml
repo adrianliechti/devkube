@@ -1,0 +1,106 @@
+observability:
+  otelcol:
+    enabled: true
+
+  jaeger:
+    enabled: false
+
+components:
+  redis:
+    enabled: true
+
+  adService:
+    enabled: true
+    podAnnotations: {}
+    #  sidecar.opentelemetry.io/inject: "false"
+    #  instrumentation.opentelemetry.io/inject-java: "true"
+
+  cartService:
+    enabled: true
+    podAnnotations: {}
+    #  sidecar.opentelemetry.io/inject: "false"
+    #  instrumentation.opentelemetry.io/inject-dotnet: "true"
+
+  checkoutService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+  currencyService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+  emailService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+  featureflagService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+  ffsPostgres:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+  frontend:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+  loadgenerator:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-python: "true"
+
+  paymentService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-nodejs: "true"
+
+  productCatalogService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+  recommendationService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-python: "true"
+
+  shippingService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+  quoteService:
+    enabled: true
+    podAnnotations: {}
+    #  instrumentation.opentelemetry.io/inject-sdk: "true"
+
+opentelemetry-collector:
+  nameOverride: otelcol
+  mode: deployment
+  config:
+    exporters:
+      otlp:
+        endpoint: telemetry.loop:4317
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          exporters:
+            - logging
+            - otlp
+        logs:
+          exporters:
+            - logging
+            - otlp
+        metrics:
+          exporters:
+            - logging
+            - otlp
