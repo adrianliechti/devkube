@@ -75,7 +75,7 @@ devkube grafana
 
 ## Advanced Features
 
-### OpenTelememetry
+### OpenTelemetry
 
 ![OpenTelemetry](docs/assets/otel.png)
 
