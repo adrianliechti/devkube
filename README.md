@@ -2,8 +2,6 @@
 
 devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a specified cloud provider on top of their managed Kubernetes offering.
 
-![Overview](docs/assets/overview.svg)
-
 ## Batteries included
 
 - [Registry](https://github.com/distribution/distribution) - image distribution
@@ -27,6 +25,7 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 - [Linode (Alpha)](https://www.linode.com/products/kubernetes/)
 - [Vultr (Alpha)](https://www.vultr.com/kubernetes/)
 
+![Overview](docs/assets/overview.svg)
 
 ## Install
 
