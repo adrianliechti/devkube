@@ -20,7 +20,7 @@ func installTempo(ctx context.Context, kubeconfig, namespace string) error {
 
 			"metricsGenerator": map[string]any{
 				"enabled":        true,
-				"remoteWriteUrl": "http://" + prometheus + "-prometheus:9090/api/v1/write",
+				"remoteWriteUrl": "http://prometheus:9090/api/v1/write",
 			},
 		},
 
