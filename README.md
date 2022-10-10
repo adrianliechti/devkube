@@ -2,7 +2,9 @@
 
 devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a specified cloud provider on top of their managed Kubernetes offering.
 
-Batteries included
+![Overview](docs/assets/overview.svg)
+
+## Batteries included
 
 - [Registry](https://github.com/distribution/distribution) - image distribution
 - [Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) - web-based user interface
@@ -12,18 +14,18 @@ Batteries included
 - [Loki](https://grafana.com/oss/loki/) - log aggregation system
 - [Tempo](https://grafana.com/oss/tempo/) - distributed tracing backend
 
-Optional Add-ons
+### Optional Add-ons
 
 - [Falco](https://falco.org) - Kubernetes threat detection engine
 - [Trivy](https://aquasecurity.github.io/trivy-operator/latest/) - Kubernetse workload vulnerability scanning
 
-Cloud providers
+### Cloud providers
 
-- [Amazon](https://aws.amazon.com/eks/)
-- [Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/)
-- [DigitalOcean](https://www.digitalocean.com/products/kubernetes)
-- [Linode](https://www.linode.com/products/kubernetes/)
-- [Vultr](https://www.vultr.com/kubernetes/)
+- [AWS (Alpha)](https://aws.amazon.com/eks/)
+- [Azure (Beta)](https://azure.microsoft.com/en-us/services/kubernetes-service/)
+- [DigitalOcean (Alpha)](https://www.digitalocean.com/products/kubernetes)
+- [Linode (Alpha)](https://www.linode.com/products/kubernetes/)
+- [Vultr (Alpha)](https://www.vultr.com/kubernetes/)
 
 
 ## Install
@@ -46,60 +48,17 @@ scoop install kubectl helm adrianliechti/devkube
 ```
 
 
-## Setup Cluster
+## Create Cluster
 
-### Using local Docker Engine
+![Cluster](docs/assets/cluster.png)
 
 ```shell
 devkube create
 ```
 
-### Using [AWS](https://aws.amazon.com/eks/) Cloud Provider
+## Access Dashboard
 
-```shell
-export AWS_ACCESS_KEY_ID=...
-export AWS_SECRET_ACCESS_KEY=...
-export AWS_DEFAULT_REGION=...
-
-devkube create --provider aws
-```
-
-### Using [Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/) Cloud Provider
-
-```shell
-export AZURE_TENANT_ID=...
-export AZURE_SUBSCRIPTION_ID=...
-
-devkube create --provider azure
-```
-
-### Using [DigitalOcean](https://www.digitalocean.com/products/kubernetes) Cloud Provider
-
-```shell
-export DIGITALOCEAN_TOKEN=...
-
-devkube create --provider digitalocean
-```
-
-### Using [Linode](https://www.linode.com/) Cloud Provider
-
-```shell
-export LINODE_TOKEN=...
-
-devkube create --provider linode
-```
-
-### Using [Vultr](https://www.vultr.com/) Cloud Provider
-
-```shell
-export VULTR_API_KEY=...
-
-devkube create --provider vultr
-```
-
-## Administration Consoles
-
-#### Kubernetes Dashboard
+![Dashboard](docs/assets/dashboard.png)
 
 ```shell
 devkube dashboard
@@ -107,22 +66,34 @@ devkube dashboard
 
 > Press "Skip" on the login page to access the dashboard as admin
 
-#### Observability Stack
+## Access Grafana
+
+![Grafana](docs/assets/grafana.png)
 
 ```shell
 devkube grafana
 ```
 
+## Advanced Features
 
-## Optional Features
+### OpenTelememetry
 
-#### Trivy
+![OpenTelemetry](docs/assets/otel.png)
+
+
+### Trivy
+
+Trivy is a comprehensive security scanner. It is reliable, fast, extremely easy to use, and it works wherever you need it.
+
+![Trivy](docs/assets/trivy.png)
 
 ```shell
 devkube enable trivy
 ```
 
 #### Falco
+
+The Falco Project is a cloud native runtime security tool. Falco makes it easy to consume kernel events, and enrich those events with information from Kubernetes and the rest of the cloud native stack.
 
 ```shell
 devkube enable falco
