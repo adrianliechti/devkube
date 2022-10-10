@@ -77,6 +77,18 @@ devkube grafana
 
 ### OpenTelemetry
 
+```mermaid
+flowchart LR
+    A[App] -->|OTLP| B(Collector<br>telemetry.loop)
+    B --> C{Forward}
+    C -->|Logs| D[Loki<br>loki.loop]
+    C -->|Traces| E[Tempo<br>tempo.loop]
+    C -->|Metrics| F[Prometheus<br>prometheus.loop]
+    D <--- G((Grafana))
+    E <--- G
+    F <--- G
+```
+
 ![OpenTelemetry](docs/assets/otel.png)
 
 ### Trivy
