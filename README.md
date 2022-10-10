@@ -49,29 +49,29 @@ scoop install kubectl helm adrianliechti/devkube
 
 ## Create Cluster
 
-![Cluster](docs/assets/cluster.png)
-
 ```shell
 devkube create
 ```
 
-## Access Dashboard
+![Cluster](docs/assets/cluster.png)
 
-![Dashboard](docs/assets/dashboard.png)
+## Access Dashboard
 
 ```shell
 devkube dashboard
 ```
 
+![Dashboard](docs/assets/dashboard.png)
+
 > Press "Skip" on the login page to access the dashboard as admin
 
 ## Access Grafana
 
-![Grafana](docs/assets/grafana.png)
-
 ```shell
 devkube grafana
 ```
+
+![Grafana](docs/assets/grafana.png)
 
 ## Advanced Features
 
@@ -79,16 +79,15 @@ devkube grafana
 
 ![OpenTelemetry](docs/assets/otel.png)
 
-
 ### Trivy
 
 Trivy is a comprehensive security scanner. It is reliable, fast, extremely easy to use, and it works wherever you need it.
 
-![Trivy](docs/assets/trivy.png)
-
 ```shell
 devkube enable trivy
 ```
+
+![Trivy](docs/assets/trivy.png)
 
 #### Falco
 
@@ -97,3 +96,5 @@ The Falco Project is a cloud native runtime security tool. Falco makes it easy t
 ```shell
 devkube enable falco
 ```
+
+![Falco](docs/assets/falco.png)
