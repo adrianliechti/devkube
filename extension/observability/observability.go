@@ -2,6 +2,8 @@ package observability
 
 import (
 	"context"
+	_ "embed"
+	"strings"
 
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 )
@@ -12,8 +14,13 @@ const (
 	prometheusRepo = "https://prometheus-community.github.io/helm-charts"
 )
 
+var (
+	//go:embed manifest.yaml
+	manifest string
+)
+
 func InstallCRD(ctx context.Context, kubeconfig, namespace string) error {
-	baseURL := "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + prometheusVersion + "/charts/kube-prometheus-stack/crds/"
+	baseURL := "https://raw.githubusercontent.com/prometheus-community/helm-charts/kube-prometheus-stack-" + monitoringVersion + "/charts/kube-prometheus-stack/crds/"
 
 	crds := []string{
 		baseURL + "crd-alertmanagerconfigs.yaml",
@@ -60,12 +67,20 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		return err
 	}
 
+	if err := kubectl.Invoke(ctx, []string{"apply", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
 	if namespace == "" {
 		namespace = "default"
+	}
+
+	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
+		// return err
 	}
 
 	if err := uninstallGrafana(ctx, kubeconfig, namespace); err != nil {

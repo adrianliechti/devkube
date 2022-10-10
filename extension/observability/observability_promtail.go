@@ -9,7 +9,7 @@ import (
 const (
 	promtail        = "promtail"
 	promtailChart   = "promtail"
-	promtailVersion = "6.4.0"
+	promtailVersion = "6.5.0"
 )
 
 func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
@@ -17,7 +17,7 @@ func installPromtail(ctx context.Context, kubeconfig, namespace string) error {
 		"config": map[string]any{
 			"clients": []map[string]any{
 				{
-					"url": "http://" + loki + ":3100/loki/api/v1/push",
+					"url": "http://loki:3100/loki/api/v1/push",
 				},
 			},
 		},
