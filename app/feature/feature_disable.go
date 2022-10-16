@@ -11,7 +11,6 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/falco"
-	"github.com/adrianliechti/devkube/extension/ingress"
 	"github.com/adrianliechti/devkube/extension/trivy"
 )
 
@@ -53,13 +52,6 @@ func DisableCommand() *cli.Command {
 
 			case "falco":
 				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
-					return err
-				}
-
-				return nil
-
-			case "ingress":
-				if err := ingress.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 

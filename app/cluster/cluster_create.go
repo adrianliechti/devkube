@@ -11,6 +11,7 @@ import (
 
 	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/dashboard"
+	"github.com/adrianliechti/devkube/extension/ingress"
 	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/observability"
 	"github.com/adrianliechti/devkube/extension/registry"
@@ -80,6 +81,10 @@ func CreateCommand() *cli.Command {
 			}
 
 			if err := registry.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := ingress.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 				return err
 			}
 
