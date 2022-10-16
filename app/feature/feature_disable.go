@@ -7,6 +7,7 @@ import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/extension/falco"
 	"github.com/adrianliechti/devkube/extension/trivy"
+	"github.com/adrianliechti/devkube/extension/vault"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
@@ -56,6 +57,13 @@ func DisableCommand() *cli.Command {
 
 			case "falco":
 				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "vault":
+				if err := vault.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 

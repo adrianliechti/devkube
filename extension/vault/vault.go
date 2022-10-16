@@ -1,0 +1,111 @@
+package vault
+
+import (
+	"context"
+
+	"github.com/adrianliechti/devkube/pkg/helm"
+	"github.com/adrianliechti/devkube/pkg/kubectl"
+)
+
+const (
+	// csiRepo = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
+
+	// csi        = "secrets-store-csi-driver"
+	// csiChart   = "secrets-store-csi-driver"
+	// csiVersion = "1.2.4"
+
+	vaultRepo = "https://helm.releases.hashicorp.com"
+
+	vault        = "vault"
+	vaultChart   = "vault"
+	vaultVersion = "0.22.0"
+)
+
+func Install(ctx context.Context, kubeconfig, namespace string) error {
+	if namespace == "" {
+		namespace = "default"
+	}
+
+	// csiValues := map[string]any{}
+
+	// if err := helm.Install(ctx, csi, csiRepo, csiChart, csiVersion, csiValues, helm.WithKubeconfig(kubeconfig), helm.WithNamespace("kube-system"), helm.WithWait(true), helm.WithDefaultOutput()); err != nil {
+	// 	return err
+	// }
+
+	vaultValues := map[string]any{
+		"server": map[string]any{
+			"enabled": true,
+
+			"standalone": map[string]any{
+				"enabled": true,
+			},
+
+			"extraContainers": []any{
+				map[string]any{
+					"name":  "vault-unsealer",
+					"image": "adrianliechti/vault-unsealer",
+					"env": []any{
+						map[string]any{
+							"name":  "VAULT_ADDR",
+							"value": "http://localhost:8200",
+						},
+						map[string]any{
+							"name":  "UNSEALER_PATH_TOKEN",
+							"value": "/data/vault.token",
+						},
+						map[string]any{
+							"name":  "UNSEALER_PATH_SHARDS",
+							"value": "/data/vault.shards",
+						},
+					},
+					"volumeMounts": []any{
+						map[string]any{
+							"name":      "data",
+							"mountPath": "/data",
+						},
+					},
+				},
+			},
+		},
+
+		"csi": map[string]any{
+			"enabled": false,
+		},
+
+		"injector": map[string]any{
+			"enabled": false,
+		},
+
+		"serverTelemetry": map[string]any{
+			"serviceMonitor": map[string]any{
+				"enabled": true,
+			},
+		},
+	}
+
+	if err := helm.Install(ctx, vault, vaultRepo, vaultChart, vaultVersion, vaultValues, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace), helm.WithDefaultOutput()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
+	if namespace == "" {
+		namespace = "default"
+	}
+
+	if err := helm.Uninstall(ctx, vault, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(namespace)); err != nil {
+		// return err
+	}
+
+	if err := kubectl.Invoke(ctx, []string{"delete", "pvc", "-l", "app.kubernetes.io/instance=" + vault}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace)); err != nil {
+		// return err
+	}
+
+	// if err := helm.Uninstall(ctx, csi, helm.WithKubeconfig(kubeconfig), helm.WithNamespace("kube-system")); err != nil {
+	// 	// return err
+	// }
+
+	return nil
+}

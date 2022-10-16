@@ -7,6 +7,7 @@ import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/extension/falco"
 	"github.com/adrianliechti/devkube/extension/trivy"
+	"github.com/adrianliechti/devkube/extension/vault"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
@@ -60,6 +61,14 @@ func EnableCommand() *cli.Command {
 				}
 
 				return nil
+
+			case "vault":
+				if err := vault.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
 			default:
 				cli.Fatalf("inavlid feature: %s", feature)
 			}

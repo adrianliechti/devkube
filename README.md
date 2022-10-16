@@ -15,7 +15,8 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 ### Optional Add-ons
 
 - [Falco](https://falco.org) - Kubernetes threat detection engine
-- [Trivy](https://aquasecurity.github.io/trivy-operator/latest/) - Kubernetse workload vulnerability scanning
+- [Trivy](https://aquasecurity.github.io/trivy-operator/latest/) - Kubernetes workload vulnerability scanning
+- [Vault](https://www.vaultproject.io/) - Manage Secrets & Protect Sensitive Data
 
 ### Cloud providers
 
