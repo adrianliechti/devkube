@@ -5,9 +5,12 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"math/big"
 	"net"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"sync"
 	"time"
 
@@ -54,6 +57,18 @@ func IngressCommand() *cli.Command {
 			kubeconfig, closer := app.MustClusterKubeconfig(c, provider, cluster)
 			defer closer()
 
+			httptunnel, err := system.FreePort(0)
+
+			if err != nil {
+				return err
+			}
+
+			httpstunnel, err := system.FreePort(0)
+
+			if err != nil {
+				return err
+			}
+
 			httpport, err := system.FreePort(c.Int("http-port"))
 
 			if err != nil {
@@ -93,22 +108,15 @@ func IngressCommand() *cli.Command {
 			capool := x509.NewCertPool()
 			capool.AddCert(cacert)
 
-			_ = httpport
-			_ = httpsport
-
 			timestamp := time.Now()
 
-			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
-			})
-
-			httpListener, err := net.Listen("tcp", ":http")
+			httpListener, err := net.Listen("tcp", fmt.Sprintf(":%d", httpport))
 
 			if err != nil {
 				return err
 			}
 
-			httpsListener, err := net.Listen("tcp", ":https")
+			httpsListener, err := net.Listen("tcp", fmt.Sprintf(":%d", httpsport))
 
 			if err != nil {
 				return err
@@ -126,7 +134,7 @@ func IngressCommand() *cli.Command {
 					return cert, nil
 				}
 
-				println("generate certificate", info.ServerName)
+				//println("generate certificate", info.ServerName)
 
 				certificatesLock.Lock()
 				defer certificatesLock.Unlock()
@@ -173,22 +181,40 @@ func IngressCommand() *cli.Command {
 			httpsListener = tls.NewListener(httpsListener, tlsConfig)
 
 			go func() {
-				http.Serve(httpListener, nil)
+				target, _ := url.Parse(fmt.Sprintf("http://localhost:%d", httptunnel))
+
+				proxy := httputil.NewSingleHostReverseProxy(target)
+
+				http.Serve(httpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					proxy.ServeHTTP(w, r)
+				}))
 			}()
 
 			go func() {
-				http.Serve(httpsListener, nil)
+				target, _ := url.Parse(fmt.Sprintf("https://localhost:%d", httpstunnel))
+
+				transport := http.DefaultTransport.(*http.Transport).Clone()
+				transport.TLSClientConfig = &tls.Config{
+					InsecureSkipVerify: true,
+				}
+
+				proxy := httputil.NewSingleHostReverseProxy(target)
+				proxy.Transport = transport
+
+				http.Serve(httpsListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					proxy.ServeHTTP(w, r)
+				}))
 			}()
 
-			<-c.Context.Done()
+			cli.Info("Ingress availalbe at:")
+			cli.Infof("  http://localhost:%d", httpport)
+			cli.Infof("  https://localhost:%d", httpsport)
+
+			if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/ingress-nginx-controller", fmt.Sprintf("%d:80", httptunnel), fmt.Sprintf("%d:443", httpstunnel)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(DefaultNamespace)); err != nil {
+				return err
+			}
 
 			return nil
-
-			// if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/ingress-nginx-controller", fmt.Sprintf("%d:80", httpport), fmt.Sprintf("%d:443", httpsport)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(DefaultNamespace), kubectl.WithDefaultOutput()); err != nil {
-			// 	return err
-			// }
-
-			// return nil
 		},
 	}
 }
