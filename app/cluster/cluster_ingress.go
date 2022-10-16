@@ -1,13 +1,22 @@
 package cluster
 
 import (
-	"fmt"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
+	"math/big"
+	"net"
+	"net/http"
+	"sync"
+	"time"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 	"github.com/adrianliechti/devkube/pkg/kubernetes"
 	"github.com/adrianliechti/devkube/pkg/system"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -69,26 +78,117 @@ func IngressCommand() *cli.Command {
 				return err
 			}
 
-			key := secret.Data["tls.key"]
-			cert := secret.Data["tls.crt"]
+			ca, err := tls.X509KeyPair(secret.Data["tls.crt"], secret.Data["tls.key"])
 
-			_ = key
-			_ = cert
+			if err != nil {
+				return err
+			}
+
+			cacert, err := x509.ParseCertificate(ca.Certificate[0])
+
+			if err != nil {
+				return err
+			}
+
+			capool := x509.NewCertPool()
+			capool.AddCert(cacert)
 
 			_ = httpport
 			_ = httpsport
 
-			// println(httpport)
-			// println(httpsport)
+			timestamp := time.Now()
 
-			// println(string(key))
-			// println(string(cert))
+			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
-			if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/ingress-nginx-controller", fmt.Sprintf("%d:80", httpport), fmt.Sprintf("%d:443", httpsport)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(DefaultNamespace), kubectl.WithDefaultOutput()); err != nil {
+			})
+
+			httpListener, err := net.Listen("tcp", ":http")
+
+			if err != nil {
 				return err
 			}
 
+			httpsListener, err := net.Listen("tcp", ":https")
+
+			if err != nil {
+				return err
+			}
+
+			tlsConfig := &tls.Config{
+				RootCAs: capool,
+			}
+
+			certificates := map[string]*tls.Certificate{}
+			var certificatesLock sync.Mutex
+
+			tlsConfig.GetCertificate = func(info *tls.ClientHelloInfo) (*tls.Certificate, error) {
+				if cert, ok := certificates[info.ServerName]; ok {
+					return cert, nil
+				}
+
+				println("generate certificate", info.ServerName)
+
+				certificatesLock.Lock()
+				defer certificatesLock.Unlock()
+
+				template := &x509.Certificate{
+					SerialNumber: big.NewInt(timestamp.Unix()),
+
+					// Subject: pkix.Name{
+					// 	CommonName: info.ServerName,
+					// },
+
+					DNSNames: []string{
+						info.ServerName,
+					},
+
+					NotBefore: timestamp,
+					NotAfter:  timestamp.AddDate(1, 0, 0),
+
+					KeyUsage:    x509.KeyUsageDigitalSignature,
+					ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+				}
+
+				privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
+
+				if err != nil {
+					return nil, err
+				}
+
+				certificate, err := x509.CreateCertificate(rand.Reader, template, cacert, &privateKey.PublicKey, ca.PrivateKey)
+
+				if err != nil {
+					return nil, err
+				}
+
+				pair := &tls.Certificate{
+					Certificate: [][]byte{certificate},
+					PrivateKey:  privateKey,
+				}
+
+				certificates[info.ServerName] = pair
+				return pair, nil
+			}
+
+			httpsListener = tls.NewListener(httpsListener, tlsConfig)
+
+			go func() {
+				http.Serve(httpListener, nil)
+			}()
+
+			go func() {
+				http.Serve(httpsListener, nil)
+			}()
+
+			<-c.Context.Done()
+
 			return nil
+
+			// if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/ingress-nginx-controller", fmt.Sprintf("%d:80", httpport), fmt.Sprintf("%d:443", httpsport)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(DefaultNamespace), kubectl.WithDefaultOutput()); err != nil {
+			// 	return err
+			// }
+
+			// return nil
 		},
 	}
 }
