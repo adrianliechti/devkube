@@ -12,7 +12,7 @@ const (
 
 	dashboard        = "dashboard"
 	dashboardChart   = "kubernetes-dashboard"
-	dashboardVersion = "5.10.0"
+	dashboardVersion = "5.11.0"
 )
 
 func Install(ctx context.Context, kubeconfig, namespace string) error {

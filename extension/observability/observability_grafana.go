@@ -9,7 +9,7 @@ import (
 const (
 	grafana        = "grafana"
 	grafanaChart   = "grafana"
-	grafanaVersion = "6.38.6"
+	grafanaVersion = "6.40.3"
 )
 
 func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
@@ -93,14 +93,14 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 						"name":   "Loki",
 						"type":   "loki",
 						"uid":    "loki",
-						"url":    "http://" + loki + ":3100",
+						"url":    "http://loki:3100",
 						"access": "proxy",
 					},
 					{
 						"name":   "Tempo",
 						"type":   "tempo",
 						"uid":    "tempo",
-						"url":    "http://" + tempo + ":3100",
+						"url":    "http://tempo:3100",
 						"access": "proxy",
 						"jsonData": map[string]any{
 							"httpMethod": "GET",
@@ -127,7 +127,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 						"name":   "Prometheus",
 						"type":   "prometheus",
 						"uid":    "prometheus",
-						"url":    "http://" + prometheus + "-prometheus:9090",
+						"url":    "http://prometheus:9090",
 						"access": "proxy",
 						"jsonData": map[string]any{
 							"httpMethod": "GET",
@@ -137,7 +137,7 @@ func installGrafana(ctx context.Context, kubeconfig, namespace string) error {
 						"name":   "Alertmanager",
 						"type":   "alertmanager",
 						"uid":    "alertmanager",
-						"url":    "http://" + prometheus + "-alertmanager:9093",
+						"url":    "http://alertmanager:9093",
 						"access": "proxy",
 
 						"jsonData": map[string]any{

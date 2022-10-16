@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  labels:
+    app: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prometheus
+    prometheus: monitoring
+  ports:
+    - name: http
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  labels:
+    app: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: alertmanager
+    alertmanager: monitoring
+  ports:
+    - name: http
+      port: 9093
+      protocol: TCP
+      targetPort: 9093
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemetry
+  labels:
+    app: telemetry
+spec:
+  selector:
+    matchLabels:
+      app: telemetry
+  template:
+    metadata:
+      labels:
+        app: telemetry
+    spec:
+      securityContext: {}
+      containers:
+        - name: collector
+          image: "otel/opentelemetry-collector-contrib:0.61.0"
+          imagePullPolicy: IfNotPresent
+          securityContext: {}
+          command:
+            - /otelcol-contrib
+            - --config=/conf/config.yaml
+          ports:
+            - name: otlp-grpc
+              protocol: TCP
+              containerPort: 4317
+            - name: otlp-http
+              protocol: TCP
+              containerPort: 4318
+          resources: {}
+          volumeMounts:
+            - mountPath: /conf
+              name: config
+      volumes:
+        - name: config
+          configMap:
+            name: telemetry
+            items:
+              - key: config
+                path: config.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telemetry
+  labels:
+    app: telemetry
+spec:
+  type: ClusterIP
+  selector:
+    app: telemetry
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      protocol: TCP
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      protocol: TCP
+      targetPort: 4318
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telemetry
+  labels:
+    app: telemetry
+data:
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch:
+
+    exporters:
+      logging:
+
+      otlp:
+        endpoint: tempo:4317
+        tls:
+          insecure: true
+
+      loki:
+        endpoint: http://loki:3100/loki/api/v1/push
+      
+      prometheusremotewrite:
+        endpoint: http://prometheus:9090/api/v1/write
+
+    service:
+      pipelines:
+        traces:
+          receivers:  [otlp]
+          processors: [batch]
+          exporters:  [logging, otlp]
+        
+        metrics:
+          receivers:  [otlp]
+          processors: [batch]
+          exporters:  [logging, prometheusremotewrite]
+
+        logs:
+          receivers:  [otlp]
+          processors: [batch]
+          exporters:  [logging, loki]
