@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -22,7 +23,9 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kubernetes"
 	"github.com/adrianliechti/devkube/pkg/system"
 
+	"github.com/ChrisWiegman/goodhosts/v4/pkg/goodhosts"
 	"github.com/samber/lo"
+
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
@@ -36,16 +39,6 @@ func IngressCommand() *cli.Command {
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 			app.ClusterFlag,
-			&cli.IntFlag{
-				Name:  "http-port",
-				Usage: "Local HTTP Port",
-				Value: 8080,
-			},
-			&cli.IntFlag{
-				Name:  "https-port",
-				Usage: "Local HTTPS Port",
-				Value: 8443,
-			},
 		},
 
 		Before: func(c *cli.Context) error {
@@ -57,22 +50,24 @@ func IngressCommand() *cli.Command {
 		},
 
 		Action: func(c *cli.Context) error {
+			elevated, err := system.IsElevated()
+
+			if err != nil {
+				return err
+			}
+
+			if !elevated {
+				if err := system.RunElevated(); err != nil {
+					cli.Fatal("This command must be run as root!")
+				}
+
+				os.Exit(0)
+			}
+
 			provider, cluster := app.MustCluster(c)
 
 			kubeconfig, closer := app.MustClusterKubeconfig(c, provider, cluster)
 			defer closer()
-
-			httpPort, err := system.FreePort(c.Int("http-port"))
-
-			if err != nil {
-				return err
-			}
-
-			httpsPort, err := system.FreePort(c.Int("https-port"))
-
-			if err != nil {
-				return err
-			}
 
 			client, err := kubernetes.NewFromConfig(kubeconfig)
 
@@ -80,27 +75,37 @@ func IngressCommand() *cli.Command {
 				return err
 			}
 
-			cli.Info("Ingress availalbe at:")
-			cli.Infof("  http://localhost:%d", httpPort)
-			cli.Infof("  https://localhost:%d", httpsPort)
+			address := "127.244.0.0"
 
-			return tunnelIngress(c.Context, client, httpPort, httpsPort)
+			cli.Info("Ingress availalbe at:")
+			cli.Infof("  http://%s:80", address)
+			cli.Infof("  https://%s:443", address)
+
+			return tunnelIngress(c.Context, client, address, 80, 443)
 		},
 	}
 }
 
-func tunnelIngress(ctx context.Context, client kubernetes.Client, httpPort, httpsPort int) error {
-	httpTunnel, err := system.FreePort(0)
+func tunnelIngress(ctx context.Context, client kubernetes.Client, address string, httpPort, httpsPort int) error {
+	hostsfile, err := goodhosts.NewHosts("Loop Ingress")
 
 	if err != nil {
 		return err
 	}
 
-	httpsTunnel, err := system.FreePort(0)
-
-	if err != nil {
+	if err := system.AliasIP(ctx, address); err != nil {
 		return err
 	}
+
+	defer func() {
+		system.UnaliasIP(context.Background(), address)
+
+		hostsfile.RemoveSection()
+		hostsfile.Flush()
+	}()
+
+	httpTunnel := 5080
+	httpsTunnel := 5443
 
 	secret, err := client.CoreV1().Secrets(DefaultNamespace).Get(ctx, "platform-ca", metav1.GetOptions{})
 
@@ -125,13 +130,13 @@ func tunnelIngress(ctx context.Context, client kubernetes.Client, httpPort, http
 
 	timestamp := time.Now()
 
-	httpListener, err := net.Listen("tcp", fmt.Sprintf(":%d", httpPort))
+	httpListener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", address, httpPort))
 
 	if err != nil {
 		return err
 	}
 
-	httpsListener, err := net.Listen("tcp", fmt.Sprintf(":%d", httpsPort))
+	httpsListener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", address, httpsPort))
 
 	if err != nil {
 		return err
@@ -196,11 +201,11 @@ func tunnelIngress(ctx context.Context, client kubernetes.Client, httpPort, http
 	httpsListener = tls.NewListener(httpsListener, tlsConfig)
 
 	go func() {
-		updateIngressHosts(ctx, client)
+		updateIngressHosts(ctx, client, hostsfile, address)
 	}()
 
 	go func() {
-		target, _ := url.Parse(fmt.Sprintf("http://localhost:%d", httpTunnel))
+		target, _ := url.Parse(fmt.Sprintf("http://%s:%d", address, httpTunnel))
 
 		proxy := httputil.NewSingleHostReverseProxy(target)
 
@@ -210,7 +215,7 @@ func tunnelIngress(ctx context.Context, client kubernetes.Client, httpPort, http
 	}()
 
 	go func() {
-		target, _ := url.Parse(fmt.Sprintf("https://localhost:%d", httpsTunnel))
+		target, _ := url.Parse(fmt.Sprintf("https://%s:%d", address, httpsTunnel))
 
 		transport := http.DefaultTransport.(*http.Transport).Clone()
 		transport.TLSClientConfig = &tls.Config{
@@ -225,14 +230,14 @@ func tunnelIngress(ctx context.Context, client kubernetes.Client, httpPort, http
 		}))
 	}()
 
-	if err := kubectl.Invoke(ctx, []string{"port-forward", "service/ingress-nginx-controller", fmt.Sprintf("%d:80", httpTunnel), fmt.Sprintf("%d:443", httpsTunnel)}, kubectl.WithKubeconfig(client.ConfigPath()), kubectl.WithNamespace(DefaultNamespace)); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"port-forward", "service/ingress-nginx-controller", "--address", address, fmt.Sprintf("%d:80", httpTunnel), fmt.Sprintf("%d:443", httpsTunnel)}, kubectl.WithKubeconfig(client.ConfigPath()), kubectl.WithNamespace(DefaultNamespace)); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func updateIngressHosts(ctx context.Context, client kubernetes.Client) error {
+func updateIngressHosts(ctx context.Context, client kubernetes.Client, hostsfile goodhosts.Hosts, address string) error {
 	watcher, err := client.NetworkingV1().Ingresses("").Watch(ctx, metav1.ListOptions{})
 
 	if err != nil {
@@ -256,11 +261,15 @@ func updateIngressHosts(ctx context.Context, client kubernetes.Client) error {
 
 		switch event.Type {
 		case watch.Added:
-			println("ingress added", ingress.Namespace, ingress.Name, strings.Join(hosts, ","))
+			hostsfile.Add(address, "", hosts...)
+			println("added", ingress.Namespace, ingress.Name, strings.Join(hosts, ","))
 
 		case watch.Deleted:
+			hostsfile.Remove(address, hosts...)
 			println("ingress deleted", ingress.Namespace, ingress.Name, strings.Join(hosts, ","))
 		}
+
+		hostsfile.Flush()
 	}
 
 	return nil
