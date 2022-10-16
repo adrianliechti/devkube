@@ -36,10 +36,14 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 
 			"metrics": map[string]any{
 				"enabled": true,
-			},
 
-			"serviceMonitor": map[string]any{
-				"enabled": true,
+				"serviceMonitor": map[string]any{
+					"enabled": true,
+				},
+
+				// "prometheusRule": map[string]any{
+				// 	"enabled": true,
+				// },
 			},
 		},
 	}
