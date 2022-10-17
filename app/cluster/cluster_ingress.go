@@ -36,6 +36,8 @@ func IngressCommand() *cli.Command {
 		Name:  "ingress",
 		Usage: "Tunnel Ingress",
 
+		Category: app.ConnectCategory,
+
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 			app.ClusterFlag,
@@ -99,7 +101,7 @@ func tunnelIngress(ctx context.Context, client kubernetes.Client, address string
 	httpTunnel := 5080
 	httpsTunnel := 5443
 
-	secret, err := client.CoreV1().Secrets(DefaultNamespace).Get(ctx, "platform-ca", metav1.GetOptions{})
+	secret, err := client.CoreV1().Secrets(app.DefaultNamespace).Get(ctx, "platform-ca", metav1.GetOptions{})
 
 	if err != nil {
 		return err
@@ -222,7 +224,7 @@ func tunnelIngress(ctx context.Context, client kubernetes.Client, address string
 		}))
 	}()
 
-	if err := kubectl.Invoke(ctx, []string{"port-forward", "service/ingress-nginx-controller", "--address", address, fmt.Sprintf("%d:80", httpTunnel), fmt.Sprintf("%d:443", httpsTunnel)}, kubectl.WithKubeconfig(client.ConfigPath()), kubectl.WithNamespace(DefaultNamespace)); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"port-forward", "service/ingress-nginx-controller", "--address", address, fmt.Sprintf("%d:80", httpTunnel), fmt.Sprintf("%d:443", httpsTunnel)}, kubectl.WithKubeconfig(client.ConfigPath()), kubectl.WithNamespace(app.DefaultNamespace)); err != nil {
 		return err
 	}
 
