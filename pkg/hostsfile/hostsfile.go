@@ -3,6 +3,7 @@ package hostsfile
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -20,7 +21,6 @@ func init() {
 		path = os.ExpandEnv(filepath.FromSlash("${SystemRoot}/System32/drivers/etc/hosts"))
 		newline = "\r\n"
 	}
-
 }
 
 func AddAlias(address string, aliases ...string) error {
@@ -41,14 +41,15 @@ func AddAlias(address string, aliases ...string) error {
 	lines = removeAliases(lines, aliases...)
 
 	for _, alias := range aliases {
-		lines = append(lines, address+" "+alias)
+		line := fmt.Sprintf("%s %s", address, alias)
+		lines = append(lines, line)
 	}
 
 	return writeLines(lines)
 }
 
-func RemoveByAlias(val ...string) error {
-	if len(val) == 0 {
+func RemoveByAlias(alias ...string) error {
+	if len(alias) == 0 {
 		return nil
 	}
 
@@ -58,13 +59,13 @@ func RemoveByAlias(val ...string) error {
 		return err
 	}
 
-	lines = removeAliases(lines, val...)
+	lines = removeAliases(lines, alias...)
 
 	return writeLines(lines)
 }
 
-func RemoveByAddress(val ...string) error {
-	if len(val) == 0 {
+func RemoveByAddress(address ...string) error {
+	if len(address) == 0 {
 		return nil
 	}
 
@@ -74,18 +75,18 @@ func RemoveByAddress(val ...string) error {
 		return err
 	}
 
-	lines = removeAddresses(lines, val...)
+	lines = removeAddresses(lines, address...)
 
 	return writeLines(lines)
 }
 
-func removeAddresses(lines []string, addresses ...string) []string {
+func removeAddresses(lines []string, address ...string) []string {
 	result := make([]string, 0)
 
 loop:
 	for _, line := range lines {
-		for _, address := range addresses {
-			if matched, _ := regexp.MatchString(`^`+address+`\s+`, line); matched {
+		for _, val := range address {
+			if matched, _ := regexp.MatchString(`^`+val+`\s+`, line); matched {
 				continue loop
 			}
 		}
@@ -96,17 +97,17 @@ loop:
 	return result
 }
 
-func removeAliases(lines []string, aliases ...string) []string {
+func removeAliases(lines []string, alias ...string) []string {
 	result := make([]string, 0)
 
 loop:
 	for _, line := range lines {
-		for _, alias := range aliases {
-			if matched, _ := regexp.MatchString(`\s+`+alias+`\s+`, line); matched {
+		for _, val := range alias {
+			if matched, _ := regexp.MatchString(`\s+`+val+`\s+`, line); matched {
 				continue loop
 			}
 
-			if matched, _ := regexp.MatchString(`\s+`+alias+`$`, line); matched {
+			if matched, _ := regexp.MatchString(`\s+`+val+`$`, line); matched {
 				continue loop
 			}
 		}
