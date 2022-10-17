@@ -19,11 +19,11 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/devkube/pkg/hostsfile"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 	"github.com/adrianliechti/devkube/pkg/kubernetes"
 	"github.com/adrianliechti/devkube/pkg/system"
 
-	"github.com/ChrisWiegman/goodhosts/v4/pkg/goodhosts"
 	"github.com/samber/lo"
 
 	networkingv1 "k8s.io/api/networking/v1"
@@ -87,21 +87,13 @@ func IngressCommand() *cli.Command {
 }
 
 func tunnelIngress(ctx context.Context, client kubernetes.Client, address string, httpPort, httpsPort int) error {
-	hostsfile, err := goodhosts.NewHosts("Loop Ingress")
-
-	if err != nil {
-		return err
-	}
-
 	if err := system.AliasIP(ctx, address); err != nil {
 		return err
 	}
 
 	defer func() {
 		system.UnaliasIP(context.Background(), address)
-
-		hostsfile.RemoveSection()
-		hostsfile.Flush()
+		hostsfile.RemoveByAddress(address)
 	}()
 
 	httpTunnel := 5080
@@ -201,7 +193,7 @@ func tunnelIngress(ctx context.Context, client kubernetes.Client, address string
 	httpsListener = tls.NewListener(httpsListener, tlsConfig)
 
 	go func() {
-		updateIngressHosts(ctx, client, hostsfile, address)
+		updateIngressHosts(ctx, client, address)
 	}()
 
 	go func() {
@@ -237,7 +229,7 @@ func tunnelIngress(ctx context.Context, client kubernetes.Client, address string
 	return nil
 }
 
-func updateIngressHosts(ctx context.Context, client kubernetes.Client, hostsfile goodhosts.Hosts, address string) error {
+func updateIngressHosts(ctx context.Context, client kubernetes.Client, address string) error {
 	watcher, err := client.NetworkingV1().Ingresses("").Watch(ctx, metav1.ListOptions{})
 
 	if err != nil {
@@ -261,15 +253,13 @@ func updateIngressHosts(ctx context.Context, client kubernetes.Client, hostsfile
 
 		switch event.Type {
 		case watch.Added:
-			hostsfile.Add(address, "", hosts...)
+			hostsfile.AddAlias(address, hosts...)
 			println("added", ingress.Namespace, ingress.Name, strings.Join(hosts, ","))
 
 		case watch.Deleted:
-			hostsfile.Remove(address, hosts...)
+			hostsfile.RemoveByAlias(hosts...)
 			println("ingress deleted", ingress.Namespace, ingress.Name, strings.Join(hosts, ","))
 		}
-
-		hostsfile.Flush()
 	}
 
 	return nil
