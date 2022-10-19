@@ -1,6 +1,6 @@
 //go:build darwin || linux
 
-package system
+package sudo
 
 import (
 	"os"

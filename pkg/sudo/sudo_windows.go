@@ -1,6 +1,6 @@
 //go:build windows
 
-package system
+package sudo
 
 import (
 	"fmt"

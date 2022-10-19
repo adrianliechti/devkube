@@ -22,6 +22,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/hostsfile"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 	"github.com/adrianliechti/devkube/pkg/kubernetes"
+	"github.com/adrianliechti/devkube/pkg/sudo"
 	"github.com/adrianliechti/devkube/pkg/system"
 
 	"github.com/samber/lo"
@@ -52,14 +53,14 @@ func IngressCommand() *cli.Command {
 		},
 
 		Action: func(c *cli.Context) error {
-			elevated, err := system.IsElevated()
+			elevated, err := sudo.IsElevated()
 
 			if err != nil {
 				return err
 			}
 
 			if !elevated {
-				if err := system.RunElevated(); err != nil {
+				if err := sudo.RunElevated(); err != nil {
 					cli.Fatal("This command must be run as root!")
 				}
 
