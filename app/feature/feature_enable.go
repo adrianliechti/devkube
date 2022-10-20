@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/devkube/app"
+	"github.com/adrianliechti/devkube/extension/catalog"
 	"github.com/adrianliechti/devkube/extension/falco"
 	"github.com/adrianliechti/devkube/extension/trivy"
 	"github.com/adrianliechti/devkube/pkg/cli"
@@ -47,8 +48,9 @@ func EnableCommand() *cli.Command {
 			defer closer()
 
 			switch strings.ToLower(feature) {
-			case "trivy":
-				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+
+			case "catalog":
+				if err := catalog.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
 					return err
 				}
 
@@ -60,6 +62,14 @@ func EnableCommand() *cli.Command {
 				}
 
 				return nil
+
+			case "trivy":
+				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
 			default:
 				cli.Fatalf("inavlid feature: %s", feature)
 			}
