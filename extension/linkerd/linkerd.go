@@ -23,22 +23,22 @@ const (
 
 	linkerd          = "linkerd-control-plane"
 	linkerdChart     = "linkerd-control-plane"
-	linkerdVersion   = "1.9.3"
+	linkerdVersion   = "1.9.4"
 	linkerdNamespace = "linkerd"
 
 	viz          = "linkerd-viz"
 	vizChart     = "linkerd-viz"
-	vizVersion   = "30.3.3"
+	vizVersion   = "30.3.4"
 	vizNamespace = "linkerd-viz"
 
 	jaeger          = "linkerd-jaeger"
 	jaegerChart     = "linkerd-jaeger"
-	jaegerVersion   = "30.4.3"
+	jaegerVersion   = "30.4.4"
 	jaegerNamespace = "linkerd-jaeger"
 
 	grafana        = "grafana"
 	grafanaChart   = "grafana"
-	grafanaVersion = "6.40.0"
+	grafanaVersion = "6.43.1"
 )
 
 var (
