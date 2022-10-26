@@ -11,6 +11,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/linkerd"
 	"github.com/adrianliechti/devkube/extension/trivy"
 )
 
@@ -54,6 +55,13 @@ func DisableCommand() *cli.Command {
 
 			case "falco":
 				if err := falco.Uninstall(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "linkerd":
+				if err := linkerd.Uninstall(c.Context, kubeconfig); err != nil {
 					return err
 				}
 
