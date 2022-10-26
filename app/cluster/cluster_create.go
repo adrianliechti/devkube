@@ -11,6 +11,7 @@ import (
 
 	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/dashboard"
+	"github.com/adrianliechti/devkube/extension/ingress"
 	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/observability"
 	"github.com/adrianliechti/devkube/extension/registry"
@@ -20,6 +21,8 @@ func CreateCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "create",
 		Usage: "Create cluster",
+
+		Category: app.ClusterCategory,
 
 		Flags: []cli.Flag{
 			app.ProviderFlag,
@@ -61,29 +64,33 @@ func CreateCommand() *cli.Command {
 				return err
 			}
 
-			kubectl.Invoke(c.Context, []string{"create", "namespace", DefaultNamespace}, kubectl.WithKubeconfig(kubeconfig))
+			kubectl.Invoke(c.Context, []string{"create", "namespace", app.DefaultNamespace}, kubectl.WithKubeconfig(kubeconfig))
 
-			if err := observability.InstallCRD(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			if err := observability.InstallCRD(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := certmanager.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			if err := certmanager.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := metrics.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			if err := metrics.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := dashboard.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			if err := dashboard.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := registry.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			if err := registry.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 				return err
 			}
 
-			if err := observability.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+			if err := ingress.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
+				return err
+			}
+
+			if err := observability.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 				return err
 			}
 

@@ -16,7 +16,9 @@ import (
 func TrustCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "trust",
-		Usage: "Trust Cluster Root CA",
+		Usage: "Trust Root CA",
+
+		Category: app.ConnectCategory,
 
 		Flags: []cli.Flag{
 			app.ProviderFlag,
@@ -39,7 +41,7 @@ func TrustCommand() *cli.Command {
 				return err
 			}
 
-			secret, err := client.CoreV1().Secrets(DefaultNamespace).Get(c.Context, "platform-ca", metav1.GetOptions{})
+			secret, err := client.CoreV1().Secrets(app.DefaultNamespace).Get(c.Context, "platform-ca", metav1.GetOptions{})
 
 			if err != nil {
 				return err
