@@ -249,7 +249,13 @@ func updateIngressHosts(ctx context.Context, client kubernetes.Client, address s
 		hosts := make([]string, 0)
 
 		for _, rule := range ingress.Spec.Rules {
-			hosts = append(hosts, rule.Host)
+			host := rule.Host
+
+			if strings.Contains(host, "*") {
+				continue
+			}
+
+			hosts = append(hosts, host)
 		}
 
 		hosts = lo.Uniq(hosts)
