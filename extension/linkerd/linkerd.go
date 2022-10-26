@@ -17,6 +17,8 @@ const (
 	linkerdRepo = "https://helm.linkerd.io/stable"
 	grafanaRepo = "https://grafana.github.io/helm-charts"
 
+	version = "2.12.2"
+
 	crds        = "linkerd-crds"
 	crdsChart   = "linkerd-crds"
 	crdsVersion = "1.4.0"
@@ -245,7 +247,7 @@ func installGrafana(ctx context.Context, kubeconfig string) error {
 		"--set", "rbac.create=false",
 		"--set", "service.port=3000",
 		"--set", "serviceAccount.create=false",
-		"-f", "https://raw.githubusercontent.com/linkerd/linkerd2/main/grafana/values.yaml",
+		"-f", "https://raw.githubusercontent.com/linkerd/linkerd2/stable-" + version + "/grafana/values.yaml",
 	}
 
 	if err := h.Invoke(ctx, args...); err != nil {
