@@ -7,6 +7,7 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 - [Registry](https://github.com/distribution/distribution) - image distribution
 - [Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) - web-based user interface
 - [Cert-Manager](https://cert-manager.io)- certificate management
+- [Ingress](https://kubernetes.github.io/ingress-nginx/) - NGINX Ingress Controller
 - [Grafana](https://grafana.com/grafana/) - data observability
 - [Prometheus](https://prometheus-operator.dev) - monitoring system
 - [Loki](https://grafana.com/oss/loki/) - log aggregation system
@@ -47,7 +48,6 @@ scoop bucket add adrianliechti https://github.com/adrianliechti/scoop-bucket
 scoop install kubectl helm adrianliechti/devkube
 ```
 
-
 ## Create Cluster
 
 ```shell
@@ -76,7 +76,28 @@ devkube grafana
 
 ## Advanced Features
 
+### Ingress Controller
+
+![Ingress](docs/assets/ingress.png)
+
+```shell
+devkube trust
+devkube ingress
+```
+
 ### OpenTelemetry
+
+```mermaid
+flowchart LR
+    A[App] -->|OTLP| B(Collector<br>telemetry.loop)
+    B --> C{Forward}
+    C -->|Logs| D[Loki<br>loki.loop]
+    C -->|Traces| E[Tempo<br>tempo.loop]
+    C -->|Metrics| F[Prometheus<br>prometheus.loop]
+    D <--- G((Grafana))
+    E <--- G
+    F <--- G
+```
 
 ![OpenTelemetry](docs/assets/otel.png)
 

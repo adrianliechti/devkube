@@ -20,6 +20,8 @@ func DisableCommand() *cli.Command {
 		Name:  "disable",
 		Usage: "Disable cluster feature",
 
+		Category: app.FeaturesCategory,
+
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 			app.ClusterFlag,
@@ -52,7 +54,7 @@ func DisableCommand() *cli.Command {
 			switch strings.ToLower(feature) {
 
 			case "falco":
-				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := falco.Uninstall(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
 
@@ -66,7 +68,7 @@ func DisableCommand() *cli.Command {
 				return nil
 
 			case "trivy":
-				if err := trivy.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := trivy.Uninstall(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
 

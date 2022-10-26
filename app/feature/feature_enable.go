@@ -20,6 +20,8 @@ func EnableCommand() *cli.Command {
 		Name:  "enable",
 		Usage: "Enable cluster feature",
 
+		Category: app.FeaturesCategory,
+
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 			app.ClusterFlag,
@@ -52,7 +54,7 @@ func EnableCommand() *cli.Command {
 			switch strings.ToLower(feature) {
 
 			case "falco":
-				if err := falco.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := falco.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
 
@@ -66,7 +68,7 @@ func EnableCommand() *cli.Command {
 				return nil
 
 			case "trivy":
-				if err := trivy.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := trivy.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
 
