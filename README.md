@@ -16,6 +16,7 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 ### Optional Add-ons
 
 - [Linkerd](https://linkerd.io) - Service Mesh
+- [Kyverno](https://kyverno.io) - Kubernetes Policy Management
 - [Falco](https://falco.org) - Kubernetes threat detection engine
 - [Trivy](https://aquasecurity.github.io/trivy-operator/latest/) - Kubernetse workload vulnerability scanning
 
