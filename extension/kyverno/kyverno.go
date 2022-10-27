@@ -37,6 +37,11 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 
 		"resourceFiltersExcludeNamespaces": []string{
 			namespace,
+			"kube-system",
+			"cert-manager",
+			"linkerd",
+			"linkerd-viz",
+			"linkerd-jaeger",
 		},
 
 		"serviceMonitor": map[string]any{
