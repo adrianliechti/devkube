@@ -112,6 +112,16 @@ devkube enable trivy
 
 ![Trivy](docs/assets/trivy.png)
 
+### Kyverno
+
+Kyverno is a policy engine designed for Kubernetes. With Kyverno, policies are managed as Kubernetes resources and no new language is required to write policies.
+
+```shell
+devkube enable kyverno
+```
+
+![Trivy](docs/assets/kyverno.png)
+
 ### Falco
 
 The Falco Project is a cloud native runtime security tool. Falco makes it easy to consume kernel events, and enrich those events with information from Kubernetes and the rest of the cloud native stack.

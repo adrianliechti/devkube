@@ -11,6 +11,7 @@ import (
 	"github.com/adrianliechti/devkube/pkg/kubectl"
 
 	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/kyverno"
 	"github.com/adrianliechti/devkube/extension/linkerd"
 	"github.com/adrianliechti/devkube/extension/trivy"
 )
@@ -55,6 +56,13 @@ func DisableCommand() *cli.Command {
 
 			case "falco":
 				if err := falco.Uninstall(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
+					return err
+				}
+
+				return nil
+
+			case "kyverno":
+				if err := kyverno.Uninstall(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
 
