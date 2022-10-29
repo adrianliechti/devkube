@@ -14,6 +14,8 @@ func GrafanaCommand() *cli.Command {
 		Name:  "grafana",
 		Usage: "Open Grafana",
 
+		Category: app.ManageCategory,
+
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 			app.ClusterFlag,
@@ -41,7 +43,7 @@ func GrafanaCommand() *cli.Command {
 				cli.OpenURL(url)
 			})
 
-			if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/grafana", fmt.Sprintf("%d:80", port)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(DefaultNamespace), kubectl.WithDefaultOutput()); err != nil {
+			if err := kubectl.Invoke(c.Context, []string{"port-forward", "service/grafana", fmt.Sprintf("%d:80", port)}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(app.DefaultNamespace), kubectl.WithDefaultOutput()); err != nil {
 				return err
 			}
 

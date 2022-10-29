@@ -19,7 +19,7 @@ const (
 
 	certmanager        = "cert-manager"
 	certmanagerChart   = "cert-manager"
-	certmanagerVersion = "v1.9.1"
+	certmanagerVersion = "v1.10.0"
 )
 
 var (

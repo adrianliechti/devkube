@@ -7,6 +7,7 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 - [Registry](https://github.com/distribution/distribution) - image distribution
 - [Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) - web-based user interface
 - [Cert-Manager](https://cert-manager.io)- certificate management
+- [Ingress](https://kubernetes.github.io/ingress-nginx/) - NGINX Ingress Controller
 - [Grafana](https://grafana.com/grafana/) - data observability
 - [Prometheus](https://prometheus-operator.dev) - monitoring system
 - [Loki](https://grafana.com/oss/loki/) - log aggregation system
@@ -14,6 +15,7 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 
 ### Optional Add-ons
 
+- [Linkerd](https://linkerd.io) - Service Mesh
 - [Falco](https://falco.org) - Kubernetes threat detection engine
 - [Trivy](https://aquasecurity.github.io/trivy-operator/latest/) - Kubernetse workload vulnerability scanning
 
@@ -29,23 +31,18 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 
 ## Install
 
-#### MacOS / Linux
+MacOS / Linux with [Homebrew](https://brew.sh)
 
-[Homebrew](https://brew.sh)
-
-```
+```shell
 brew install adrianliechti/tap/devkube
 ```
 
-#### Windows
-
-[Scoop](https://scoop.sh)
+Windows with [Scoop](https://scoop.sh)
 
 ```shell
 scoop bucket add adrianliechti https://github.com/adrianliechti/scoop-bucket
 scoop install kubectl helm adrianliechti/devkube
 ```
-
 
 ## Create Cluster
 
@@ -75,6 +72,20 @@ devkube grafana
 
 ## Advanced Features
 
+### Ingress Controller
+
+![Ingress](docs/assets/ingress.png)
+
+This CLI can forward traffic to the ingress controller and simulate DNS by adding entries in `/etc/hosts` temporary. It also alows to trust the pre-configured certificate authority (CA) to support TLS rules.
+
+```shell
+# Trust Platform CA (use --uninstall to remove)
+devkube trust
+
+# Tunnel Traffic (needs sudo)
+devkube ingress
+```
+
 ### OpenTelemetry
 
 ```mermaid
@@ -101,7 +112,7 @@ devkube enable trivy
 
 ![Trivy](docs/assets/trivy.png)
 
-#### Falco
+### Falco
 
 The Falco Project is a cloud native runtime security tool. Falco makes it easy to consume kernel events, and enrich those events with information from Kubernetes and the rest of the cloud native stack.
 
@@ -110,3 +121,35 @@ devkube enable falco
 ```
 
 ![Falco](docs/assets/falco.png)
+
+### Linkerd
+
+Linkerd is a service mesh for Kubernetes. It makes running services easier and safer by giving you runtime debugging, observability, reliability, and security—all without requiring any changes to your code.
+
+```shell
+devkube enable linkerd
+```
+
+#### Install CLI
+
+MacOS / Linux with [Homebrew](https://brew.sh)
+
+```shell
+brew install linkerd
+```
+
+Windows with [Scoop](https://scoop.sh)
+
+```shell
+scoop install linkerd
+```
+
+Open Dashboard
+
+```shell
+linkerd viz dashboard
+```
+
+![Linkerd](docs/assets/linkerd.png)
+
+![Linkerd Grafana](docs/assets/linkerd_grafana.png)

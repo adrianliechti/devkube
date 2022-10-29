@@ -7,7 +7,9 @@ import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/extension/catalog"
 	"github.com/adrianliechti/devkube/extension/falco"
+	"github.com/adrianliechti/devkube/extension/linkerd"
 	"github.com/adrianliechti/devkube/extension/trivy"
+
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/devkube/pkg/kubectl"
@@ -17,6 +19,8 @@ func DisableCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "disable",
 		Usage: "Disable cluster feature",
+
+		Category: app.FeaturesCategory,
 
 		Flags: []cli.Flag{
 			app.ProviderFlag,
@@ -50,25 +54,24 @@ func DisableCommand() *cli.Command {
 			switch strings.ToLower(feature) {
 
 			case "catalog":
-				if err := catalog.Install(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := catalog.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
-
-				return nil
 
 			case "falco":
-				if err := falco.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := falco.Uninstall(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
 
-				return nil
+			case "linkerd":
+				if err := linkerd.Uninstall(c.Context, kubeconfig); err != nil {
+					return err
+				}
 
 			case "trivy":
-				if err := trivy.Uninstall(c.Context, kubeconfig, DefaultNamespace); err != nil {
+				if err := trivy.Uninstall(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
-
-				return nil
 
 			default:
 				cli.Fatalf("inavlid feature: %s", feature)

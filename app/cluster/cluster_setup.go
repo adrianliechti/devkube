@@ -10,6 +10,8 @@ func SetupCommand() *cli.Command {
 		Name:  "setup",
 		Usage: "Setup cluster",
 
+		Category: app.ClusterCategory,
+
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 			app.ClusterFlag,

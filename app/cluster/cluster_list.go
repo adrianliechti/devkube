@@ -10,6 +10,8 @@ func ListCommand() *cli.Command {
 		Name:  "list",
 		Usage: "List clusters",
 
+		Category: app.ClusterCategory,
+
 		Flags: []cli.Flag{
 			app.ProviderFlag,
 		},
