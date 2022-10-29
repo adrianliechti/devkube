@@ -54,7 +54,7 @@ func DisableCommand() *cli.Command {
 			switch strings.ToLower(feature) {
 
 			case "catalog":
-				if err := catalog.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
+				if err := catalog.Uninstall(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 					return err
 				}
 
