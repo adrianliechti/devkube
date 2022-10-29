@@ -9,7 +9,7 @@ import (
 
 const (
 	catalog          = "catalog-controller-manager"
-	catalogNamespace = "loop"
+	catalogNamespace = "catalog-system"
 
 	manifestURL = "https://raw.githubusercontent.com/adrianliechti/loop-catalog/main/kubernetes/install.yaml"
 )
@@ -27,7 +27,7 @@ func Install(ctx context.Context, kubeconfig, namespace string) error {
 		// ignore error
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"create", "clusterrolebinding", catalog, "--clusterrole=cluster-admin", "--serviceaccount=" + namespace + ":" + catalog}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
+	if err := kubectl.Invoke(ctx, []string{"create", "clusterrolebinding", catalog, "--clusterrole=cluster-admin", "--serviceaccount=" + catalogNamespace + ":" + catalog}, kubectl.WithKubeconfig(kubeconfig)); err != nil {
 		return err
 	}
 
