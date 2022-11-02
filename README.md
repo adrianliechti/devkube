@@ -18,7 +18,7 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 - [Linkerd](https://linkerd.io) - Service Mesh
 - [Kyverno](https://kyverno.io) - Kubernetes Policy Management
 - [Falco](https://falco.org) - Kubernetes threat detection engine
-- [Trivy](https://aquasecurity.github.io/trivy-operator/latest/) - Kubernetse workload vulnerability scanning
+- [Trivy](https://aquasecurity.github.io/trivy-operator/latest/) - Kubernetes workload vulnerability scanning
 
 ### Cloud providers
 
@@ -77,7 +77,7 @@ devkube grafana
 
 ![Ingress](docs/assets/ingress.png)
 
-This CLI can forward traffic to the ingress controller and simulate DNS by adding entries in `/etc/hosts` temporary. It also alows to trust the pre-configured certificate authority (CA) to support TLS rules.
+This CLI can forward traffic to the ingress controller and simulate DNS by adding entries in `/etc/hosts` temporary. It also allows to trust the pre-configured certificate authority (CA) to support TLS rules.
 
 ```shell
 # Trust Platform CA (use --uninstall to remove)
