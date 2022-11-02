@@ -30,6 +30,11 @@ devkube bootstraps feature-rich Kubernetes clusters locally using Docker or on a
 
 ![Overview](docs/assets/overview.svg)
 
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) - Container daemon
+- [Kind](https://kind.sigs.k8s.io/) - Kubernetes in Docker, for local cluster
+
 ## Install
 
 MacOS / Linux with [Homebrew](https://brew.sh)
