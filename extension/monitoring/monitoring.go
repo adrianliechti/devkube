@@ -1,4 +1,4 @@
-package prometheus
+package monitoring
 
 import (
 	"context"
@@ -8,17 +8,18 @@ import (
 )
 
 const (
+	name      = "monitoring"
 	namespace = "monitoring"
 
-	repo    = "https://prometheus-community.github.io/helm-charts"
-	chart   = "kube-prometheus-stack"
-	version = "61.2.0"
+	repoURL      = "https://prometheus-community.github.io/helm-charts"
+	chartName    = "kube-prometheus-stack"
+	chartVersion = "61.2.0"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
 	values := map[string]any{
-		"nameOverride":     "monitoring",
-		"fullnameOverride": "monitoring",
+		"nameOverride":     name,
+		"fullnameOverride": name,
 
 		"cleanPrometheusOperatorObjectNames": true,
 
@@ -52,22 +53,22 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 			"forceDeployDatasources": true,
 		},
 
-		// "alertmanager": map[string]any{
-		// 	"alertmanagerSpec": map[string]any{
-		// 		"storage": map[string]any{
-		// 			"volumeClaimTemplate": map[string]any{
-		// 				"spec": map[string]any{
-		// 					"accessModes": []string{"ReadWriteOnce"},
-		// 					"resources": map[string]any{
-		// 						"requests": map[string]any{
-		// 							"storage": "10Gi",
-		// 						},
-		// 					},
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// },
+		"alertmanager": map[string]any{
+			"alertmanagerSpec": map[string]any{
+				"storage": map[string]any{
+					"volumeClaimTemplate": map[string]any{
+						"spec": map[string]any{
+							"accessModes": []string{"ReadWriteOnce"},
+							"resources": map[string]any{
+								"requests": map[string]any{
+									"storage": "10Gi",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 
 		"prometheus": map[string]any{
 			"prometheusSpec": map[string]any{
@@ -86,25 +87,25 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 				"ruleSelector":                  nil,
 				"ruleSelectorNilUsesHelmValues": false,
 
-				//"retentionSize": "9GiB",
+				"retentionSize": "9GiB",
 
-				// "storageSpec": map[string]any{
-				// 	"volumeClaimTemplate": map[string]any{
-				// 		"spec": map[string]any{
-				// 			"accessModes": []string{"ReadWriteOnce"},
-				// 			"resources": map[string]any{
-				// 				"requests": map[string]any{
-				// 					"storage": "10Gi",
-				// 				},
-				// 			},
-				// 		},
-				// 	},
-				// },
+				"storageSpec": map[string]any{
+					"volumeClaimTemplate": map[string]any{
+						"spec": map[string]any{
+							"accessModes": []string{"ReadWriteOnce"},
+							"resources": map[string]any{
+								"requests": map[string]any{
+									"storage": "10Gi",
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}
 
-	if err := helm.Ensure(ctx, client, namespace, "monitoring", repo, chart, version, values); err != nil {
+	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
 		return err
 	}
 

@@ -1,11 +1,11 @@
-package cluster
+package delete
 
 import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
 )
 
-func DeleteCommand() *cli.Command {
+func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "delete",
 		Usage: "Delete cluster",

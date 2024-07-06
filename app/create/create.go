@@ -1,12 +1,18 @@
-package cluster
+package create
 
 import (
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/extension/prometheus"
+	"github.com/adrianliechti/devkube/app/setup"
 	"github.com/adrianliechti/devkube/pkg/cli"
+
+	"github.com/adrianliechti/devkube/extension/certmanager"
+	"github.com/adrianliechti/devkube/extension/grafana"
+	"github.com/adrianliechti/devkube/extension/loki"
+	"github.com/adrianliechti/devkube/extension/monitoring"
+	"github.com/adrianliechti/devkube/extension/tempo"
 )
 
-func CreateCommand() *cli.Command {
+func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "create",
 		Usage: "Create cluster",
@@ -21,12 +27,24 @@ func CreateCommand() *cli.Command {
 
 			client := app.MustClient(c)
 
-			// if err := certmanager.Ensure(c.Context, client); err != nil {
-			// 	//return err
-			// }
+			if err := certmanager.Ensure(c.Context, client); err != nil {
+				return err
+			}
 
-			if err := prometheus.Ensure(c.Context, client); err != nil {
-				//return err
+			if err := monitoring.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			if err := loki.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			if err := tempo.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			if err := grafana.Ensure(c.Context, client); err != nil {
+				return err
 			}
 
 			// if err := metrics.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
@@ -45,11 +63,7 @@ func CreateCommand() *cli.Command {
 			// 	return err
 			// }
 
-			// if err := observability.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
-			// 	return err
-			// }
-
-			return ExportConfig(c.Context, provider, cluster, "")
+			return setup.Export(c.Context, provider, cluster, "")
 		},
 	}
 }

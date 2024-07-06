@@ -1,4 +1,4 @@
-package cluster
+package setup
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 
-func SetupCommand() *cli.Command {
+func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "setup",
 		Usage: "Setup cluster",
@@ -19,12 +19,12 @@ func SetupCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			provider, cluster := app.MustCluster(c)
 
-			return ExportConfig(c.Context, provider, cluster, "")
+			return Export(c.Context, provider, cluster, "")
 		},
 	}
 }
 
-func ExportConfig(ctx context.Context, provider provider.Provider, cluster string, path string) error {
+func Export(ctx context.Context, provider provider.Provider, cluster string, path string) error {
 	if path == "" {
 		path = kubernetes.ConfigPath()
 	}
