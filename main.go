@@ -6,8 +6,7 @@ import (
 	"os/signal"
 
 	"github.com/adrianliechti/devkube/app/cluster"
-	"github.com/adrianliechti/devkube/app/feature"
-	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/loop/pkg/cli"
 )
 
 var version string
@@ -33,22 +32,10 @@ func initApp() cli.App {
 		HideHelpCommand: true,
 
 		Commands: []*cli.Command{
-			cluster.ListCommand(),
+			cluster.SetupCommand(),
 
 			cluster.CreateCommand(),
 			cluster.DeleteCommand(),
-
-			cluster.SetupCommand(),
-			cluster.TrustCommand(),
-
-			cluster.RegistryCommand(),
-			cluster.IngressCommand(),
-
-			cluster.GrafanaCommand(),
-			cluster.DashboardCommand(),
-
-			feature.EnableCommand(),
-			feature.DisableCommand(),
 		},
 	}
 }

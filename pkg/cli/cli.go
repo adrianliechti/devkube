@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/manifoldco/promptui"
+	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/olekukonko/tablewriter"
-	"github.com/skratchdot/open-golang/open"
+	"github.com/pkg/browser"
 	"github.com/urfave/cli/v2"
 )
 
@@ -33,7 +34,13 @@ func Infof(format string, a ...interface{}) {
 }
 
 func Warn(v ...interface{}) {
-	os.Stderr.WriteString(fmt.Sprintln(v...))
+	color := lipgloss.AdaptiveColor{Light: "#FFFDF5", Dark: "#FFFDF5"}
+
+	var style = lipgloss.NewStyle().
+		Foreground(color)
+
+	s := style.Render(fmt.Sprintln(v...))
+	os.Stderr.WriteString(s + "\n")
 }
 
 func Warnf(format string, a ...interface{}) {
@@ -42,7 +49,13 @@ func Warnf(format string, a ...interface{}) {
 }
 
 func Error(v ...interface{}) {
-	os.Stderr.WriteString(fmt.Sprintln(v...))
+	color := lipgloss.AdaptiveColor{Light: "#FF4672", Dark: "#ED567A"}
+
+	var style = lipgloss.NewStyle().
+		Foreground(color)
+
+	s := style.Render(fmt.Sprintln(v...))
+	os.Stderr.WriteString(s + "\n")
 }
 
 func Errorf(format string, a ...interface{}) {
@@ -60,56 +73,137 @@ func Fatalf(format string, a ...interface{}) {
 	Fatal(v)
 }
 
-func OpenURL(url string) error {
-	err := open.Run(url)
+func OpenFile(path string) error {
+	err := browser.OpenFile(path)
 
 	if err != nil {
-		Error("Unable to start your browser. try manually")
-		Info(url)
+		Error("Unable to start file. try manually")
+		Error(path)
+	}
+
+	return nil
+}
+
+func OpenURL(url string) error {
+	err := browser.OpenURL(url)
+
+	if err != nil {
+		Error("Unable to start your browser. try manually.")
+		Error(url)
 	}
 
 	return nil
 }
 
 func Select(label string, items []string) (int, string, error) {
-	prompt := promptui.Select{
-		Label: label,
-		Items: items,
+	s := huh.NewSelect[int]()
+
+	if label != "" {
+		s.Title(label)
 	}
 
-	return prompt.Run()
+	options := make([]huh.Option[int], 0)
+
+	for i, item := range items {
+		options = append(options, huh.NewOption(item, i))
+	}
+
+	var index int
+
+	s.Value(&index)
+	s.Options(options...)
+
+	if err := s.Run(); err != nil {
+		return 0, "", err
+	}
+
+	result := items[index]
+
+	if result != "" {
+		fmt.Println("> " + result)
+	}
+
+	return index, result, nil
+}
+
+func MustSelect(label string, items []string) (int, string) {
+	index, value, err := Select(label, items)
+
+	if err != nil {
+		Fatal(err)
+	}
+
+	return index, value
 }
 
 func Prompt(label, placeholder string) (string, error) {
-	prompt := promptui.Prompt{
-		Label:   label,
-		Default: placeholder,
+	i := huh.NewInput()
+
+	if label != "" {
+		i.Title(label)
 	}
 
-	return prompt.Run()
+	if placeholder != "" {
+		i.Placeholder(placeholder)
+	}
+
+	var result string
+	i.Value(&result)
+
+	if err := i.Run(); err != nil {
+		return "", err
+	}
+
+	if result != "" {
+		fmt.Println("> " + result)
+	}
+
+	return result, nil
+}
+
+func MustPrompt(label, placeholder string) string {
+	value, err := Prompt(label, placeholder)
+
+	if err != nil {
+		Fatal(err)
+	}
+
+	return value
 }
 
 func Confirm(label string, placeholder bool) (bool, error) {
-	value := "n"
+	c := huh.NewConfirm()
 
-	if placeholder {
-		value = "y"
+	if label != "" {
+		c.Title(label)
 	}
 
-	prompt := promptui.Prompt{
-		Label: label,
+	var result bool
+	c.Value(&result)
 
-		IsConfirm: true,
-		Default:   value,
-	}
+	return result, c.Run()
+}
 
-	_, err := prompt.Run()
+func MustConfirm(label string, placeholder bool) bool {
+	value, err := Confirm(label, placeholder)
 
 	if err != nil {
-		return false, err
+		Fatal(err)
 	}
 
-	return true, nil
+	return value
+}
+
+func Title(val string) {
+	// Green
+	color := lipgloss.AdaptiveColor{Light: "#02BA84", Dark: "#02BF87"}
+
+	var style = lipgloss.NewStyle().
+		Foreground(color).
+		Bold(true).
+		Underline(true)
+
+	fmt.Println(style.Render(val))
 }
 
 func Table(header []string, rows [][]string) {

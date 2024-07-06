@@ -10,13 +10,6 @@ func DeleteCommand() *cli.Command {
 		Name:  "delete",
 		Usage: "Delete cluster",
 
-		Category: app.ClusterCategory,
-
-		Flags: []cli.Flag{
-			app.ProviderFlag,
-			app.ClusterFlag,
-		},
-
 		Action: func(c *cli.Context) error {
 			provider, cluster := app.MustCluster(c)
 

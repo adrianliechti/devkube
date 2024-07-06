@@ -30,6 +30,6 @@ func (p *Provider) Delete(ctx context.Context, name string) error {
 	return kind.Delete(ctx, name)
 }
 
-func (p *Provider) Export(ctx context.Context, name, path string) error {
-	return kind.Export(ctx, name, path)
+func (p *Provider) Config(ctx context.Context, name string) ([]byte, error) {
+	return kind.Config(ctx, name)
 }

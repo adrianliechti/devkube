@@ -7,7 +7,7 @@ import (
 	"sigs.k8s.io/kind/pkg/log"
 )
 
-func Export(ctx context.Context, name, kubeconfig string, opt ...Option) error {
+func Config(ctx context.Context, name string, opt ...Option) ([]byte, error) {
 	logger := log.NoopLogger{}
 
 	provider := cluster.NewProvider(
@@ -15,5 +15,11 @@ func Export(ctx context.Context, name, kubeconfig string, opt ...Option) error {
 		//runtime.GetDefault(logger),
 	)
 
-	return provider.ExportKubeConfig(name, kubeconfig, false)
+	data, err := provider.KubeConfig(name, false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return []byte(data), nil
 }
