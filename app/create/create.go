@@ -9,6 +9,7 @@ import (
 	"github.com/adrianliechti/devkube/extension/grafana"
 	"github.com/adrianliechti/devkube/extension/loki"
 	"github.com/adrianliechti/devkube/extension/monitoring"
+	"github.com/adrianliechti/devkube/extension/promtail"
 	"github.com/adrianliechti/devkube/extension/tempo"
 )
 
@@ -36,6 +37,10 @@ func Command() *cli.Command {
 			}
 
 			if err := loki.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			if err := promtail.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
