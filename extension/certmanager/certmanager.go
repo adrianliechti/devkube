@@ -5,21 +5,9 @@ import (
 	_ "embed"
 	"strings"
 
+	"github.com/adrianliechti/devkube/pkg/apply"
 	"github.com/adrianliechti/devkube/pkg/helm"
-	"github.com/adrianliechti/devkube/pkg/kubectl"
-	"github.com/adrianliechti/devkube/pkg/kubernetes"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	certmanagerRepo      = "https://charts.jetstack.io"
-	certmanagerNamespace = "cert-manager"
-
-	certmanager        = "cert-manager"
-	certmanagerChart   = "cert-manager"
-	certmanagerVersion = "v1.10.0"
+	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 
 var (
@@ -27,73 +15,30 @@ var (
 	manifest string
 )
 
-func Install(ctx context.Context, kubeconfig, namespace string) error {
-	if namespace == "" {
-		namespace = "default"
-	}
+const (
+	name      = "cert-manager"
+	namespace = "cert-manager"
 
-	client, err := kubernetes.NewFromConfig(kubeconfig)
+	repoURL      = "https://charts.jetstack.io"
+	chartName    = "cert-manager"
+	chartVersion = "1.15.1"
+)
 
-	if err != nil {
-		return err
-	}
-
-	nodes, err := client.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
-
-	if err != nil {
-		return err
-	}
-
+func Ensure(ctx context.Context, client kubernetes.Client) error {
 	values := map[string]any{
-		"installCRDs": true,
-
-		"prometheus": map[string]any{
-			"servicemonitor": map[string]any{
-				"enabled": true,
-			},
+		"crds": map[string]any{
+			"enabled": true,
+			"keep":    true,
 		},
 	}
 
-	if isAWS(nodes.Items) {
-		values["webhook"] = map[string]any{
-			"securePort":  10260,
-			"hostNetwork": true,
-		}
-	}
-
-	if err := helm.Install(ctx, certmanager, certmanagerRepo, certmanagerChart, certmanagerVersion, values, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(certmanagerNamespace), helm.WithWait(true), helm.WithDefaultOutput()); err != nil {
+	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
 		return err
 	}
 
-	if err := kubectl.Invoke(ctx, []string{"apply", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
+	if err := apply.Apply(ctx, client, namespace, strings.NewReader(manifest)); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func Uninstall(ctx context.Context, kubeconfig, namespace string) error {
-	if namespace == "" {
-		namespace = "default"
-	}
-
-	if err := kubectl.Invoke(ctx, []string{"delete", "-f", "-"}, kubectl.WithKubeconfig(kubeconfig), kubectl.WithNamespace(namespace), kubectl.WithInput(strings.NewReader(manifest)), kubectl.WithDefaultOutput()); err != nil {
-		// return err
-	}
-
-	if err := helm.Uninstall(ctx, certmanager, helm.WithKubeconfig(kubeconfig), helm.WithNamespace(certmanagerNamespace)); err != nil {
-		// return err
-	}
-
-	return nil
-}
-
-func isAWS(nodes []corev1.Node) bool {
-	for _, node := range nodes {
-		if strings.HasPrefix(node.Spec.ProviderID, "aws://") {
-			return true
-		}
-	}
-
-	return false
 }

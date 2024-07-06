@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  labels:
+    app: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prometheus
+    prometheus: monitoring
+  ports:
+    - name: http
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  labels:
+    app: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: alertmanager
+    alertmanager: monitoring
+  ports:
+    - name: http
+      port: 9093
+      protocol: TCP
+      targetPort: 9093
+---
+apiVersion: mutations.gatekeeper.sh/v1
+kind: ModifySet
+metadata:
+  name: pod-mutation-otel
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    kinds:
+      - apiGroups: ["*"]
+        kinds: ["Pod"]
+    excludedNamespaces:
+      - kube-*
+      - cert-manager
+      - crossplane-*
+      - gatekeeper-*
+      - platform
+  location: "spec.containers[name:*].env"
+  parameters:
+    values:
+      fromList:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://otel.monitoring:4318
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: http/protobuf

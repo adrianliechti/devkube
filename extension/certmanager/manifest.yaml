@@ -46,7 +46,10 @@ spec:
       hostPID: true
       containers:
         - name: sleep
-          image: k8s.gcr.io/pause:3.7
+          image: alpine:3
+          command:
+            - sleep
+            - infinity
       initContainers:
         - name: init
           image: alpine:3

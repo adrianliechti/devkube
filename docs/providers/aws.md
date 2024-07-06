@@ -1,9 +1,0 @@
-### Using [AWS](https://aws.amazon.com/eks/) Cloud Provider
-
-```shell
-export AWS_ACCESS_KEY_ID=...
-export AWS_SECRET_ACCESS_KEY=...
-export AWS_DEFAULT_REGION=...
-
-devkube create --provider aws
-```

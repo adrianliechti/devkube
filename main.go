@@ -2,19 +2,33 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/adrianliechti/devkube/app/cluster"
-	"github.com/adrianliechti/devkube/app/feature"
+	"github.com/adrianliechti/devkube/app/connect"
+	"github.com/adrianliechti/devkube/app/create"
+	"github.com/adrianliechti/devkube/app/delete"
+	"github.com/adrianliechti/devkube/app/grafana"
+	"github.com/adrianliechti/devkube/app/logs"
+	"github.com/adrianliechti/devkube/app/setup"
 	"github.com/adrianliechti/devkube/pkg/cli"
+
+	"github.com/lmittmann/tint"
 )
 
 var version string
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill, syscall.SIGTERM)
 	defer stop()
+
+	slog.SetDefault(slog.New(tint.NewHandler(os.Stderr, &tint.Options{
+		Level:      slog.LevelInfo,
+		TimeFormat: time.Kitchen,
+	})))
 
 	app := initApp()
 
@@ -33,22 +47,14 @@ func initApp() cli.App {
 		HideHelpCommand: true,
 
 		Commands: []*cli.Command{
-			cluster.ListCommand(),
+			create.Command(),
+			delete.Command(),
 
-			cluster.CreateCommand(),
-			cluster.DeleteCommand(),
+			setup.Command(),
+			connect.Command(),
+			grafana.Command(),
 
-			cluster.SetupCommand(),
-			cluster.TrustCommand(),
-
-			cluster.RegistryCommand(),
-			cluster.IngressCommand(),
-
-			cluster.GrafanaCommand(),
-			cluster.DashboardCommand(),
-
-			feature.EnableCommand(),
-			feature.DisableCommand(),
+			logs.Command(),
 		},
 	}
 }

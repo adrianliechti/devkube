@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel
+  labels:
+    app: otel
+spec:
+  selector:
+    matchLabels:
+      app: otel
+  template:
+    metadata:
+      labels:
+        app: otel
+    spec:
+      securityContext: {}
+      containers:
+        - name: collector
+          image: otel/opentelemetry-collector-contrib
+          imagePullPolicy: Always
+          securityContext: {}
+          command:
+            - /otelcol-contrib
+            - --config=/conf/config.yaml
+          ports:
+            - name: otlp-grpc
+              protocol: TCP
+              containerPort: 4317
+            - name: otlp-http
+              protocol: TCP
+              containerPort: 4318
+          resources: {}
+          volumeMounts:
+            - mountPath: /conf
+              name: config
+      volumes:
+        - name: config
+          configMap:
+            name: otel
+            items:
+              - key: config
+                path: config.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel
+  labels:
+    app: otel
+spec:
+  type: ClusterIP
+  selector:
+    app: otel
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      protocol: TCP
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      protocol: TCP
+      targetPort: 4318
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel
+  labels:
+    app: otel
+data:
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch:
+
+    exporters:
+      logging:
+
+      otlp:
+        endpoint: tempo:4317
+        tls:
+          insecure: true
+
+      loki:
+        endpoint: http://loki:3100/loki/api/v1/push
+      
+      prometheusremotewrite:
+        endpoint: http://prometheus:9090/api/v1/write
+
+    service:
+      pipelines:
+        traces:
+          receivers:  [otlp]
+          processors: [batch]
+          exporters:  [logging, otlp]
+        
+        metrics:
+          receivers:  [otlp]
+          processors: [batch]
+          exporters:  [logging, prometheusremotewrite]
+
+        logs:
+          receivers:  [otlp]
+          processors: [batch]
+          exporters:  [logging, loki]
