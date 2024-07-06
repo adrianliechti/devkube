@@ -1,0 +1,77 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: platform
+spec:
+  ca:
+    secretName: platform-ca
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: platform-ca
+spec:
+  isCA: true
+  commonName: Platform Root CA
+  duration: 87600h
+  secretName: platform-ca
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: platform-ca-installer
+spec:
+  selector:
+    matchLabels:
+      app: platform-ca-installer
+  template:
+    metadata:
+      labels:
+        app: platform-ca-installer
+    spec:
+      hostPID: true
+      containers:
+        - name: sleep
+          image: alpine:3
+          command:
+            - sleep
+            - infinity
+      initContainers:
+        - name: init
+          image: alpine:3
+          securityContext:
+            privileged: true
+          env:
+            - name: ROOTCA
+              valueFrom:
+                secretKeyRef:
+                  name: platform-ca
+                  key: ca.crt
+          command:
+            - nsenter
+            - --mount=/proc/1/ns/mnt
+            - --
+            - sh
+            - -c
+            - |
+              echo "$ROOTCA"
+              if [ -d "/usr/local/share/ca-certificates" ]; then
+                echo "$ROOTCA" > /usr/local/share/ca-certificates/platform-ca.crt && update-ca-certificates
+              elif [ -d "/etc/pki/ca-trust/source/anchors" ]; then
+                echo "$ROOTCA" > /etc/pki/ca-trust/source/anchors/platform-ca.crt && update-ca-trust
+              fi
+              systemctl restart containerd

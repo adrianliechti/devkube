@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
+	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 
 func MustCluster(c *cli.Context) (provider.Provider, string) {
@@ -25,4 +26,36 @@ func Cluster(c *cli.Context) (provider.Provider, string, error) {
 	}
 
 	return provider, cluster, nil
+}
+
+func MustClient(c *cli.Context) kubernetes.Client {
+	client, err := Client(c)
+
+	if err != nil {
+		cli.Fatal(err)
+	}
+
+	return client
+}
+
+func Client(c *cli.Context) (kubernetes.Client, error) {
+	provider, cluster, err := Cluster(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := provider.Config(c.Context, cluster)
+
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := kubernetes.NewFromBytes(data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }

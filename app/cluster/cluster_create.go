@@ -1,10 +1,8 @@
 package cluster
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/adrianliechti/devkube/app"
+	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/pkg/cli"
 )
 
@@ -29,19 +27,11 @@ func CreateCommand() *cli.Command {
 			provider := app.MustProvider(c)
 			cluster := "devkube"
 
-			dir, err := os.MkdirTemp("", "devkube")
-
-			if err != nil {
+			if err := provider.Create(c.Context, cluster); err != nil {
 				return err
 			}
 
-			defer os.RemoveAll(dir)
-
-			kubeconfig := filepath.Join(dir, "kubeconfig")
-
-			if err := provider.Create(c.Context, cluster, kubeconfig); err != nil {
-				return err
-			}
+			client := app.MustClient(c)
 
 			// kubectl.Invoke(c.Context, []string{"create", "namespace", app.DefaultNamespace}, kubectl.WithKubeconfig(kubeconfig))
 
@@ -49,9 +39,9 @@ func CreateCommand() *cli.Command {
 			// 	return err
 			// }
 
-			// if err := certmanager.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
-			// 	return err
-			// }
+			if err := certmanager.Install(c.Context, client); err != nil {
+				return err
+			}
 
 			// if err := metrics.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 			// 	return err

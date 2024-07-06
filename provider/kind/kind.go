@@ -2,6 +2,7 @@ package kind
 
 import (
 	"context"
+	"os"
 
 	"github.com/adrianliechti/devkube/pkg/kind"
 	"github.com/adrianliechti/devkube/provider"
@@ -18,8 +19,18 @@ func (p *Provider) List(ctx context.Context) ([]string, error) {
 	return kind.List(ctx)
 }
 
-func (p *Provider) Create(ctx context.Context, name string, kubeconfig string) error {
-	if err := kind.Create(ctx, name, nil, kubeconfig, kind.WithDefaultOutput()); err != nil {
+func (p *Provider) Create(ctx context.Context, name string) error {
+	dir, err := os.MkdirTemp("", "kubeconfig-")
+
+	if err != nil {
+		return err
+	}
+
+	path := dir + "/.config"
+
+	defer os.RemoveAll(dir)
+
+	if err := kind.Create(ctx, name, nil, path, kind.WithDefaultOutput()); err != nil {
 		return err
 	}
 
