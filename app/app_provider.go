@@ -7,7 +7,13 @@ import (
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
 	"github.com/adrianliechti/devkube/provider/kind"
+	"github.com/adrianliechti/devkube/provider/none"
 )
+
+var ProviderFlag = &cli.StringFlag{
+	Name:  "provider",
+	Usage: "provider name",
+}
 
 func MustProvider(c *cli.Context) provider.Provider {
 	provider, err := Provider(c)
@@ -20,11 +26,14 @@ func MustProvider(c *cli.Context) provider.Provider {
 }
 
 func Provider(c *cli.Context) (provider.Provider, error) {
-	provider := ""
+	provider := c.String(ProviderFlag.Name)
 
 	switch strings.ToLower(provider) {
 	case "", "local":
 		return kind.New(), nil
+
+	case "none":
+		return none.NewFromEnvironment()
 
 	default:
 		return nil, fmt.Errorf("unknown provider %q", provider)

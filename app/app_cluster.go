@@ -6,6 +6,11 @@ import (
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 
+var ClusterFlag = &cli.StringFlag{
+	Name:  "cluster",
+	Usage: "cluster name",
+}
+
 func MustCluster(c *cli.Context) (provider.Provider, string) {
 	provider, cluster, err := Cluster(c)
 
@@ -19,7 +24,7 @@ func MustCluster(c *cli.Context) (provider.Provider, string) {
 func Cluster(c *cli.Context) (provider.Provider, string, error) {
 	provider := MustProvider(c)
 
-	cluster := ""
+	cluster := c.String(ClusterFlag.Name)
 
 	if cluster == "" {
 		cluster = "devkube"

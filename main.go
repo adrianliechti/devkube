@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/app/connect"
 	"github.com/adrianliechti/devkube/app/create"
 	"github.com/adrianliechti/devkube/app/delete"
@@ -45,6 +46,11 @@ func initApp() cli.App {
 		Version: version,
 
 		HideHelpCommand: true,
+
+		Flags: []cli.Flag{
+			app.ProviderFlag,
+			app.ClusterFlag,
+		},
 
 		Commands: []*cli.Command{
 			create.Command(),
