@@ -12,7 +12,7 @@ const (
 
 	repo    = "https://prometheus-community.github.io/helm-charts"
 	chart   = "kube-prometheus-stack"
-	version = "40.5.0"
+	version = "61.2.0"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
@@ -103,8 +103,6 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 			},
 		},
 	}
-
-	_ = values
 
 	if err := helm.Ensure(ctx, client, namespace, "monitoring", repo, chart, version, values); err != nil {
 		return err
