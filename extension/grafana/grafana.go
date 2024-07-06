@@ -146,7 +146,7 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 						"name":   "Prometheus",
 						"type":   "prometheus",
 						"uid":    "prometheus",
-						"url":    "http://monitoring-prometheus:9090",
+						"url":    "http://prometheus:9090",
 						"access": "proxy",
 
 						"jsonData": map[string]any{
@@ -157,7 +157,7 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 						"name":   "Alertmanager",
 						"type":   "alertmanager",
 						"uid":    "alertmanager",
-						"url":    "http://monitoring-alertmanager:9093",
+						"url":    "http://alertmanager:9093",
 						"access": "proxy",
 
 						"jsonData": map[string]any{

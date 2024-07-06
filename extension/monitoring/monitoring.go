@@ -2,9 +2,14 @@ package monitoring
 
 import (
 	"context"
+	_ "embed"
+	"strings"
 
+	"github.com/adrianliechti/devkube/pkg/apply"
 	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -14,6 +19,11 @@ const (
 	repoURL      = "https://prometheus-community.github.io/helm-charts"
 	chartName    = "kube-prometheus-stack"
 	chartVersion = "61.2.0"
+)
+
+var (
+	//go:embed manifest.yaml
+	manifest string
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
@@ -107,6 +117,19 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 
 	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
 		return err
+	}
+
+	if err := apply.Apply(ctx, client, namespace, strings.NewReader(manifest)); err != nil {
+		return err
+	}
+
+	for _, name := range []string{
+		"monitoring-grafana-overview",
+		"monitoring-prometheus",
+		"monitoring-alertmanager-overview",
+		"monitoring-nodes-darwin",
+	} {
+		client.CoreV1().ConfigMaps(namespace).Delete(ctx, name, metav1.DeleteOptions{})
 	}
 
 	return nil
