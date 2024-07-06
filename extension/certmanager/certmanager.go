@@ -19,7 +19,7 @@ const (
 	namespace = "cert-manager"
 )
 
-func Install(ctx context.Context, client kubernetes.Client) error {
+func Ensure(ctx context.Context, client kubernetes.Client) error {
 	if err := apply.ApplyURL(ctx, client, namespace, "https://github.com/cert-manager/cert-manager/releases/download/v"+version+"/cert-manager.yaml"); err != nil {
 		return err
 	}

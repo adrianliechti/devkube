@@ -39,7 +39,7 @@ func CreateCommand() *cli.Command {
 			// 	return err
 			// }
 
-			if err := certmanager.Install(c.Context, client); err != nil {
+			if err := certmanager.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
