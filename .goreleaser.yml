@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -20,11 +22,7 @@ changelog:
   sort: asc
 
 brews:
-  - dependencies:
-      - name: kubernetes-cli
-      - name: helm
-
-    tap:
+  - repository:
       owner: adrianliechti
       name: homebrew-tap
 
@@ -32,11 +30,11 @@ brews:
       name: Adrian Liechti
       email: adrian@localhost
 
-scoop:
-  bucket:
-    owner: adrianliechti
-    name: scoop-bucket
+scoops:
+  - repository:
+      owner: adrianliechti
+      name: scoop-bucket
 
-  commit_author:
-    name: Adrian Liechti
-    email: adrian@localhost
+    commit_author:
+      name: Adrian Liechti
+      email: adrian@localhost
