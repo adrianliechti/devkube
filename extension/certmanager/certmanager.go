@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/adrianliechti/devkube/pkg/apply"
+	"github.com/adrianliechti/devkube/pkg/helm"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 
@@ -15,12 +16,23 @@ var (
 )
 
 const (
-	version   = "1.15.1"
+	name      = "cert-manager"
 	namespace = "cert-manager"
+
+	repoURL      = "https://charts.jetstack.io"
+	chartName    = "cert-manager"
+	chartVersion = "1.15.1"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
-	if err := apply.ApplyURL(ctx, client, namespace, "https://github.com/cert-manager/cert-manager/releases/download/v"+version+"/cert-manager.yaml"); err != nil {
+	values := map[string]any{
+		"crds": map[string]any{
+			"enabled": true,
+			"keep":    true,
+		},
+	}
+
+	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
 		return err
 	}
 

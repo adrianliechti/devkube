@@ -8,6 +8,7 @@ import (
 	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/grafana"
 	"github.com/adrianliechti/devkube/extension/loki"
+	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/monitoring"
 	"github.com/adrianliechti/devkube/extension/promtail"
 	"github.com/adrianliechti/devkube/extension/tempo"
@@ -32,6 +33,10 @@ func Command() *cli.Command {
 				return err
 			}
 
+			if err := metrics.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
 			if err := monitoring.Ensure(c.Context, client); err != nil {
 				return err
 			}
@@ -51,10 +56,6 @@ func Command() *cli.Command {
 			if err := grafana.Ensure(c.Context, client); err != nil {
 				return err
 			}
-
-			// if err := metrics.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
-			// 	return err
-			// }
 
 			// if err := dashboard.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 			// 	return err
