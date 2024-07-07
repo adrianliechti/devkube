@@ -16,6 +16,7 @@ import (
 	"github.com/adrianliechti/devkube/extension/monitoring"
 	"github.com/adrianliechti/devkube/extension/otel"
 	"github.com/adrianliechti/devkube/extension/promtail"
+	"github.com/adrianliechti/devkube/extension/registry"
 	"github.com/adrianliechti/devkube/extension/tempo"
 )
 
@@ -46,6 +47,12 @@ func Command() *cli.Command {
 			cli.Info("★ installing Cert-Manager...")
 
 			if err := certmanager.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			cli.Info("★ installing Registry...")
+
+			if err := registry.Ensure(c.Context, client); err != nil {
 				return err
 			}
 

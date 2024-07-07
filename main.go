@@ -13,6 +13,7 @@ import (
 	"github.com/adrianliechti/devkube/app/create"
 	"github.com/adrianliechti/devkube/app/delete"
 	"github.com/adrianliechti/devkube/app/grafana"
+	"github.com/adrianliechti/devkube/app/load"
 	"github.com/adrianliechti/devkube/app/logs"
 	"github.com/adrianliechti/devkube/app/setup"
 	"github.com/adrianliechti/devkube/pkg/cli"
@@ -60,6 +61,7 @@ func initApp() cli.App {
 			connect.Command(),
 			grafana.Command(),
 
+			load.Command(),
 			logs.Command(),
 		},
 	}

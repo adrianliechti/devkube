@@ -1,0 +1,152 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: registry
+  labels:
+    app: registry
+spec:
+  secretName: registry-tls
+  dnsNames:
+    - registry
+    - registry.local
+    - localhost
+  issuerRef:
+    name: platform
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  labels:
+    app: registry
+spec:
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      containers:
+        - name: registry
+          image: registry:2
+          env:
+            - name: REGISTRY_HTTP_ADDR
+              value: 0.0.0.0:80
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/registry
+          resources: {}
+        - name: proxy
+          image: ghcr.io/adrianliechti/loop-proxy
+          args:
+            - "-port"
+            - "443"
+            - "-target"
+            - "http://localhost"
+            - "-key-file"
+            - "/certs/tls.key"
+            - "-cert-file"
+            - "/certs/tls.crt"
+          ports:
+            - containerPort: 443
+          volumeMounts:
+            - name: certs
+              mountPath: "/certs"
+          resources: {}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: registry
+        - name: certs
+          secret:
+            secretName: registry-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  labels:
+    app: registry
+spec:
+  type: ClusterIP
+  selector:
+    app: registry
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: https
+      port: 443
+      targetPort: 443
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: registry
+  labels:
+    app: registry
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: registry-proxy
+  labels:
+    app: registry-proxy
+spec:
+  selector:
+    matchLabels:
+      app: registry-proxy
+  template:
+    metadata:
+      labels:
+        app: registry-proxy
+    spec:
+      hostPID: true
+      initContainers:
+        - name: init
+          image: busybox
+          securityContext:
+            privileged: true
+          command:
+            - nsenter
+            - --mount=/proc/1/ns/mnt
+            - --
+            - sh
+            - -c
+            - "grep -q 'registry' /etc/hosts || echo 127.88.0.10 registry registry.local >> /etc/hosts"
+      containers:
+        - name: proxy
+          image: ghcr.io/adrianliechti/loop-proxy
+          args:
+            - "-port"
+            - "443"
+            - "-target"
+            - "http://registry"
+            - "-key-file"
+            - "/certs/tls.key"
+            - "-cert-file"
+            - "/certs/tls.crt"
+          ports:
+            - containerPort: 443
+              hostIP: 127.88.0.10
+              hostPort: 443
+          volumeMounts:
+            - name: certs
+              mountPath: "/certs"
+          resources: {}
+      volumes:
+        - name: certs
+          secret:
+            secretName: registry-tls

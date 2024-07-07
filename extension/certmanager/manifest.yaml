@@ -1,12 +1,12 @@
 apiVersion: cert-manager.io/v1
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: selfsigned
 spec:
   selfSigned: {}
 ---
 apiVersion: cert-manager.io/v1
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: platform
 spec:
@@ -27,21 +27,21 @@ spec:
     size: 256
   issuerRef:
     name: selfsigned
-    kind: Issuer
+    kind: ClusterIssuer
     group: cert-manager.io
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: platform-ca-installer
+  name: platform-ca-trust
 spec:
   selector:
     matchLabels:
-      app: platform-ca-installer
+      app: platform-ca-trust
   template:
     metadata:
       labels:
-        app: platform-ca-installer
+        app: platform-ca-trust
     spec:
       hostPID: true
       containers:

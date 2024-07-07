@@ -22,7 +22,7 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 		"tempo": map[string]any{
 			"metricsGenerator": map[string]any{
 				"enabled":        true,
-				"remoteWriteUrl": "http://monitoring:9090/api/v1/write",
+				"remoteWriteUrl": "http://prometheus:9090/api/v1/write",
 			},
 		},
 
