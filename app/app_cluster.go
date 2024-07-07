@@ -22,7 +22,11 @@ func MustCluster(c *cli.Context) (provider.Provider, string) {
 }
 
 func Cluster(c *cli.Context) (provider.Provider, string, error) {
-	provider := MustProvider(c)
+	provider, err := Provider(c)
+
+	if err != nil {
+		return nil, "", err
+	}
 
 	cluster := c.String(ClusterFlag.Name)
 

@@ -1,6 +1,8 @@
 package create
 
 import (
+	"errors"
+
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/app/setup"
 	"github.com/adrianliechti/devkube/pkg/cli"
@@ -23,10 +25,17 @@ func Command() *cli.Command {
 		Usage: "create cluster",
 
 		Action: func(c *cli.Context) error {
-			provider := app.MustProvider(c)
-			cluster := "devkube"
+			provider, cluster, _ := app.Cluster(c)
 
-			cli.Info("📦 Creating Cluster...")
+			if provider == nil {
+				return errors.New("invalid provider specified")
+			}
+
+			if cluster == "" {
+				return errors.New("invalid cluster specified")
+			}
+
+			cli.Info("★ installing Kubernetes Cluster...")
 
 			if err := provider.Create(c.Context, cluster); err != nil {
 				//return err
@@ -34,25 +43,25 @@ func Command() *cli.Command {
 
 			client := app.MustClient(c)
 
-			cli.Info("📦 Installing Cert-Manager...")
+			cli.Info("★ installing Cert-Manager...")
 
 			if err := certmanager.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
-			cli.Info("📦 Installing Gatekeeper...")
+			cli.Info("★ installing Gatekeeper...")
 
 			if err := gatekeeper.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
-			cli.Info("📦 Installing Crossplane...")
+			cli.Info("★ installing Crossplane...")
 
 			if err := crossplane.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
-			cli.Info("📦 Installing Monitoring...")
+			cli.Info("★ installing Prometheus...")
 
 			if err := metrics.Ensure(c.Context, client); err != nil {
 				return err
@@ -62,33 +71,33 @@ func Command() *cli.Command {
 				return err
 			}
 
-			cli.Info("📦 Installing Loki...")
+			cli.Info("★ installing Grafana Loki...")
 
 			if err := loki.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
-			cli.Info("📦 Installing Tempo...")
+			cli.Info("★ installing Grafana Tempo...")
 
 			if err := tempo.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
-			cli.Info("📦 Installing Promtail...")
+			cli.Info("★ installing Grafana...")
+
+			if err := grafana.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			cli.Info("★ installing Promtail...")
 
 			if err := promtail.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
-			cli.Info("📦 Installing OTEL Collector...")
+			cli.Info("★ installing OpenTelemetry...")
 
 			if err := otel.Ensure(c.Context, client); err != nil {
-				return err
-			}
-
-			cli.Info("📦 Installing Grafana...")
-
-			if err := grafana.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
