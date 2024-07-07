@@ -20,7 +20,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "create",
-		Usage: "Create cluster",
+		Usage: "create cluster",
 
 		Action: func(c *cli.Context) error {
 			provider := app.MustProvider(c)

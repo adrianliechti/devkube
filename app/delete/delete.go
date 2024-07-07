@@ -8,7 +8,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "delete",
-		Usage: "Delete cluster",
+		Usage: "delete cluster",
 
 		Action: func(c *cli.Context) error {
 			provider, cluster := app.MustCluster(c)

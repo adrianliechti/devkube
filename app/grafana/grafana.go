@@ -10,7 +10,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "grafana",
-		Usage: "Open Grafana",
+		Usage: "open Grafana",
 
 		Action: func(c *cli.Context) error {
 			client := app.MustClient(c)
