@@ -2,10 +2,8 @@ package helm
 
 import (
 	"context"
-	"errors"
 
 	"github.com/adrianliechti/loop/pkg/kubernetes"
-	"helm.sh/helm/v3/pkg/storage/driver"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,10 +16,10 @@ func Ensure(ctx context.Context, client kubernetes.Client, namespace, name, repo
 		},
 	}, metav1.CreateOptions{})
 
-	err := Upgrade(ctx, client, namespace, name, repoURL, chartName, chartVersion, values)
+	err := Install(ctx, client, namespace, name, repoURL, chartName, chartVersion, values)
 
-	if errors.Is(err, driver.ErrNoDeployedReleases) {
-		err = Install(ctx, client, namespace, name, repoURL, chartName, chartVersion, values)
+	if err != nil {
+		err = Upgrade(ctx, client, namespace, name, repoURL, chartName, chartVersion, values)
 	}
 
 	return err

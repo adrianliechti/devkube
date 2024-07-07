@@ -29,6 +29,8 @@ func Install(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	a.RepoURL = repoURL
 	a.Version = chartVersion
 
+	a.CreateNamespace = true
+
 	if _, err := a.Run(chart, values); err != nil {
 		return err
 	}
