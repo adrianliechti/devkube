@@ -30,7 +30,7 @@ func Provider(c *cli.Context) (provider.Provider, error) {
 
 	switch strings.ToLower(provider) {
 	case "", "local":
-		return kind.New(), nil
+		return kind.New()
 
 	case "none":
 		return none.NewFromEnvironment()
