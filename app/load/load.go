@@ -25,8 +25,13 @@ func Command() *cli.Command {
 		Action: func(c *cli.Context) error {
 			client := app.MustClient(c)
 
-			port := app.MustPortOrRandom(c, 5555)
+			if c.Args().Len() != 1 {
+				return errors.New("needs one arguments: image")
+			}
 
+			image := c.Args().Get(0)
+
+			port := app.MustPortOrRandom(c, 5555)
 			ready := make(chan struct{})
 
 			go func() {
@@ -37,7 +42,7 @@ func Command() *cli.Command {
 
 			<-ready
 
-			if err := LoadImage(c.Context, "alpine:3", fmt.Sprintf("localhost:%d", port)); err != nil {
+			if err := LoadImage(c.Context, image, fmt.Sprintf("localhost:%d", port)); err != nil {
 				log.Fatal(err)
 			}
 

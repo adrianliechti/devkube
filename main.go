@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/adrianliechti/devkube/app"
+	"github.com/adrianliechti/devkube/app/build"
 	"github.com/adrianliechti/devkube/app/connect"
 	"github.com/adrianliechti/devkube/app/create"
 	"github.com/adrianliechti/devkube/app/delete"
@@ -61,6 +62,7 @@ func initApp() cli.App {
 			connect.Command(),
 			grafana.Command(),
 
+			build.Command(),
 			load.Command(),
 			logs.Command(),
 		},
