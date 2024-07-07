@@ -10,11 +10,21 @@ import (
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client, namespace, name, repoURL, chartName, chartVersion string, values map[string]any) error {
-	client.CoreV1().Namespaces().Create(ctx, &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
-		},
-	}, metav1.CreateOptions{})
+	if _, err := client.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{}); err != nil {
+		if !kubernetes.IsNotFound(err) {
+			return err
+		}
+
+		obj := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: namespace,
+			},
+		}
+
+		if _, err := client.CoreV1().Namespaces().Create(ctx, obj, metav1.CreateOptions{}); err != nil {
+			return err
+		}
+	}
 
 	err := Install(ctx, client, namespace, name, repoURL, chartName, chartVersion, values)
 

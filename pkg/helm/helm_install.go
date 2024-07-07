@@ -2,6 +2,7 @@ package helm
 
 import (
 	"context"
+	"time"
 
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
@@ -29,7 +30,10 @@ func Install(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	a.RepoURL = repoURL
 	a.Version = chartVersion
 
-	a.CreateNamespace = true
+	a.Wait = true
+	a.Devel = true
+
+	a.Timeout = 15 * time.Minute
 
 	if _, err := a.Run(chart, values); err != nil {
 		return err

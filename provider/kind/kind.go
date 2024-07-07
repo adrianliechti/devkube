@@ -3,9 +3,12 @@ package kind
 import (
 	"context"
 	"os"
+	"time"
 
-	"github.com/adrianliechti/devkube/pkg/kind"
 	"github.com/adrianliechti/devkube/provider"
+
+	"sigs.k8s.io/kind/pkg/cluster"
+	"sigs.k8s.io/kind/pkg/log"
 )
 
 type Provider struct {
@@ -16,7 +19,14 @@ func New() provider.Provider {
 }
 
 func (p *Provider) List(ctx context.Context) ([]string, error) {
-	return kind.List(ctx)
+	logger := log.NoopLogger{}
+
+	provider := cluster.NewProvider(
+		cluster.ProviderWithLogger(logger),
+		//runtime.GetDefault(logger),
+	)
+
+	return provider.List()
 }
 
 func (p *Provider) Create(ctx context.Context, name string) error {
@@ -26,21 +36,48 @@ func (p *Provider) Create(ctx context.Context, name string) error {
 		return err
 	}
 
-	path := dir + "/.config"
+	kubeconfig := dir + "/.config"
 
 	defer os.RemoveAll(dir)
 
-	if err := kind.Create(ctx, name, nil, path, kind.WithDefaultOutput()); err != nil {
-		return err
+	logger := log.NoopLogger{}
+
+	provider := cluster.NewProvider(
+		cluster.ProviderWithLogger(logger),
+	)
+
+	opts := []cluster.CreateOption{
+		cluster.CreateWithWaitForReady(time.Duration(0)),
+		cluster.CreateWithKubeconfigPath(kubeconfig),
 	}
 
-	return nil
+	return provider.Create(name, opts...)
 }
 
 func (p *Provider) Delete(ctx context.Context, name string) error {
-	return kind.Delete(ctx, name)
+	logger := log.NoopLogger{}
+
+	provider := cluster.NewProvider(
+		cluster.ProviderWithLogger(logger),
+		//runtime.GetDefault(logger),
+	)
+
+	return provider.Delete(name, "")
 }
 
 func (p *Provider) Config(ctx context.Context, name string) ([]byte, error) {
-	return kind.Config(ctx, name)
+	logger := log.NoopLogger{}
+
+	provider := cluster.NewProvider(
+		cluster.ProviderWithLogger(logger),
+		//runtime.GetDefault(logger),
+	)
+
+	data, err := provider.KubeConfig(name, false)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return []byte(data), nil
 }
