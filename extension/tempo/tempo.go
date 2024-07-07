@@ -11,9 +11,10 @@ const (
 	name      = "tempo"
 	namespace = "monitoring"
 
+	// https://artifacthub.io/packages/helm/grafana/tempo
 	repoURL      = "https://grafana.github.io/helm-charts"
 	chartName    = "tempo"
-	chartVersion = "1.8.0"
+	chartVersion = "1.10.0"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

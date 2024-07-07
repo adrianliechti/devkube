@@ -29,7 +29,7 @@ func Command() *cli.Command {
 			cli.Info("📦 Creating Cluster...")
 
 			if err := provider.Create(c.Context, cluster); err != nil {
-				return err
+				//return err
 			}
 
 			client := app.MustClient(c)

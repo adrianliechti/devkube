@@ -16,6 +16,7 @@ const (
 	name      = "monitoring"
 	namespace = "monitoring"
 
+	// https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
 	repoURL      = "https://prometheus-community.github.io/helm-charts"
 	chartName    = "kube-prometheus-stack"
 	chartVersion = "61.2.0"

@@ -11,6 +11,7 @@ const (
 	name      = "loki"
 	namespace = "monitoring"
 
+	// https://artifacthub.io/packages/helm/grafana/loki
 	repoURL      = "https://grafana.github.io/helm-charts"
 	chartName    = "loki"
 	chartVersion = "5.48.0"

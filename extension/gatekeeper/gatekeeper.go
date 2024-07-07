@@ -10,6 +10,7 @@ import (
 const (
 	namespace = "gatekeeper-system"
 
+	// https://github.com/open-policy-agent/gatekeeper/releases
 	version = "v3.16.3"
 )
 

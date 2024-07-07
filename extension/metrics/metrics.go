@@ -13,6 +13,7 @@ const (
 	name      = "metrics-server"
 	namespace = "kube-system"
 
+	// https://artifacthub.io/packages/helm/metrics-server/metrics-server
 	repoURL      = "https://kubernetes-sigs.github.io/metrics-server"
 	chartName    = "metrics-server"
 	chartVersion = "3.12.1"

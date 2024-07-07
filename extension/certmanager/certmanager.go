@@ -19,6 +19,7 @@ const (
 	name      = "cert-manager"
 	namespace = "cert-manager"
 
+	// https://artifacthub.io/packages/helm/cert-manager/cert-manager
 	repoURL      = "https://charts.jetstack.io"
 	chartName    = "cert-manager"
 	chartVersion = "1.15.1"

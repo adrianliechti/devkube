@@ -11,6 +11,7 @@ const (
 	name      = "grafana"
 	namespace = "monitoring"
 
+	// https://artifacthub.io/packages/helm/grafana/grafana
 	repoURL      = "https://grafana.github.io/helm-charts"
 	chartName    = "grafana"
 	chartVersion = "8.3.2"
