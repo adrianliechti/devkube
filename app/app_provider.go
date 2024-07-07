@@ -12,7 +12,7 @@ import (
 
 var ProviderFlag = &cli.StringFlag{
 	Name:  "provider",
-	Usage: "provider name",
+	Usage: "cluster provider",
 }
 
 func MustProvider(c *cli.Context) provider.Provider {

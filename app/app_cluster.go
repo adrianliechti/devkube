@@ -8,7 +8,7 @@ import (
 
 var ClusterFlag = &cli.StringFlag{
 	Name:  "cluster",
-	Usage: "cluster name",
+	Usage: "cluster instance",
 }
 
 func MustCluster(c *cli.Context) (provider.Provider, string) {

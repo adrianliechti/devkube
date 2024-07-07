@@ -13,7 +13,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "connect",
-		Usage: "forward cluster workload traffic",
+		Usage: "forward Kubernetes services",
 
 		Flags: []cli.Flag{
 			&cli.StringSliceFlag{

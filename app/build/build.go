@@ -22,7 +22,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "build",
-		Usage: "build image and copy to registry",
+		Usage: "build image into registry",
 
 		Action: func(c *cli.Context) error {
 			client := app.MustClient(c)

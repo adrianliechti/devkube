@@ -14,7 +14,7 @@ import (
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "setup",
-		Usage: "configure Kubernetes context",
+		Usage: "setup kubectl config",
 
 		Action: func(c *cli.Context) error {
 			provider, cluster := app.MustCluster(c)
