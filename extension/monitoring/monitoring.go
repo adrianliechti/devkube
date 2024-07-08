@@ -14,7 +14,7 @@ import (
 
 const (
 	name      = "monitoring"
-	namespace = "monitoring"
+	namespace = "platform"
 
 	// https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
 	repoURL      = "https://prometheus-community.github.io/helm-charts"

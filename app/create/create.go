@@ -9,6 +9,7 @@ import (
 
 	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/crossplane"
+	"github.com/adrianliechti/devkube/extension/dashboard"
 	"github.com/adrianliechti/devkube/extension/gatekeeper"
 	"github.com/adrianliechti/devkube/extension/grafana"
 	"github.com/adrianliechti/devkube/extension/loki"
@@ -47,12 +48,6 @@ func Command() *cli.Command {
 			cli.Info("★ installing Cert-Manager...")
 
 			if err := certmanager.Ensure(c.Context, client); err != nil {
-				return err
-			}
-
-			cli.Info("★ installing Registry...")
-
-			if err := registry.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
@@ -96,6 +91,18 @@ func Command() *cli.Command {
 				return err
 			}
 
+			cli.Info("★ installing Registry...")
+
+			if err := registry.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			cli.Info("★ installing Dashboard...")
+
+			if err := dashboard.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
 			cli.Info("★ installing Promtail...")
 
 			if err := promtail.Ensure(c.Context, client); err != nil {
@@ -107,14 +114,6 @@ func Command() *cli.Command {
 			if err := otel.Ensure(c.Context, client); err != nil {
 				return err
 			}
-
-			// if err := dashboard.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
-			// 	return err
-			// }
-
-			// if err := registry.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
-			// 	return err
-			// }
 
 			// if err := ingress.Install(c.Context, kubeconfig, app.DefaultNamespace); err != nil {
 			// 	return err

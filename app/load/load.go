@@ -35,7 +35,7 @@ func Command() *cli.Command {
 			ready := make(chan struct{})
 
 			go func() {
-				if err := client.ServicePortForward(c.Context, "default", "registry", "", map[int]int{port: 80}, ready); err != nil {
+				if err := client.ServicePortForward(c.Context, "platform", "registry", "", map[int]int{port: 80}, ready); err != nil {
 					log.Fatal(err)
 				}
 			}()

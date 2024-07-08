@@ -9,7 +9,7 @@ import (
 
 const (
 	name      = "tempo"
-	namespace = "monitoring"
+	namespace = "platform"
 
 	// https://artifacthub.io/packages/helm/grafana/tempo
 	repoURL      = "https://grafana.github.io/helm-charts"

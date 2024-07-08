@@ -20,7 +20,7 @@ func Command() *cli.Command {
 				return errors.New("needs two arguments: image and context path")
 			}
 
-			image, err := build.ParseImage("registry.default/" + c.Args().Get(0))
+			image, err := build.ParseImage("registry.platform/" + c.Args().Get(0))
 
 			if err != nil {
 				return err

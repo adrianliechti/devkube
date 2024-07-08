@@ -26,7 +26,7 @@ func Command() *cli.Command {
 				cli.OpenURL(url)
 			}()
 
-			return client.ServicePortForward(c.Context, "monitoring", "grafana", "", map[int]int{port: 3000}, ready)
+			return client.ServicePortForward(c.Context, "platform", "grafana", "", map[int]int{port: 3000}, ready)
 		},
 	}
 }

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	namespace = "monitoring"
+	namespace = "platform"
 )
 
 var (

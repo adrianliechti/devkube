@@ -8,7 +8,7 @@ spec:
   secretName: registry-tls
   dnsNames:
     - registry
-    - registry.local
+    - registry.platform
     - localhost
   issuerRef:
     name: platform
@@ -125,7 +125,7 @@ spec:
             - --
             - sh
             - -c
-            - "grep -q 'registry' /etc/hosts || echo 127.88.0.10 registry registry.local >> /etc/hosts"
+            - "grep -q 'registry' /etc/hosts || echo 127.88.0.10 registry registry.platform >> /etc/hosts"
       containers:
         - name: proxy
           image: ghcr.io/adrianliechti/loop-proxy

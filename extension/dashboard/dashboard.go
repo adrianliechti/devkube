@@ -1,4 +1,4 @@
-package registry
+package dashboard
 
 import (
 	"context"
@@ -12,13 +12,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	namespace = "platform"
-)
-
 var (
 	//go:embed manifest.yaml
 	manifest string
+)
+
+const (
+	namespace = "platform"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

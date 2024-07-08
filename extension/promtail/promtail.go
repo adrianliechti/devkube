@@ -9,7 +9,7 @@ import (
 
 const (
 	name      = "promtail"
-	namespace = "monitoring"
+	namespace = "platform"
 
 	// https://artifacthub.io/packages/helm/grafana/promtail
 	repoURL      = "https://grafana.github.io/helm-charts"
