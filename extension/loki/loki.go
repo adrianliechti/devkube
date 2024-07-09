@@ -2,88 +2,43 @@ package loki
 
 import (
 	"context"
+	_ "embed"
+	"strings"
 
-	"github.com/adrianliechti/devkube/pkg/helm"
+	"github.com/adrianliechti/devkube/pkg/apply"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	name      = "loki"
 	namespace = "platform"
+)
 
-	// https://artifacthub.io/packages/helm/grafana/loki
-	repoURL      = "https://grafana.github.io/helm-charts"
-	chartName    = "loki"
-	chartVersion = "5.48.0"
+var (
+	//go:embed manifest.yaml
+	manifest string
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
-	values := map[string]any{
-		"loki": map[string]any{
-			"commonConfig": map[string]any{
-				"replication_factor": 1,
+	if _, err := client.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{}); err != nil {
+		if !kubernetes.IsNotFound(err) {
+			return err
+		}
+
+		obj := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: namespace,
 			},
+		}
 
-			"auth_enabled": false,
-
-			"storage": map[string]any{
-				"type": "filesystem",
-			},
-
-			"querier": map[string]any{
-				"max_concurrent": 8,
-			},
-		},
-
-		"singleBinary": map[string]any{
-			"replicas": 1,
-
-			"persistence": map[string]any{
-				"size": "10Gi",
-			},
-		},
-
-		"tableManager": map[string]any{
-			"retention_deletes_enabled": true,
-			"retention_period":          "7d",
-		},
-
-		"gateway": map[string]any{
-			"enabled": false,
-		},
-
-		"test": map[string]any{
-			"enabled": false,
-		},
-
-		"monitoring": map[string]any{
-			"dashboards": map[string]any{
-				"enabled": false,
-			},
-
-			"rules": map[string]any{
-				"enabled": false,
-			},
-
-			"serviceMonitor": map[string]any{
-				"enabled": false,
-			},
-
-			"selfMonitoring": map[string]any{
-				"enabled": false,
-
-				"grafanaAgent": map[string]any{
-					"installOperator": false,
-				},
-			},
-
-			"lokiCanary": map[string]any{
-				"enabled": false,
-			},
-		},
+		if _, err := client.CoreV1().Namespaces().Create(ctx, obj, metav1.CreateOptions{}); err != nil {
+			return err
+		}
 	}
 
-	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
+	if err := apply.Apply(ctx, client, namespace, strings.NewReader(manifest)); err != nil {
 		return err
 	}
 

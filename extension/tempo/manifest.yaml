@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  labels:
+    app: tempo
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tempo
+  template:
+    metadata:
+      labels:
+        app: tempo
+    spec:
+      containers:
+      - image: grafana/tempo:2.5.0
+        name: tempo
+        args:
+        - -config.file=/config.yaml
+        volumeMounts:
+        - name: config
+          mountPath: /config.yaml
+          subPath: config.yaml
+        - name: data
+          mountPath: /var/tempo
+        resources: {}
+      volumes:
+      - name: config
+        configMap:
+          name: tempo
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  labels:
+    app: tempo
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 3200
+  selector:
+    app: tempo
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo
+data:
+  config.yaml: |
+    server:
+      http_listen_port: 3200
+      grpc_listen_port: 9095     
+    
+    storage:
+      trace:
+        backend: local
+
+        local:
+          path: /var/tempo/traces
+
+        wal:
+          path: /var/tempo/wal
+
+    compactor:
+      compaction:
+        block_retention: 24h
+    
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+    
+    metrics_generator:
+      storage:
+        path: /var/tempo/generator/wal
+
+        remote_write:
+          - url: http://prometheus:9090/api/v1/write
+
+      traces_storage:
+        path: /var/tempo/generator/traces
+    
+    overrides:
+      defaults:
+        metrics_generator:
+          processors: [service-graphs, span-metrics, local-blocks]
+    
+    usage_report:
+      reporting_enabled: false

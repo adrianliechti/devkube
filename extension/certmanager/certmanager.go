@@ -10,11 +10,6 @@ import (
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 
-var (
-	//go:embed manifest.yaml
-	manifest string
-)
-
 const (
 	name      = "cert-manager"
 	namespace = "cert-manager"
@@ -23,6 +18,11 @@ const (
 	repoURL      = "https://charts.jetstack.io"
 	chartName    = "cert-manager"
 	chartVersion = "1.15.1"
+)
+
+var (
+	//go:embed manifest.yaml
+	manifest string
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

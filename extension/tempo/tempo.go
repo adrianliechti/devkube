@@ -2,37 +2,43 @@ package tempo
 
 import (
 	"context"
+	_ "embed"
+	"strings"
 
-	"github.com/adrianliechti/devkube/pkg/helm"
+	"github.com/adrianliechti/devkube/pkg/apply"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	name      = "tempo"
 	namespace = "platform"
+)
 
-	// https://artifacthub.io/packages/helm/grafana/tempo
-	repoURL      = "https://grafana.github.io/helm-charts"
-	chartName    = "tempo"
-	chartVersion = "1.10.0"
+var (
+	//go:embed manifest.yaml
+	manifest string
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
-	values := map[string]any{
-		"tempo": map[string]any{
-			"metricsGenerator": map[string]any{
-				"enabled":        true,
-				"remoteWriteUrl": "http://prometheus:9090/api/v1/write",
-			},
-		},
+	if _, err := client.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{}); err != nil {
+		if !kubernetes.IsNotFound(err) {
+			return err
+		}
 
-		"persistence": map[string]any{
-			"enabled": true,
-			"size":    "10Gi",
-		},
+		obj := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: namespace,
+			},
+		}
+
+		if _, err := client.CoreV1().Namespaces().Create(ctx, obj, metav1.CreateOptions{}); err != nil {
+			return err
+		}
 	}
 
-	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
+	if err := apply.Apply(ctx, client, namespace, strings.NewReader(manifest)); err != nil {
 		return err
 	}
 
