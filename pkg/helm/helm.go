@@ -3,16 +3,21 @@ package helm
 import (
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
+	"helm.sh/helm/v3/pkg/storage/driver"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
-
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
+
+var ErrReleaseExists = driver.ErrReleaseExists
+var ErrReleaseNotFound = driver.ErrReleaseNotFound
+var ErrNoDeployedReleases = driver.ErrNoDeployedReleases
 
 func NewClientGetter(client kubernetes.Client) genericclioptions.RESTClientGetter {
 	return &clientGetter{

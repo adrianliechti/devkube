@@ -32,6 +32,7 @@ func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	}, metav1.CreateOptions{})
 
 	a := action.NewUpgrade(config)
+
 	a.Namespace = namespace
 
 	a.RepoURL = repoURL
@@ -40,7 +41,7 @@ func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	a.ReuseValues = false
 	a.ResetValues = true
 
-	a.Wait = true
+	//a.Wait = true
 	a.Devel = true
 
 	a.CleanupOnFail = true

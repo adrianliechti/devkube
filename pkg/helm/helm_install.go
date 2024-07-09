@@ -24,13 +24,15 @@ func Install(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	}
 
 	a := action.NewInstall(config)
-	a.Namespace = namespace
 	a.ReleaseName = name
+
+	a.CreateNamespace = true
+	a.Namespace = namespace
 
 	a.RepoURL = repoURL
 	a.Version = chartVersion
 
-	a.Wait = true
+	//a.Wait = true
 	a.Devel = true
 
 	a.Timeout = 15 * time.Minute
