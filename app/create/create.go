@@ -7,18 +7,8 @@ import (
 	"github.com/adrianliechti/devkube/app/setup"
 	"github.com/adrianliechti/devkube/pkg/cli"
 
-	"github.com/adrianliechti/devkube/extension/certmanager"
-	"github.com/adrianliechti/devkube/extension/crossplane"
-	"github.com/adrianliechti/devkube/extension/dashboard"
-	"github.com/adrianliechti/devkube/extension/gatekeeper"
-	"github.com/adrianliechti/devkube/extension/grafana"
 	"github.com/adrianliechti/devkube/extension/loki"
-	"github.com/adrianliechti/devkube/extension/metrics"
-	"github.com/adrianliechti/devkube/extension/monitoring"
 	"github.com/adrianliechti/devkube/extension/otel"
-	"github.com/adrianliechti/devkube/extension/promtail"
-	"github.com/adrianliechti/devkube/extension/registry"
-	"github.com/adrianliechti/devkube/extension/tempo"
 )
 
 func Command() *cli.Command {
@@ -45,33 +35,45 @@ func Command() *cli.Command {
 
 			client := app.MustClient(c)
 
-			cli.Info("★ installing Cert-Manager...")
+			// cli.Info("★ installing Cert-Manager...")
 
-			if err := certmanager.Ensure(c.Context, client); err != nil {
-				return err
-			}
+			// if err := certmanager.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
 
-			cli.Info("★ installing Gatekeeper...")
+			// cli.Info("★ installing Gatekeeper...")
 
-			if err := gatekeeper.Ensure(c.Context, client); err != nil {
-				return err
-			}
+			// if err := gatekeeper.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
 
-			cli.Info("★ installing Crossplane...")
+			// cli.Info("★ installing Crossplane...")
 
-			if err := crossplane.Ensure(c.Context, client); err != nil {
-				return err
-			}
+			// if err := crossplane.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
 
-			cli.Info("★ installing Prometheus...")
+			// cli.Info("★ installing Registry...")
 
-			if err := metrics.Ensure(c.Context, client); err != nil {
-				return err
-			}
+			// if err := registry.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
 
-			if err := monitoring.Ensure(c.Context, client); err != nil {
-				return err
-			}
+			// cli.Info("★ installing Dashboard...")
+
+			// if err := dashboard.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
+
+			// cli.Info("★ installing Prometheus...")
+
+			// if err := metrics.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
+
+			// if err := monitoring.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
 
 			cli.Info("★ installing Grafana Loki...")
 
@@ -79,35 +81,17 @@ func Command() *cli.Command {
 				return err
 			}
 
-			cli.Info("★ installing Grafana Tempo...")
+			// cli.Info("★ installing Grafana Tempo...")
 
-			if err := tempo.Ensure(c.Context, client); err != nil {
-				return err
-			}
+			// if err := tempo.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
 
-			cli.Info("★ installing Grafana...")
+			// cli.Info("★ installing Grafana...")
 
-			if err := grafana.Ensure(c.Context, client); err != nil {
-				return err
-			}
-
-			cli.Info("★ installing Registry...")
-
-			if err := registry.Ensure(c.Context, client); err != nil {
-				return err
-			}
-
-			cli.Info("★ installing Dashboard...")
-
-			if err := dashboard.Ensure(c.Context, client); err != nil {
-				return err
-			}
-
-			cli.Info("★ installing Promtail...")
-
-			if err := promtail.Ensure(c.Context, client); err != nil {
-				return err
-			}
+			// if err := grafana.Ensure(c.Context, client); err != nil {
+			// 	return err
+			// }
 
 			cli.Info("★ installing OpenTelemetry...")
 

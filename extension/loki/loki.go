@@ -14,24 +14,45 @@ const (
 	// https://artifacthub.io/packages/helm/grafana/loki
 	repoURL      = "https://grafana.github.io/helm-charts"
 	chartName    = "loki"
-	chartVersion = "5.48.0"
+	chartVersion = "6.6.5"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
 	values := map[string]any{
+		"deploymentMode": "SingleBinary",
+
 		"loki": map[string]any{
+			"auth_enabled": false,
+
 			"commonConfig": map[string]any{
 				"replication_factor": 1,
 			},
-
-			"auth_enabled": false,
 
 			"storage": map[string]any{
 				"type": "filesystem",
 			},
 
+			"schemaConfig": map[string]any{
+				"configs": []map[string]any{
+					{
+						"from":  "2024-01-01",
+						"store": "tsdb",
+						"index": map[string]any{
+							"prefix": "loki_index_",
+							"period": "24h",
+						},
+						"object_store": "filesystem",
+						"schema":       "v13",
+					},
+				},
+			},
+
 			"querier": map[string]any{
 				"max_concurrent": 8,
+			},
+
+			"limits_config": map[string]any{
+				"allow_structured_metadata": true,
 			},
 		},
 
@@ -43,9 +64,24 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 			},
 		},
 
-		"tableManager": map[string]any{
-			"retention_deletes_enabled": true,
-			"retention_period":          "7d",
+		"resultsCache": map[string]any{
+			"enabled": false,
+		},
+
+		"chunksCache": map[string]any{
+			"enabled": false,
+		},
+
+		"read": map[string]any{
+			"replicas": 0,
+		},
+
+		"backend": map[string]any{
+			"replicas": 0,
+		},
+
+		"write": map[string]any{
+			"replicas": 0,
 		},
 
 		"gateway": map[string]any{
@@ -56,30 +92,8 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 			"enabled": false,
 		},
 
-		"monitoring": map[string]any{
-			"dashboards": map[string]any{
-				"enabled": false,
-			},
-
-			"rules": map[string]any{
-				"enabled": false,
-			},
-
-			"serviceMonitor": map[string]any{
-				"enabled": false,
-			},
-
-			"selfMonitoring": map[string]any{
-				"enabled": false,
-
-				"grafanaAgent": map[string]any{
-					"installOperator": false,
-				},
-			},
-
-			"lokiCanary": map[string]any{
-				"enabled": false,
-			},
+		"lokiCanary": map[string]any{
+			"enabled": false,
 		},
 	}
 
