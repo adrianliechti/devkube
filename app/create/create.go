@@ -51,6 +51,12 @@ func Command() *cli.Command {
 				return err
 			}
 
+			cli.Info("★ installing Registry...")
+
+			if err := registry.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
 			cli.Info("★ installing Gatekeeper...")
 
 			if err := gatekeeper.Ensure(c.Context, client); err != nil {
@@ -60,6 +66,12 @@ func Command() *cli.Command {
 			cli.Info("★ installing Crossplane...")
 
 			if err := crossplane.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			cli.Info("★ installing Dashboard...")
+
+			if err := dashboard.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
@@ -88,18 +100,6 @@ func Command() *cli.Command {
 			cli.Info("★ installing Grafana...")
 
 			if err := grafana.Ensure(c.Context, client); err != nil {
-				return err
-			}
-
-			cli.Info("★ installing Registry...")
-
-			if err := registry.Ensure(c.Context, client); err != nil {
-				return err
-			}
-
-			cli.Info("★ installing Dashboard...")
-
-			if err := dashboard.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
