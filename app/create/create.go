@@ -45,15 +45,15 @@ func Command() *cli.Command {
 
 			client := app.MustClient(c)
 
-			cli.Info("★ installing Cert-Manager...")
-
-			if err := certmanager.Ensure(c.Context, client); err != nil {
-				return err
-			}
-
 			cli.Info("★ installing Registry...")
 
 			if err := registry.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			cli.Info("★ installing Cert-Manager...")
+
+			if err := certmanager.Ensure(c.Context, client); err != nil {
 				return err
 			}
 
