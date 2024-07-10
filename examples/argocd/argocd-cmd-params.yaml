@@ -1,0 +1,17 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: argocd-cmd-params-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cmd-params-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  application.namespaces: '*'
+  controller.repo.server.plaintext: 'true'
+  dexserver.disable.tls: 'true'
+  reposerver.disable.tls: 'true'
+  server.dex.server.plaintext: 'true'
+  server.disable.auth: 'true'
+  server.insecure: 'true'
+  server.repo.server.plaintext: 'true'
