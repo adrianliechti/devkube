@@ -1,16 +1,25 @@
+# Tekont
 
+## Install Tekton Dashboard, Pipelines & Triggers
 
 ```shell
 $ kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-$ kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
 
 $ kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
 $ kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/interceptors.yaml
+
+$ kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
 ```
+
+### Open Dashboard
 
 ```shell
 $ kubectl port-forward -n tekton-pipelines service/tekton-dashboard 9097:9097
 ```
+
+open [http://localhost:9097](http://localhost:9097) in browser
+
+### Sample Pipeline
 
 ```shell
 $ kubectl apply -f pipeline/
@@ -19,6 +28,8 @@ $ kubectl apply -f pipeline/
 ```shell
 $ kubectl apply -f pipeline-run/
 ```
+
+### Sample Pipeline Trigger
 
 ```shell
 $ kubectl apply -f pipeline-trigger/
