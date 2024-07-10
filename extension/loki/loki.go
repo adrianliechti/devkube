@@ -26,8 +26,6 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 
 			"commonConfig": map[string]any{
 				"replication_factor": 1,
-
-				"instance_addr": "127.0.0.1",
 			},
 
 			"storage": map[string]any{
