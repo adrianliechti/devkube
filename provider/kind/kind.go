@@ -2,6 +2,7 @@ package kind
 
 import (
 	"context"
+	_ "embed"
 	"os"
 	"time"
 
@@ -13,6 +14,11 @@ import (
 type kind struct {
 	provider *cluster.Provider
 }
+
+var (
+	//go:embed config.yaml
+	config []byte
+)
 
 func New() (provider.Provider, error) {
 	logger := log.NoopLogger{}
@@ -46,8 +52,9 @@ func (k *kind) Create(ctx context.Context, name string) error {
 	defer os.RemoveAll(dir)
 
 	opts := []cluster.CreateOption{
-		cluster.CreateWithWaitForReady(time.Duration(0)),
+		cluster.CreateWithRawConfig(config),
 		cluster.CreateWithKubeconfigPath(kubeconfig),
+		cluster.CreateWithWaitForReady(time.Duration(0)),
 	}
 
 	return k.provider.Create(name, opts...)

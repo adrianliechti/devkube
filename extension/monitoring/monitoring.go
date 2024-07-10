@@ -34,30 +34,6 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 
 		"cleanPrometheusOperatorObjectNames": true,
 
-		"coreDns": map[string]any{
-			"enabled": false,
-		},
-
-		"kubeDns": map[string]any{
-			"enabled": false,
-		},
-
-		"kubeEtcd": map[string]any{
-			"enabled": false,
-		},
-
-		"kubeScheduler": map[string]any{
-			"enabled": false,
-		},
-
-		"kubeProxy": map[string]any{
-			"enabled": false,
-		},
-
-		"kubeControllerManager": map[string]any{
-			"enabled": false,
-		},
-
 		"grafana": map[string]any{
 			"enabled":                false,
 			"forceDeployDashboards":  true,
