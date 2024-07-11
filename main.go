@@ -15,6 +15,7 @@ import (
 	"github.com/adrianliechti/devkube/app/dashboard"
 	"github.com/adrianliechti/devkube/app/delete"
 	"github.com/adrianliechti/devkube/app/grafana"
+	"github.com/adrianliechti/devkube/app/install"
 	"github.com/adrianliechti/devkube/app/load"
 	"github.com/adrianliechti/devkube/app/logs"
 	"github.com/adrianliechti/devkube/app/setup"
@@ -58,6 +59,8 @@ func initApp() cli.App {
 		Commands: []*cli.Command{
 			create.Command(),
 			delete.Command(),
+
+			install.Command(),
 
 			setup.Command(),
 			connect.Command(),
