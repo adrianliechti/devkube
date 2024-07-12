@@ -2,6 +2,7 @@ package install
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/extension"
@@ -28,14 +29,32 @@ func Command() *cli.Command {
 
 			client := app.MustClient(c)
 
-			var labels []string
+			var e extension.Extension
 
-			for _, i := range extension.Optional {
-				labels = append(labels, i.Title)
+			if c.Args().Len() > 0 {
+				if c.Args().Len() > 1 {
+					return errors.New("too many arguments")
+				}
+
+				for _, i := range extension.Optional {
+					if strings.EqualFold(c.Args().Get(0), i.Name) {
+						e = i
+					}
+				}
+			} else {
+				var labels []string
+
+				for _, i := range extension.Optional {
+					labels = append(labels, i.Title)
+				}
+
+				i, _ := cli.MustSelect("Extension", labels)
+				e = extension.Optional[i]
 			}
 
-			i, _ := cli.MustSelect("Extension", labels)
-			e := extension.Optional[i]
+			if e.Ensure == nil {
+				return errors.New("unknown extension")
+			}
 
 			cli.MustRun("Installing "+e.Title+"...", func() error {
 				return e.Ensure(c.Context, client)
