@@ -7,6 +7,7 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/devkube/pkg/kubeconfig"
 	"github.com/adrianliechti/devkube/provider"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
@@ -39,5 +40,19 @@ func Export(ctx context.Context, provider provider.Provider, cluster string, pat
 		return err
 	}
 
-	return os.WriteFile(path, data, 0600)
+	var configs [][]byte
+
+	if source, _ := os.ReadFile(path); source != nil {
+		configs = append(configs, source)
+	}
+
+	configs = append(configs, data)
+
+	result, err := kubeconfig.Merge(configs...)
+
+	if err != nil {
+		return os.WriteFile(path, data, 0600)
+	}
+
+	return os.WriteFile(path, result, 0600)
 }

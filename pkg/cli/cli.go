@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pkg/browser"
@@ -225,4 +226,27 @@ func Table(header []string, rows [][]string) {
 	table.SetNoWhiteSpace(true)
 
 	table.Render()
+}
+
+func Run(title string, action func() error) error {
+	var err error
+
+	spinner.New().
+		Title(title).
+		Action(func() {
+			err = action()
+		}).
+		Run()
+
+	return err
+}
+
+func MustRun(title string, action func() error) error {
+	err := Run(title, action)
+
+	if err != nil {
+		Fatal(err)
+	}
+
+	return err
 }

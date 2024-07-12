@@ -7,6 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/adrianliechti/loop v0.16.8
 	github.com/charmbracelet/huh v0.4.2
+	github.com/charmbracelet/huh/spinner v0.0.0-20240711191530-dbf5a5ac0510
 	github.com/charmbracelet/lipgloss v0.11.0
 	github.com/google/go-containerregistry v0.19.2
 	github.com/lmittmann/tint v1.0.4
@@ -39,10 +40,10 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chai2010/gettext-go v1.0.2 // indirect
 	github.com/charmbracelet/bubbles v0.18.0 // indirect
-	github.com/charmbracelet/bubbletea v0.26.3 // indirect
-	github.com/charmbracelet/x/ansi v0.1.1 // indirect
+	github.com/charmbracelet/bubbletea v0.26.4 // indirect
+	github.com/charmbracelet/x/ansi v0.1.2 // indirect
 	github.com/charmbracelet/x/exp/strings v0.0.0-20240524151031-ff83003bf67a // indirect
-	github.com/charmbracelet/x/input v0.1.1 // indirect
+	github.com/charmbracelet/x/input v0.1.2 // indirect
 	github.com/charmbracelet/x/term v0.1.1 // indirect
 	github.com/charmbracelet/x/windows v0.1.2 // indirect
 	github.com/containerd/containerd v1.7.19 // indirect
