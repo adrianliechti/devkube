@@ -37,11 +37,9 @@ func Command() *cli.Command {
 			i, _ := cli.MustSelect("Extension", labels)
 			e := extension.Optional[i]
 
-			cli.Info("★ installing " + e.Title + "...")
-
-			if err := e.Ensure(c.Context, client); err != nil {
-				return err
-			}
+			cli.MustRun("Installing "+e.Title+"...", func() error {
+				return e.Ensure(c.Context, client)
+			})
 
 			return nil
 		},
