@@ -6,8 +6,6 @@ import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/extension"
 	"github.com/adrianliechti/devkube/pkg/cli"
-
-	"github.com/adrianliechti/devkube/extension/argocd"
 )
 
 func Command() *cli.Command {
@@ -30,18 +28,14 @@ func Command() *cli.Command {
 
 			client := app.MustClient(c)
 
-			items := []Item{
-				{"argocd", "Argo CD", argocd.Ensure},
-			}
-
 			var labels []string
 
-			for _, i := range items {
+			for _, i := range extension.Optional {
 				labels = append(labels, i.Title)
 			}
 
 			i, _ := cli.MustSelect("Extension", labels)
-			e := items[i]
+			e := extension.Optional[i]
 
 			cli.Info("★ installing " + e.Title + "...")
 
@@ -52,10 +46,4 @@ func Command() *cli.Command {
 			return nil
 		},
 	}
-}
-
-type Item struct {
-	Name   string
-	Title  string
-	Ensure extension.EnsureFunc
 }

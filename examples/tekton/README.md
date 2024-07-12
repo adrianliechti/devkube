@@ -3,12 +3,7 @@
 ## Install Tekton Dashboard, Pipelines & Triggers
 
 ```shell
-$ kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-
-$ kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
-$ kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/interceptors.yaml
-
-$ kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
+$ devkube install tekton
 ```
 
 ### Open Dashboard
