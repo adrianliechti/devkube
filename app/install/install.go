@@ -2,7 +2,6 @@ package install
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/extension"
@@ -31,28 +30,32 @@ func Command() *cli.Command {
 
 			client := app.MustClient(c)
 
-			fns := []extension.EnsureFunc{}
-
-			for _, extension := range c.Args().Slice() {
-				switch strings.ToLower(extension) {
-				case "argocd":
-					fns = append(fns, argocd.Ensure)
-				default:
-					return errors.New("unknown extension: " + extension)
-				}
+			items := []Item{
+				{"argocd", "Argo CD", argocd.Ensure},
 			}
 
-			cli.Info("★ installing extensions(s)...")
+			var labels []string
 
-			var result error
-
-			for _, fn := range fns {
-				if err := fn(c.Context, client); err != nil {
-					result = errors.Join(result, err)
-				}
+			for _, i := range items {
+				labels = append(labels, i.Title)
 			}
 
-			return result
+			i, _ := cli.MustSelect("Extension", labels)
+			e := items[i]
+
+			cli.Info("★ installing " + e.Title + "...")
+
+			if err := e.Ensure(c.Context, client); err != nil {
+				return err
+			}
+
+			return nil
 		},
 	}
+}
+
+type Item struct {
+	Name   string
+	Title  string
+	Ensure extension.EnsureFunc
 }
