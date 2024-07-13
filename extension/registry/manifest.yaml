@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: registry
-          image: registry:2
+          image: public.ecr.aws/docker/library/registry:2
           env:
             - name: REGISTRY_HTTP_ADDR
               value: 0.0.0.0:80
@@ -116,7 +116,7 @@ spec:
       hostPID: true
       initContainers:
         - name: init
-          image: busybox
+          image: public.ecr.aws/docker/library/busybox:stable
           securityContext:
             privileged: true
           command:
