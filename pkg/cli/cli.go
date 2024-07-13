@@ -9,11 +9,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pkg/browser"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
-
-type App = cli.App
-type Context = cli.Context
 
 type Command = cli.Command
 
@@ -23,7 +20,6 @@ type IntSliceFlag = cli.IntSliceFlag
 type StringFlag = cli.StringFlag
 type StringSliceFlag = cli.StringSliceFlag
 type BoolFlag = cli.BoolFlag
-type PathFlag = cli.PathFlag
 
 func Info(v ...interface{}) {
 	os.Stdout.WriteString(fmt.Sprintln(v...))

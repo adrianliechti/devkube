@@ -17,20 +17,20 @@ func Command() *cli.Command {
 		Name:  "logs",
 		Usage: "stream application logs",
 
-		Action: func(c *cli.Context) error {
-			client := app.MustClient(c)
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			client := app.MustClient(ctx, cmd)
 
 			name := ""
 			namespace := ""
 
 			if name == "" {
-				app := app.MustApplication(c.Context, client, namespace)
+				app := app.MustApplication(ctx, client, namespace)
 
 				name = app.Name
 				namespace = app.Namespace
 			}
 
-			return Stream(c.Context, client, namespace, name)
+			return Stream(ctx, client, namespace, name)
 		},
 	}
 }

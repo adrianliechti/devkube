@@ -1,11 +1,12 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"strconv"
 	"strings"
 
-	"github.com/adrianliechti/loop/pkg/cli"
+	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/loop/pkg/system"
 )
 
@@ -14,12 +15,12 @@ var PortFlag = &cli.IntFlag{
 	Usage: "port",
 }
 
-func Port(c *cli.Context) int {
-	return c.Int(PortFlag.Name)
+func Port(ctx context.Context, cmd *cli.Command) int {
+	return int(cmd.Int(PortFlag.Name))
 }
 
-func MustPort(c *cli.Context) int {
-	port := Port(c)
+func MustPort(ctx context.Context, cmd *cli.Command) int {
+	port := Port(ctx, cmd)
 
 	if port <= 0 {
 		cli.Fatal(errors.New("port missing"))
@@ -33,8 +34,8 @@ var PortsFlag = &cli.StringSliceFlag{
 	Usage: "port mappings",
 }
 
-func Ports(c *cli.Context) (map[int]int, error) {
-	s := c.StringSlice(PortsFlag.Name)
+func Ports(ctx context.Context, cmd *cli.Command) (map[int]int, error) {
+	s := cmd.StringSlice(PortsFlag.Name)
 
 	result := map[int]int{}
 
@@ -67,8 +68,8 @@ func Ports(c *cli.Context) (map[int]int, error) {
 	return result, nil
 }
 
-func MustPorts(c *cli.Context) map[int]int {
-	ports, err := Ports(c)
+func MustPorts(ctx context.Context, cmd *cli.Command) map[int]int {
+	ports, err := Ports(ctx, cmd)
 
 	if err != nil {
 		cli.Fatal(err)
@@ -81,8 +82,8 @@ func MustPorts(c *cli.Context) map[int]int {
 	return ports
 }
 
-func PortOrRandom(c *cli.Context, preference int) (int, error) {
-	port := Port(c)
+func PortOrRandom(ctx context.Context, cmd *cli.Command, preference int) (int, error) {
+	port := Port(ctx, cmd)
 
 	if port > 0 {
 		return port, nil
@@ -91,8 +92,8 @@ func PortOrRandom(c *cli.Context, preference int) (int, error) {
 	return system.FreePort(preference)
 }
 
-func MustPortOrRandom(c *cli.Context, preference int) int {
-	port, err := PortOrRandom(c, preference)
+func MustPortOrRandom(ctx context.Context, cmd *cli.Command, preference int) int {
+	port, err := PortOrRandom(ctx, cmd, preference)
 
 	if err != nil {
 		cli.Fatal(err)
@@ -101,12 +102,12 @@ func MustPortOrRandom(c *cli.Context, preference int) int {
 	return port
 }
 
-func RandomPort(c *cli.Context, preference int) (int, error) {
+func RandomPort(ctx context.Context, cmd *cli.Command, preference int) (int, error) {
 	return system.FreePort(preference)
 }
 
-func MustRandomPort(c *cli.Context, preference int) int {
-	port, err := RandomPort(c, preference)
+func MustRandomPort(ctx context.Context, cmd *cli.Command, preference int) int {
+	port, err := RandomPort(ctx, cmd, preference)
 
 	if err != nil {
 		cli.Fatal(err)

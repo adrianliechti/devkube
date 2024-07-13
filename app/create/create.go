@@ -1,6 +1,7 @@
 package create
 
 import (
+	"context"
 	"errors"
 
 	"github.com/adrianliechti/devkube/app"
@@ -14,8 +15,8 @@ func Command() *cli.Command {
 		Name:  "create",
 		Usage: "create cluster",
 
-		Action: func(c *cli.Context) error {
-			provider, cluster, _ := app.Cluster(c)
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			provider, cluster, _ := app.Cluster(ctx, cmd)
 
 			if provider == nil {
 				return errors.New("invalid provider specified")
@@ -26,19 +27,19 @@ func Command() *cli.Command {
 			}
 
 			cli.MustRun("Installing Kubernetes Cluster...", func() error {
-				provider.Create(c.Context, cluster)
+				provider.Create(ctx, cluster)
 				return nil
 			})
 
-			client := app.MustClient(c)
+			client := app.MustClient(ctx, cmd)
 
 			for _, e := range extension.Default {
 				cli.MustRun("Installing "+e.Title+"...", func() error {
-					return e.Ensure(c.Context, client)
+					return e.Ensure(ctx, client)
 				})
 			}
 
-			return setup.Export(c.Context, provider, cluster, "")
+			return setup.Export(ctx, provider, cluster, "")
 		},
 	}
 }

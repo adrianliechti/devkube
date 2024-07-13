@@ -27,7 +27,7 @@ func Command() *cli.Command {
 			},
 		},
 
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, cmd *cli.Command) error {
 			elevated, err := system.IsElevated()
 
 			if err != nil {
@@ -38,21 +38,21 @@ func Command() *cli.Command {
 				cli.Fatal("This command must be run as root!")
 			}
 
-			client := app.MustClient(c)
+			client := app.MustClient(ctx, cmd)
 
 			var tunnelScope string = "default"
 			var tunnelNamespaces []string = nil
 
-			if val := c.StringSlice("namespace"); len(val) > 0 {
+			if val := cmd.StringSlice("namespace"); len(val) > 0 {
 				tunnelScope = val[0]
 				tunnelNamespaces = val
 			}
 
-			if val := c.String("scope"); val != "" {
+			if val := cmd.String("scope"); val != "" {
 				tunnelScope = val
 			}
 
-			return Catapult(c.Context, client, tunnelNamespaces, tunnelScope)
+			return Catapult(ctx, client, tunnelNamespaces, tunnelScope)
 		},
 	}
 }

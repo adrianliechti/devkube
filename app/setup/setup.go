@@ -17,10 +17,10 @@ func Command() *cli.Command {
 		Name:  "setup",
 		Usage: "setup kubectl config",
 
-		Action: func(c *cli.Context) error {
-			provider, cluster := app.MustCluster(c)
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			provider, cluster := app.MustCluster(ctx, cmd)
 
-			return Export(c.Context, provider, cluster, "")
+			return Export(ctx, provider, cluster, "")
 		},
 	}
 }

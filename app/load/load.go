@@ -22,27 +22,27 @@ func Command() *cli.Command {
 		Name:  "load",
 		Usage: "load image into registry",
 
-		Action: func(c *cli.Context) error {
-			client := app.MustClient(c)
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			client := app.MustClient(ctx, cmd)
 
-			if c.Args().Len() != 1 {
+			if cmd.Args().Len() != 1 {
 				return errors.New("needs one arguments: image")
 			}
 
-			image := c.Args().Get(0)
+			image := cmd.Args().Get(0)
 
-			port := app.MustPortOrRandom(c, 5555)
+			port := app.MustPortOrRandom(ctx, cmd, 5555)
 			ready := make(chan struct{})
 
 			go func() {
-				if err := client.ServicePortForward(c.Context, "platform", "registry", "", map[int]int{port: 80}, ready); err != nil {
+				if err := client.ServicePortForward(ctx, "platform", "registry", "", map[int]int{port: 80}, ready); err != nil {
 					log.Fatal(err)
 				}
 			}()
 
 			<-ready
 
-			if err := LoadImage(c.Context, image, fmt.Sprintf("localhost:%d", port)); err != nil {
+			if err := LoadImage(ctx, image, fmt.Sprintf("localhost:%d", port)); err != nil {
 				log.Fatal(err)
 			}
 

@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+
 	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
@@ -11,8 +13,8 @@ var ClusterFlag = &cli.StringFlag{
 	Usage: "cluster instance",
 }
 
-func MustCluster(c *cli.Context) (provider.Provider, string) {
-	provider, cluster, err := Cluster(c)
+func MustCluster(ctx context.Context, cmd *cli.Command) (provider.Provider, string) {
+	provider, cluster, err := Cluster(ctx, cmd)
 
 	if err != nil {
 		cli.Fatal(err)
@@ -21,14 +23,14 @@ func MustCluster(c *cli.Context) (provider.Provider, string) {
 	return provider, cluster
 }
 
-func Cluster(c *cli.Context) (provider.Provider, string, error) {
-	provider, err := Provider(c)
+func Cluster(ctx context.Context, cmd *cli.Command) (provider.Provider, string, error) {
+	provider, err := Provider(ctx, cmd)
 
 	if err != nil {
 		return nil, "", err
 	}
 
-	cluster := c.String(ClusterFlag.Name)
+	cluster := cmd.String(ClusterFlag.Name)
 
 	if cluster == "" {
 		cluster = "devkube"
@@ -37,8 +39,8 @@ func Cluster(c *cli.Context) (provider.Provider, string, error) {
 	return provider, cluster, nil
 }
 
-func MustClient(c *cli.Context) kubernetes.Client {
-	client, err := Client(c)
+func MustClient(ctx context.Context, cmd *cli.Command) kubernetes.Client {
+	client, err := Client(ctx, cmd)
 
 	if err != nil {
 		cli.Fatal(err)
@@ -47,14 +49,14 @@ func MustClient(c *cli.Context) kubernetes.Client {
 	return client
 }
 
-func Client(c *cli.Context) (kubernetes.Client, error) {
-	provider, cluster, err := Cluster(c)
+func Client(ctx context.Context, cmd *cli.Command) (kubernetes.Client, error) {
+	provider, cluster, err := Cluster(ctx, cmd)
 
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := provider.Config(c.Context, cluster)
+	data, err := provider.Config(ctx, cluster)
 
 	if err != nil {
 		return nil, err

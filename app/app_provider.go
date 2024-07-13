@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -15,8 +16,8 @@ var ProviderFlag = &cli.StringFlag{
 	Usage: "cluster provider",
 }
 
-func MustProvider(c *cli.Context) provider.Provider {
-	provider, err := Provider(c)
+func MustProvider(ctx context.Context, cmd *cli.Command) provider.Provider {
+	provider, err := Provider(ctx, cmd)
 
 	if err != nil {
 		cli.Fatal(err)
@@ -25,8 +26,8 @@ func MustProvider(c *cli.Context) provider.Provider {
 	return provider
 }
 
-func Provider(c *cli.Context) (provider.Provider, error) {
-	provider := c.String(ProviderFlag.Name)
+func Provider(ctx context.Context, cmd *cli.Command) (provider.Provider, error) {
+	provider := cmd.String(ProviderFlag.Name)
 
 	switch strings.ToLower(provider) {
 	case "", "local":

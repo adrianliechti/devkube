@@ -1,6 +1,7 @@
 package install
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -16,8 +17,8 @@ func Command() *cli.Command {
 
 		Hidden: true,
 
-		Action: func(c *cli.Context) error {
-			provider, cluster, _ := app.Cluster(c)
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			provider, cluster, _ := app.Cluster(ctx, cmd)
 
 			if provider == nil {
 				return errors.New("invalid provider specified")
@@ -27,17 +28,17 @@ func Command() *cli.Command {
 				return errors.New("invalid cluster specified")
 			}
 
-			client := app.MustClient(c)
+			client := app.MustClient(ctx, cmd)
 
 			var e extension.Extension
 
-			if c.Args().Len() > 0 {
-				if c.Args().Len() > 1 {
+			if cmd.Args().Len() > 0 {
+				if cmd.Args().Len() > 1 {
 					return errors.New("too many arguments")
 				}
 
 				for _, i := range extension.Optional {
-					if strings.EqualFold(c.Args().Get(0), i.Name) {
+					if strings.EqualFold(cmd.Args().Get(0), i.Name) {
 						e = i
 					}
 				}
@@ -57,7 +58,7 @@ func Command() *cli.Command {
 			}
 
 			cli.MustRun("Installing "+e.Title+"...", func() error {
-				return e.Ensure(c.Context, client)
+				return e.Ensure(ctx, client)
 			})
 
 			return nil
