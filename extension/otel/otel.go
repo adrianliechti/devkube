@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"strings"
 
-	"github.com/adrianliechti/devkube/pkg/apply"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 
@@ -19,7 +18,7 @@ var (
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
-	if err := apply.Apply(ctx, client, namespace, strings.NewReader(manifest)); err != nil {
+	if err := client.Apply(ctx, namespace, strings.NewReader(manifest)); err != nil {
 		return err
 	}
 

@@ -5,7 +5,7 @@ go 1.22.0
 toolchain go1.22.5
 
 require (
-	github.com/adrianliechti/loop v0.16.9-0.20240713144459-067287e7ab14
+	github.com/adrianliechti/loop v0.16.9-0.20240713164255-64b6155ceb9e
 	github.com/charmbracelet/huh v0.5.1
 	github.com/charmbracelet/huh/spinner v0.0.0-20240712195021-ccca06d54254
 	github.com/charmbracelet/lipgloss v0.12.1
