@@ -79,7 +79,7 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 				"allow_sign_up":        false,
 				"allow_org_create":     false,
 				"auto_assign_org":      true,
-				"auto_assign_org_role": "Viewer",
+				"auto_assign_org_role": "Editor",
 				"viewers_can_edit":     true,
 				"editors_can_admin":    true,
 			},
@@ -96,7 +96,7 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 			"auth.anonymous": map[string]any{
 				"enabled":  true,
 				"org_name": "Main Org.",
-				"org_role": "Viewer",
+				"org_role": "Editor",
 			},
 		},
 
