@@ -3,8 +3,8 @@ package kind
 import (
 	"context"
 	_ "embed"
-	"errors"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -12,10 +12,6 @@ import (
 
 	"sigs.k8s.io/kind/pkg/cluster"
 	"sigs.k8s.io/kind/pkg/log"
-
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/client"
 )
 
 type kind struct {
@@ -72,35 +68,23 @@ func (k *kind) Delete(ctx context.Context, name string) error {
 }
 
 func (k *kind) Start(ctx context.Context, name string) error {
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	container := strings.ToLower(name + "-control-plane")
 
-	if err != nil {
-		return err
-	}
+	exec.Command("docker", "start", container).Run()
+	exec.Command("podman", "start", container).Run()
+	exec.Command("nerdctl", "start", container).Run()
 
-	containerID, err := k.clusterContainer(ctx, cli, name)
-
-	if err != nil {
-		return err
-	}
-
-	return cli.ContainerStart(ctx, containerID, container.StartOptions{})
+	return nil
 }
 
 func (k *kind) Stop(ctx context.Context, name string) error {
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	container := strings.ToLower(name + "-control-plane")
 
-	if err != nil {
-		return err
-	}
+	exec.Command("docker", "stop", container).Run()
+	exec.Command("podman", "stop", container).Run()
+	exec.Command("nerdctl", "stop", container).Run()
 
-	containerID, err := k.clusterContainer(ctx, cli, name)
-
-	if err != nil {
-		return err
-	}
-
-	return cli.ContainerStop(ctx, containerID, container.StopOptions{})
+	return nil
 }
 
 func (k *kind) Config(ctx context.Context, name string) ([]byte, error) {
@@ -111,32 +95,4 @@ func (k *kind) Config(ctx context.Context, name string) ([]byte, error) {
 	}
 
 	return []byte(data), nil
-}
-
-func (k *kind) clusterContainer(ctx context.Context, client *client.Client, name string) (string, error) {
-	filter := filters.NewArgs(
-		filters.KeyValuePair{
-			Key:   "label",
-			Value: "io.x-k8s.kind.cluster=" + strings.ToLower(name),
-		},
-		filters.KeyValuePair{
-			Key:   "label",
-			Value: "io.x-k8s.kind.role=control-plane",
-		},
-	)
-
-	containers, err := client.ContainerList(ctx, container.ListOptions{
-		All:     true,
-		Filters: filter,
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	if len(containers) != 1 {
-		return "", errors.New("container not found")
-	}
-
-	return containers[0].ID, nil
 }
