@@ -54,6 +54,14 @@ func (p *Provider) Delete(ctx context.Context, name string) error {
 	return nil
 }
 
+func (p *Provider) Start(ctx context.Context, name string) error {
+	return nil
+}
+
+func (p *Provider) Stop(ctx context.Context, name string) error {
+	return nil
+}
+
 func (p *Provider) Config(ctx context.Context, name string) ([]byte, error) {
 	data, err := os.ReadFile(p.kubeconfig)
 

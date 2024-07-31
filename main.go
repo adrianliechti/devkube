@@ -20,6 +20,8 @@ import (
 	"github.com/adrianliechti/devkube/app/logs"
 	"github.com/adrianliechti/devkube/app/otel"
 	"github.com/adrianliechti/devkube/app/setup"
+	"github.com/adrianliechti/devkube/app/start"
+	"github.com/adrianliechti/devkube/app/stop"
 	"github.com/adrianliechti/devkube/pkg/cli"
 
 	"github.com/lmittmann/tint"
@@ -58,22 +60,25 @@ func initApp() cli.Command {
 		},
 
 		Commands: []*cli.Command{
+
 			create.Command(),
 			delete.Command(),
 
-			install.Command(),
+			start.Command(),
+			stop.Command(),
 
 			setup.Command(),
 			connect.Command(),
+
+			install.Command(),
 
 			dashboard.Command(),
 			grafana.Command(),
 			otel.Command(),
 
-			build.Command(),
-			load.Command(),
-
 			logs.Command(),
+			load.Command(),
+			build.Command(),
 		},
 	}
 }
