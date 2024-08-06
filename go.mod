@@ -7,9 +7,9 @@ toolchain go1.22.5
 require (
 	github.com/adrianliechti/loop v0.16.9-0.20240713164255-64b6155ceb9e
 	github.com/charmbracelet/huh v0.5.2
-	github.com/charmbracelet/huh/spinner v0.0.0-20240803000013-2eb851f67645
+	github.com/charmbracelet/huh/spinner v0.0.0-20240806005253-b7436a76999a
 	github.com/charmbracelet/lipgloss v0.12.1
-	github.com/google/go-containerregistry v0.20.1
+	github.com/google/go-containerregistry v0.20.2
 	github.com/lmittmann/tint v1.0.5
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
