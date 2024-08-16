@@ -14,7 +14,7 @@ const (
 	// https://artifacthub.io/packages/helm/grafana/loki
 	repoURL      = "https://grafana.github.io/helm-charts"
 	chartName    = "loki"
-	chartVersion = "6.7.3"
+	chartVersion = "6.10.0"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

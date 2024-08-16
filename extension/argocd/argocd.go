@@ -14,7 +14,7 @@ const (
 	// https://artifacthub.io/packages/helm/argo/argo-cd
 	repoURL      = "https://argoproj.github.io/argo-helm"
 	chartName    = "argo-cd"
-	chartVersion = "7.3.11"
+	chartVersion = "7.4.3"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
