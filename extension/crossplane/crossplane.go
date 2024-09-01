@@ -11,10 +11,11 @@ const (
 	name      = "crossplane"
 	namespace = "crossplane-system"
 
+	//
 	// https://artifacthub.io/packages/helm/crossplane/crossplane
 	repoURL      = "https://charts.crossplane.io/stable"
 	chartName    = "crossplane"
-	chartVersion = "1.16.0"
+	chartVersion = "1.17.0"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

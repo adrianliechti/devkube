@@ -14,7 +14,7 @@ const (
 	// https://artifacthub.io/packages/helm/grafana/promtail
 	repoURL      = "https://grafana.github.io/helm-charts"
 	chartName    = "promtail"
-	chartVersion = "6.16.4"
+	chartVersion = "6.16.5"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
@@ -33,6 +34,8 @@ func Export(ctx context.Context, provider provider.Provider, cluster string, pat
 	if path == "" {
 		return errors.New("invalid path")
 	}
+
+	os.MkdirAll(filepath.Dir(path), 0755)
 
 	data, err := provider.Config(ctx, cluster)
 
