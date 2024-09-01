@@ -24,6 +24,10 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 			"keep":    true,
 		},
 
+		"dex": map[string]any{
+			"enabled": false,
+		},
+
 		"configs": map[string]any{
 			"cm": map[string]any{
 				"exec.enabled": true,
