@@ -27,7 +27,7 @@ func Command() *cli.Command {
 				cli.OpenURL(url)
 			}()
 
-			return client.ServicePortForward(ctx, "platform", "dashboard", "", map[int]int{port: 8080}, ready)
+			return client.ServicePortForward(ctx, "platform", "dashboard", "", map[int]int{port: 9090}, ready)
 		},
 	}
 }

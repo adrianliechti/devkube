@@ -16,7 +16,7 @@ spec:
       securityContext: {}
       containers:
         - name: collector
-          image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.107.0
+          image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.111.0
           imagePullPolicy: Always
           securityContext: {}
           command:
@@ -81,8 +81,6 @@ data:
       batch:
 
     exporters:
-      logging:
-
       otlp:
         endpoint: tempo:4317
         tls:
@@ -99,17 +97,17 @@ data:
         traces:
           receivers:  [otlp]
           processors: [batch]
-          exporters:  [logging, otlp]
+          exporters:  [otlp]
         
         metrics:
           receivers:  [otlp]
           processors: [batch]
-          exporters:  [logging, prometheusremotewrite]
+          exporters:  [prometheusremotewrite]
 
         logs:
           receivers:  [otlp]
           processors: [batch]
-          exporters:  [logging, loki]
+          exporters:  [loki]
 ---
 apiVersion: mutations.gatekeeper.sh/v1
 kind: ModifySet

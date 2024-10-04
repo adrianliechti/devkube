@@ -16,7 +16,7 @@ const (
 	// https://artifacthub.io/packages/helm/metrics-server/metrics-server
 	repoURL      = "https://kubernetes-sigs.github.io/metrics-server"
 	chartName    = "metrics-server"
-	chartVersion = "3.12.1"
+	chartVersion = "3.12.2"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

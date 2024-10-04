@@ -21,14 +21,13 @@ const (
 	// https://artifacthub.io/packages/helm/cert-manager/cert-manager
 	repoURL      = "https://charts.jetstack.io"
 	chartName    = "cert-manager"
-	chartVersion = "1.15.3"
+	chartVersion = "1.16.1"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
 	values := map[string]any{
 		"crds": map[string]any{
 			"enabled": true,
-			"keep":    true,
 		},
 	}
 
