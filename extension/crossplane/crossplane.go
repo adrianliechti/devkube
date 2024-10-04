@@ -15,7 +15,7 @@ const (
 	// https://artifacthub.io/packages/helm/crossplane/crossplane
 	repoURL      = "https://charts.crossplane.io/stable"
 	chartName    = "crossplane"
-	chartVersion = "1.17.0"
+	chartVersion = "1.17.1"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

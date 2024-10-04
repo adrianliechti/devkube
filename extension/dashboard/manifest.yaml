@@ -53,7 +53,7 @@ spec:
             - "--insecure-port=8081"
           resources: {}
         - name: api
-          image: docker.io/kubernetesui/dashboard-api:1.7.0
+          image: docker.io/kubernetesui/dashboard-api:1.8.1
           imagePullPolicy: Always
           args:
             - "--bind-address=127.0.0.1"
