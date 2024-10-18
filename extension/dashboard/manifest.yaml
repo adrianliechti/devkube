@@ -41,6 +41,9 @@ spec:
         - name: proxy
           image: ghcr.io/adrianliechti/loop-dashboard
           imagePullPolicy: Always
+          env:
+            - name: BASE_URL
+              value: http://dashboard:80
           ports:
             - containerPort: 9090
           resources: {}
