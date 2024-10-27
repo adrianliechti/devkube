@@ -48,7 +48,8 @@ spec:
             - containerPort: 9090
           resources: {}
         - name: web
-          image: docker.io/kubernetesui/dashboard-web:1.5.0
+          # 
+          image: docker.io/kubernetesui/dashboard-web:1.5.2
           imagePullPolicy: Always
           args:
             - "--bind-address=127.0.0.1"
@@ -56,7 +57,7 @@ spec:
             - "--insecure-port=8081"
           resources: {}
         - name: api
-          image: docker.io/kubernetesui/dashboard-api:1.9.0
+          image: docker.io/kubernetesui/dashboard-api:1.10.1
           imagePullPolicy: Always
           args:
             - "--bind-address=127.0.0.1"
@@ -65,7 +66,7 @@ spec:
             - "--metrics-provider=none"
           resources: {}
         - name: auth
-          image: docker.io/kubernetesui/dashboard-auth:1.2.0
+          image: docker.io/kubernetesui/dashboard-auth:1.2.2
           imagePullPolicy: Always
           args:
             - "--address=127.0.0.1"

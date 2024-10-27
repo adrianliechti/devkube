@@ -16,7 +16,7 @@ const (
 	// https://github.com/crossplane/crossplane/releases
 	repoURL      = "https://charts.crossplane.io/stable"
 	chartName    = "crossplane"
-	chartVersion = "1.17.1"
+	chartVersion = "1.17.2"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
