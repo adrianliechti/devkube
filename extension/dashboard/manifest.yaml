@@ -49,7 +49,7 @@ spec:
           resources: {}
         - name: web
           # 
-          image: docker.io/kubernetesui/dashboard-web:1.5.2
+          image: docker.io/kubernetesui/dashboard-web:1.6.0
           imagePullPolicy: Always
           args:
             - "--bind-address=127.0.0.1"
