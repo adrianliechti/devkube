@@ -16,15 +16,11 @@ const (
 	// https://github.com/crossplane/crossplane/releases
 	repoURL      = "https://charts.crossplane.io/stable"
 	chartName    = "crossplane"
-	chartVersion = "1.17.2"
+	chartVersion = "1.18.0"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
-	values := map[string]any{
-		"args": []string{
-			"--enable-environment-configs",
-		},
-	}
+	values := map[string]any{}
 
 	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
 		return err
