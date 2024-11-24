@@ -68,6 +68,10 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 			},
 		},
 
+		"gateway": map[string]any{
+			"enabled": false,
+		},
+
 		"resultsCache": map[string]any{
 			"enabled": false,
 		},
@@ -76,11 +80,11 @@ func Ensure(ctx context.Context, client kubernetes.Client) error {
 			"enabled": false,
 		},
 
-		"read": map[string]any{
+		"backend": map[string]any{
 			"replicas": 0,
 		},
 
-		"backend": map[string]any{
+		"read": map[string]any{
 			"replicas": 0,
 		},
 
