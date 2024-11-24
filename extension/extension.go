@@ -9,6 +9,7 @@ import (
 	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/crossplane"
 	"github.com/adrianliechti/devkube/extension/dashboard"
+	"github.com/adrianliechti/devkube/extension/envoy"
 	"github.com/adrianliechti/devkube/extension/gatekeeper"
 	"github.com/adrianliechti/devkube/extension/grafana"
 	"github.com/adrianliechti/devkube/extension/loki"
@@ -94,6 +95,11 @@ var Default []Extension = []Extension{
 }
 
 var Optional []Extension = []Extension{
+	{
+		Name:   "envoy",
+		Title:  "Envoy Gateway",
+		Ensure: envoy.Ensure,
+	},
 	{
 		Name:   "argocd",
 		Title:  "Argo CD",
