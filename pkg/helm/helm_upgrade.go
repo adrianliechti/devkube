@@ -7,16 +7,15 @@ import (
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/registry"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, repoURL, chartName, chartVersion string, values map[string]any) error {
-	chart, err := loadChart(repoURL, chartName, chartVersion)
-
-	if err != nil {
-		return err
-	}
+	settings := cli.New()
 
 	config := new(action.Configuration)
 	logger := func(format string, v ...interface{}) {}
@@ -47,6 +46,22 @@ func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	a.CleanupOnFail = true
 
 	a.Timeout = 15 * time.Minute
+
+	if client, err := registry.NewClient(); err == nil {
+		a.SetRegistryClient(client)
+	}
+
+	path, err := a.ChartPathOptions.LocateChart(chartName, settings)
+
+	if err != nil {
+		return err
+	}
+
+	chart, err := loader.Load(path)
+
+	if err != nil {
+		return err
+	}
 
 	if _, err := a.Run(name, chart, values); err != nil {
 		return err
