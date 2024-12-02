@@ -5,13 +5,13 @@ go 1.23
 require (
 	github.com/adrianliechti/loop v0.17.3
 	github.com/charmbracelet/huh v0.6.0
-	github.com/charmbracelet/huh/spinner v0.0.0-20241119235641-e7e76ffbce9f
+	github.com/charmbracelet/huh/spinner v0.0.0-20241127125741-aad810dfbce6
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/google/go-containerregistry v0.20.2
 	github.com/lmittmann/tint v1.0.5
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
-	github.com/urfave/cli/v3 v3.0.0-alpha9.4
+	github.com/urfave/cli/v3 v3.0.0-alpha9.7
 	helm.sh/helm/v3 v3.16.3
 	k8s.io/api v0.31.3
 	k8s.io/apimachinery v0.31.3
