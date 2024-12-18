@@ -14,7 +14,7 @@ const (
 	// https://artifacthub.io/packages/helm/grafana/grafana
 	repoURL      = "https://grafana.github.io/helm-charts"
 	chartName    = "grafana"
-	chartVersion = "8.6.4"
+	chartVersion = "8.8.2"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

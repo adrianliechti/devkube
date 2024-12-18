@@ -7,19 +7,19 @@ toolchain go1.23.4
 require (
 	github.com/adrianliechti/loop v0.17.4
 	github.com/charmbracelet/huh v0.6.0
-	github.com/charmbracelet/huh/spinner v0.0.0-20241211235322-ceae3bbcfbb4
+	github.com/charmbracelet/huh/spinner v0.0.0-20241216182847-438e4f741435
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/google/go-containerregistry v0.20.2
-	github.com/lmittmann/tint v1.0.5
+	github.com/lmittmann/tint v1.0.6
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/urfave/cli/v3 v3.0.0-alpha9.7
-	helm.sh/helm/v3 v3.16.3
+	helm.sh/helm/v3 v3.16.4
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0
 	k8s.io/cli-runtime v0.32.0
 	k8s.io/client-go v0.32.0
-	sigs.k8s.io/kind v0.25.0
+	sigs.k8s.io/kind v0.26.0
 )
 
 require (
@@ -42,7 +42,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chai2010/gettext-go v1.0.2 // indirect
 	github.com/charmbracelet/bubbles v0.20.0 // indirect
-	github.com/charmbracelet/bubbletea v1.2.3 // indirect
+	github.com/charmbracelet/bubbletea v1.2.5-0.20241205214244-9306010a31ee // indirect
 	github.com/charmbracelet/x/ansi v0.4.5 // indirect
 	github.com/charmbracelet/x/exp/strings v0.0.0-20240722160745-212f7b056ed0 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
