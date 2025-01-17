@@ -20,7 +20,7 @@ func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	config := new(action.Configuration)
 	logger := func(format string, v ...interface{}) {}
 
-	if err := config.Init(NewClientGetter(client), namespace, "", logger); err != nil {
+	if err := config.Init(NewClientGetter(client, namespace), namespace, "", logger); err != nil {
 		return err
 	}
 

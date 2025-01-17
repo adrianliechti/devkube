@@ -5,6 +5,7 @@ import (
 
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
+	"github.com/adrianliechti/devkube/extension/alloy"
 	"github.com/adrianliechti/devkube/extension/argocd"
 	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/crossplane"
@@ -16,7 +17,6 @@ import (
 	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/monitoring"
 	"github.com/adrianliechti/devkube/extension/otel"
-	"github.com/adrianliechti/devkube/extension/promtail"
 	"github.com/adrianliechti/devkube/extension/registry"
 	"github.com/adrianliechti/devkube/extension/tekton"
 	"github.com/adrianliechti/devkube/extension/tempo"
@@ -78,14 +78,14 @@ var Default []Extension = []Extension{
 		Ensure: tempo.Ensure,
 	},
 	{
+		Name:   "alloy",
+		Title:  "Grafana Alloy",
+		Ensure: alloy.Ensure,
+	},
+	{
 		Name:   "grafana",
 		Title:  "Grafana",
 		Ensure: grafana.Ensure,
-	},
-	{
-		Name:   "promtail",
-		Title:  "Promtail",
-		Ensure: promtail.Ensure,
 	},
 	{
 		Name:   "otel",
