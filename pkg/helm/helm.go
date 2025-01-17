@@ -19,14 +19,16 @@ var ErrReleaseExists = driver.ErrReleaseExists
 var ErrReleaseNotFound = driver.ErrReleaseNotFound
 var ErrNoDeployedReleases = driver.ErrNoDeployedReleases
 
-func NewClientGetter(client kubernetes.Client) genericclioptions.RESTClientGetter {
+func NewClientGetter(client kubernetes.Client, namespace string) genericclioptions.RESTClientGetter {
 	return &clientGetter{
-		client: client,
+		client:    client,
+		namespace: namespace,
 	}
 }
 
 type clientGetter struct {
-	client kubernetes.Client
+	client    kubernetes.Client
+	namespace string
 
 	mapper    meta.RESTMapper
 	discovery discovery.CachedDiscoveryInterface
@@ -65,11 +67,12 @@ func (c *clientGetter) ToRESTMapper() (meta.RESTMapper, error) {
 }
 
 func (c *clientGetter) ToRawKubeConfigLoader() clientcmd.ClientConfig {
-	return &clientConfig{client: c.client}
+	return &clientConfig{client: c.client, namespace: c.namespace}
 }
 
 type clientConfig struct {
-	client kubernetes.Client
+	client    kubernetes.Client
+	namespace string
 }
 
 func (c *clientConfig) ClientConfig() (*rest.Config, error) {
@@ -77,7 +80,15 @@ func (c *clientConfig) ClientConfig() (*rest.Config, error) {
 }
 
 func (c *clientConfig) Namespace() (string, bool, error) {
-	return c.client.Namespace(), true, nil
+	if c.namespace != "" {
+		return c.namespace, true, nil
+	}
+
+	if val := c.client.Namespace(); val != "" {
+		return val, true, nil
+	}
+
+	return "default", true, nil
 }
 
 func (c *clientConfig) RawConfig() (clientcmdapi.Config, error) {
