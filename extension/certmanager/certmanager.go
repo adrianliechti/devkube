@@ -21,7 +21,7 @@ const (
 	// https://artifacthub.io/packages/helm/cert-manager/cert-manager
 	repoURL      = "https://charts.jetstack.io"
 	chartName    = "cert-manager"
-	chartVersion = "1.16.2"
+	chartVersion = "1.16.3"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {

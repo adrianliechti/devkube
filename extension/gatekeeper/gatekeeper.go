@@ -14,7 +14,7 @@ const (
 	// https://artifacthub.io/packages/helm/gatekeeper/gatekeeper
 	repoURL      = "https://open-policy-agent.github.io/gatekeeper/charts"
 	chartName    = "gatekeeper"
-	chartVersion = "3.18.1"
+	chartVersion = "3.18.2"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
