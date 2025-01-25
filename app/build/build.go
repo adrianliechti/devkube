@@ -6,7 +6,7 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/pkg/cli"
-	"github.com/adrianliechti/loop/app/build"
+	"github.com/adrianliechti/loop/pkg/remote/build"
 )
 
 func Command() *cli.Command {
@@ -35,7 +35,7 @@ func Command() *cli.Command {
 
 			image.Insecure = true
 
-			return build.Run(ctx, client, "", image, path, "")
+			return build.Run(ctx, client, image, path, "", nil)
 		},
 	}
 }
