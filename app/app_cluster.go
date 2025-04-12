@@ -3,8 +3,8 @@ package app
 import (
 	"context"
 
-	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
+	"github.com/adrianliechti/go-cli"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 

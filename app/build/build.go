@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/go-cli"
 	"github.com/adrianliechti/loop/pkg/remote/build"
 )
 

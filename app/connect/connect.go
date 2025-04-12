@@ -6,7 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/go-cli"
 	"github.com/adrianliechti/loop/pkg/catapult"
 	"github.com/adrianliechti/loop/pkg/gateway"
 	"github.com/adrianliechti/loop/pkg/kubernetes"

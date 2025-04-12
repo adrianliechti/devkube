@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/adrianliechti/devkube/pkg/cli"
 	"github.com/adrianliechti/devkube/provider"
 	"github.com/adrianliechti/devkube/provider/kind"
 	"github.com/adrianliechti/devkube/provider/none"
+	"github.com/adrianliechti/go-cli"
 )
 
 var ProviderFlag = &cli.StringFlag{

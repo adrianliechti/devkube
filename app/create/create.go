@@ -7,7 +7,7 @@ import (
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/app/setup"
 	"github.com/adrianliechti/devkube/extension"
-	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/go-cli"
 )
 
 func Command() *cli.Command {

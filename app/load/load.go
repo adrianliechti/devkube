@@ -10,7 +10,7 @@ import (
 	"path"
 
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/go-cli"
 
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"

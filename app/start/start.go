@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/adrianliechti/devkube/app"
-	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/go-cli"
 )
 
 func Command() *cli.Command {

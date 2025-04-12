@@ -22,7 +22,7 @@ import (
 	"github.com/adrianliechti/devkube/app/setup"
 	"github.com/adrianliechti/devkube/app/start"
 	"github.com/adrianliechti/devkube/app/stop"
-	"github.com/adrianliechti/devkube/pkg/cli"
+	"github.com/adrianliechti/go-cli"
 
 	"github.com/lmittmann/tint"
 )
