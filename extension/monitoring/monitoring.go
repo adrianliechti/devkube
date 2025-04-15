@@ -18,7 +18,7 @@ const (
 	// https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
 	repoURL      = "https://prometheus-community.github.io/helm-charts"
 	chartName    = "kube-prometheus-stack"
-	chartVersion = "69.3.0"
+	chartVersion = "70.4.2"
 )
 
 var (

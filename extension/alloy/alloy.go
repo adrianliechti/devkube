@@ -15,7 +15,7 @@ const (
 	// https://artifacthub.io/packages/helm/grafana/alloy
 	repoURL      = "https://grafana.github.io/helm-charts"
 	chartName    = "alloy"
-	chartVersion = "0.11.0"
+	chartVersion = "1.0.1"
 )
 
 var (

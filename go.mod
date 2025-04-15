@@ -3,8 +3,8 @@ module github.com/adrianliechti/devkube
 go 1.24.2
 
 require (
-	github.com/adrianliechti/go-cli v0.0.0-20250412101417-339eab1be7bb
-	github.com/adrianliechti/loop v0.18.4-0.20250409190220-1da688b525c1
+	github.com/adrianliechti/go-cli v0.0.3
+	github.com/adrianliechti/loop v0.18.4-0.20250415062539-99c9485ea62c
 	github.com/google/go-containerregistry v0.20.3
 	github.com/lmittmann/tint v1.0.7
 	helm.sh/helm/v3 v3.17.3
@@ -34,21 +34,16 @@ require (
 	github.com/catppuccin/go v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chai2010/gettext-go v1.0.2 // indirect
-	github.com/charmbracelet/bubbles v0.20.1-0.20250320170029-54f28b650198 // indirect
-	github.com/charmbracelet/bubbles/v2 v2.0.0-beta.1.0.20250331172056-9d2d5dfc712c // indirect
+	github.com/charmbracelet/bubbles v0.21.0 // indirect
 	github.com/charmbracelet/bubbletea v1.3.4 // indirect
-	github.com/charmbracelet/bubbletea/v2 v2.0.0-beta.1.0.20250331173400-ed4fde7ae48f // indirect
 	github.com/charmbracelet/colorprofile v0.3.0 // indirect
 	github.com/charmbracelet/huh v0.6.0 // indirect
-	github.com/charmbracelet/huh/v2 v2.0.0-20250402132115-2785463c98f8 // indirect
+	github.com/charmbracelet/huh/spinner v0.0.0-20250410174039-76d1f8226680 // indirect
 	github.com/charmbracelet/lipgloss v1.1.0 // indirect
-	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.1.0.20250401142624-f274d052315e // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/exp/strings v0.0.0-20240722160745-212f7b056ed0 // indirect
-	github.com/charmbracelet/x/input v0.3.4 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
-	github.com/charmbracelet/x/windows v0.2.0 // indirect
 	github.com/containerd/containerd v1.7.24 // indirect
 	github.com/containerd/errdefs v0.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
@@ -127,7 +122,6 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
-	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
