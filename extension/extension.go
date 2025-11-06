@@ -5,21 +5,15 @@ import (
 
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
-	"github.com/adrianliechti/devkube/extension/alloy"
 	"github.com/adrianliechti/devkube/extension/argocd"
 	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/crossplane"
 	"github.com/adrianliechti/devkube/extension/dashboard"
 	"github.com/adrianliechti/devkube/extension/envoy"
 	"github.com/adrianliechti/devkube/extension/gatekeeper"
-	"github.com/adrianliechti/devkube/extension/grafana"
-	"github.com/adrianliechti/devkube/extension/loki"
-	"github.com/adrianliechti/devkube/extension/metrics"
-	"github.com/adrianliechti/devkube/extension/monitoring"
 	"github.com/adrianliechti/devkube/extension/otel"
 	"github.com/adrianliechti/devkube/extension/registry"
 	"github.com/adrianliechti/devkube/extension/tekton"
-	"github.com/adrianliechti/devkube/extension/tempo"
 )
 
 type Extension struct {
@@ -43,16 +37,6 @@ var Default []Extension = []Extension{
 		Ensure: gatekeeper.Ensure,
 	},
 	{
-		Name:   "crossplane",
-		Title:  "Crossplane",
-		Ensure: crossplane.Ensure,
-	},
-	{
-		Name:   "metrics",
-		Title:  "Metrics",
-		Ensure: metrics.Ensure,
-	},
-	{
 		Name:   "registry",
 		Title:  "Registry",
 		Ensure: registry.Ensure,
@@ -63,31 +47,6 @@ var Default []Extension = []Extension{
 		Ensure: dashboard.Ensure,
 	},
 	{
-		Name:   "prometheus",
-		Title:  "Prometheus",
-		Ensure: monitoring.Ensure,
-	},
-	{
-		Name:   "loki",
-		Title:  "Grafana Loki",
-		Ensure: loki.Ensure,
-	},
-	{
-		Name:   "tempo",
-		Title:  "Grafana Tempo",
-		Ensure: tempo.Ensure,
-	},
-	{
-		Name:   "alloy",
-		Title:  "Grafana Alloy",
-		Ensure: alloy.Ensure,
-	},
-	{
-		Name:   "grafana",
-		Title:  "Grafana",
-		Ensure: grafana.Ensure,
-	},
-	{
 		Name:   "otel",
 		Title:  "OpenTelemetry",
 		Ensure: otel.Ensure,
@@ -95,6 +54,11 @@ var Default []Extension = []Extension{
 }
 
 var Optional []Extension = []Extension{
+	{
+		Name:   "crossplane",
+		Title:  "Crossplane",
+		Ensure: crossplane.Ensure,
+	},
 	{
 		Name:   "envoy",
 		Title:  "Envoy Gateway",

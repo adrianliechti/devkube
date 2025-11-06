@@ -1,3 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  labels:
+    app: lgtm
+spec:
+  type: ClusterIP
+  selector:
+    app: lgtm
+  ports:
+    - name: grafana
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
 ---
 apiVersion: v1
 kind: Service
@@ -8,8 +23,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: alloy
-    app.kubernetes.io/instance: alloy
+    app: lgtm
   ports:
     - name: otlp-grpc
       port: 4317
@@ -19,6 +33,47 @@ spec:
       port: 4318
       protocol: TCP
       targetPort: 4318
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lgtm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lgtm
+  template:
+    metadata:
+      labels:
+        app: lgtm
+    spec:
+      containers:
+        - name: lgtm
+          image: grafana/otel-lgtm:latest
+          ports:
+            - containerPort: 3000
+            - containerPort: 4317
+            - containerPort: 4318
+          volumeMounts:
+            - name: data
+              mountPath: /data/tempo
+              subPath: tempo
+            - name: data
+              mountPath: /data/grafana
+              subPath: grafana
+            - name: data
+              mountPath: /data/loki
+              subPath: loki
+            - name: data
+              mountPath: /data/prometheus
+              subPath: prometheus
+            - name: data
+              mountPath: /data/pyroscope
+              subPath: pyroscope
+      volumes:
+        - name: data
+          emptyDir: {}
 ---
 apiVersion: mutations.gatekeeper.sh/v1
 kind: ModifySet
