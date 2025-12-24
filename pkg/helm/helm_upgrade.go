@@ -2,14 +2,16 @@ package helm
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/registry"
+	"helm.sh/helm/v4/pkg/action"
+	"helm.sh/helm/v4/pkg/chart/loader"
+	"helm.sh/helm/v4/pkg/cli"
+	"helm.sh/helm/v4/pkg/kube"
+	"helm.sh/helm/v4/pkg/registry"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -18,9 +20,9 @@ func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	settings := cli.New()
 
 	config := new(action.Configuration)
-	logger := func(format string, v ...interface{}) {}
+	config.LogHolder.SetLogger(slog.DiscardHandler)
 
-	if err := config.Init(NewClientGetter(client, namespace), namespace, "", logger); err != nil {
+	if err := config.Init(NewClientGetter(client, namespace), namespace, ""); err != nil {
 		return err
 	}
 
@@ -46,6 +48,7 @@ func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	a.CleanupOnFail = true
 
 	a.Timeout = 15 * time.Minute
+	a.WaitStrategy = kube.StatusWatcherStrategy
 
 	if client, err := registry.NewClient(); err == nil {
 		a.SetRegistryClient(client)

@@ -3,7 +3,7 @@ package helm
 import (
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
-	"helm.sh/helm/v3/pkg/storage/driver"
+	"helm.sh/helm/v4/pkg/storage/driver"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/cli-runtime/pkg/genericclioptions"

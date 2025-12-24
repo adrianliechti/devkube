@@ -15,7 +15,7 @@ const (
 
 	// https://github.com/envoyproxy/gateway/releases
 	chartName    = "oci://docker.io/envoyproxy/gateway-helm"
-	chartVersion = "v1.5.4"
+	chartVersion = "v1.6.1"
 )
 
 var (
