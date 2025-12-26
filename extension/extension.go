@@ -10,6 +10,7 @@ import (
 	"github.com/adrianliechti/devkube/extension/crossplane"
 	"github.com/adrianliechti/devkube/extension/envoy"
 	"github.com/adrianliechti/devkube/extension/gatekeeper"
+	"github.com/adrianliechti/devkube/extension/metrics"
 	"github.com/adrianliechti/devkube/extension/otel"
 	"github.com/adrianliechti/devkube/extension/registry"
 	"github.com/adrianliechti/devkube/extension/tekton"
@@ -31,8 +32,13 @@ var Default []Extension = []Extension{
 		Ensure: certmanager.Ensure,
 	},
 	{
+		Name:   "metrics",
+		Title:  "Metrics Server",
+		Ensure: metrics.Ensure,
+	},
+	{
 		Name:   "registry",
-		Title:  "Registry",
+		Title:  "Docker Registry",
 		Ensure: registry.Ensure,
 	},
 	{
