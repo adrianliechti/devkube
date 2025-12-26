@@ -26,8 +26,8 @@ github.com/ProtonMail/go-crypto v1.3.0 h1:ILq8+Sf5If5DCpHQp4PbZdS1J7HDFRXz/+xKBi
 github.com/ProtonMail/go-crypto v1.3.0/go.mod h1:9whxjD8Rbs29b4XWbB8irEcE8KHMqaR2e7GWU1R+/PE=
 github.com/adrianliechti/go-cli v0.0.9-0.20251224221129-e598926b8cc9 h1:/sOYVvfbX8HpD76B3I89zEbSBCVZkXKOByKDh6I7d44=
 github.com/adrianliechti/go-cli v0.0.9-0.20251224221129-e598926b8cc9/go.mod h1:omm1cFDnHj/Yei11SZksg0yG7Y+znIJkLSolZcHdjFU=
-github.com/adrianliechti/loop v0.20.0 h1:tvOJF2N5lnsIxM6AWYSobrHy9anXRV5dbjZCE3rfs90=
-github.com/adrianliechti/loop v0.20.0/go.mod h1:SufY/zV3+lzcEjnNLjZGSSfvEuv7x4Vrtte9Eai4wiA=
+github.com/adrianliechti/loop v0.20.1 h1:Xmyvzyzh26kRrv/Libp9klrgkhZbCmq46YKteS1Ryb0=
+github.com/adrianliechti/loop v0.20.1/go.mod h1:PcNDJo3m41tIAI8SGC8x4MCfyXox9Lx6GojOqi+yk14=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=

@@ -17,7 +17,6 @@ import (
 	"github.com/adrianliechti/devkube/app/grafana"
 	"github.com/adrianliechti/devkube/app/install"
 	"github.com/adrianliechti/devkube/app/load"
-	"github.com/adrianliechti/devkube/app/logs"
 	"github.com/adrianliechti/devkube/app/otel"
 	"github.com/adrianliechti/devkube/app/setup"
 	"github.com/adrianliechti/devkube/app/start"
@@ -60,7 +59,6 @@ func initApp() cli.Command {
 		},
 
 		Commands: []*cli.Command{
-
 			create.Command(),
 			delete.Command(),
 
@@ -76,7 +74,6 @@ func initApp() cli.Command {
 			grafana.Command(),
 			otel.Command(),
 
-			logs.Command(),
 			load.Command(),
 			build.Command(),
 		},

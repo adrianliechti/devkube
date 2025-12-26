@@ -10,20 +10,22 @@ The default `create` command will spin up a local DevKube cluster in a single co
 $ devkube create
 ★ installing Kubernetes Cluster...
 ★ installing Cert-Manager...
-★ installing Gatekeeper...
 ★ installing Registry...
-★ installing Dashboard...
+★ installing Gatekeeper...
 ★ installing OpenTelemetry...
 ```
 
 Installed Components
-- [Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) - cluster management web ui
-- [Registry](https://distribution.github.io/distribution/) - container images distribution
-- [Cert-Manager](https://cert-manager.io) -X.509 certificate management
-- [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/website/) - customizable policy controller
-- [Crossplane](https://www.crossplane.io) - universal control plane
-- [Grafana LGTM](ithub.com/grafana/docker-otel-lgtm) - observability and data visualization
+- [Cert-Manager](https://cert-manager.io) - X.509 Certificate Management
+- [Registry](https://distribution.github.io/distribution/) - Container Images Distribution
+- [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/website/) - Customizable Policy controller
+- [Grafana LGTM](ithub.com/grafana/docker-otel-lgtm) - Observability and Data Visualization
 
+Optional Components
+- [Crossplane](https://www.crossplane.io) - Universal Control Plane
+- [Envoy Gateway](https://gateway.envoyproxy.io) - Manage Application and API traffic
+- [Argo CD](https://argo-cd.readthedocs.io) - Declarative GitOps CD
+- [Tekton](https://tekton.dev) - Cloud Native CI/CD
 
 ## Management Tools
 
@@ -50,8 +52,7 @@ To access workload services within your cluster, `connect` allows you to forward
 ```shell
 sudo devkube connect
 ...
-5:58PM INF adding tunnel namespace=platform hosts="[dashboard.platform dashboard.platform.svc.cluster.local]" ports=[80]
-5:58PM INF adding tunnel namespace=platform hosts="[grafana.platform grafana.platform.svc.cluster.local]" ports=[80]
+5:58PM INF adding tunnel address=127.244.179.12 hosts="[grafana.platform grafana.platform.svc.cluster.local]" ports=[3000]
 ...
 ```
 

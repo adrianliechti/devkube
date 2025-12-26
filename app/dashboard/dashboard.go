@@ -3,9 +3,11 @@ package dashboard
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/go-cli"
+	"github.com/adrianliechti/loop/pkg/dashboard"
 )
 
 func Command() *cli.Command {
@@ -16,18 +18,42 @@ func Command() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			client := app.MustClient(ctx, cmd)
 
-			port := app.MustPortOrRandom(ctx, cmd, 9090)
+			port := app.MustPortOrRandom(ctx, cmd, 8888)
+			url := fmt.Sprintf("http://127.0.0.1:%d", port)
 
-			ready := make(chan struct{})
+			// ready := make(chan struct{})
 
-			go func() {
-				<-ready
+			// go func() {
+			// 	<-ready
+			// 	cli.OpenURL(url)
+			// }()
 
-				url := fmt.Sprintf("http://127.0.0.1:%d", port)
+			time.AfterFunc(2*time.Second, func() {
 				cli.OpenURL(url)
-			}()
+			})
 
-			return client.ServicePortForward(ctx, "platform", "dashboard", "", map[int]int{port: 9090}, ready)
+			options := &dashboard.DashboardOptions{
+				Port: port,
+
+				PlatformNamespaces: []string{
+					"kube-public",
+					"kube-system",
+					"kube-node-lease",
+					"local-path-storage",
+
+					"cert-manager",
+					"crossplane-system",
+					"gatekeeper-system",
+
+					"argocd",
+					"tekton-pipelines",
+					"tekton-pipelines-resolvers",
+
+					"platform",
+				},
+			}
+
+			return dashboard.Run(ctx, client, options)
 		},
 	}
 }

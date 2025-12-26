@@ -8,7 +8,6 @@ import (
 	"github.com/adrianliechti/devkube/extension/argocd"
 	"github.com/adrianliechti/devkube/extension/certmanager"
 	"github.com/adrianliechti/devkube/extension/crossplane"
-	"github.com/adrianliechti/devkube/extension/dashboard"
 	"github.com/adrianliechti/devkube/extension/envoy"
 	"github.com/adrianliechti/devkube/extension/gatekeeper"
 	"github.com/adrianliechti/devkube/extension/otel"
@@ -32,19 +31,14 @@ var Default []Extension = []Extension{
 		Ensure: certmanager.Ensure,
 	},
 	{
-		Name:   "gatekeeper",
-		Title:  "Gatekeeper",
-		Ensure: gatekeeper.Ensure,
-	},
-	{
 		Name:   "registry",
 		Title:  "Registry",
 		Ensure: registry.Ensure,
 	},
 	{
-		Name:   "dashboard",
-		Title:  "Dashboard",
-		Ensure: dashboard.Ensure,
+		Name:   "gatekeeper",
+		Title:  "Gatekeeper",
+		Ensure: gatekeeper.Ensure,
 	},
 	{
 		Name:   "otel",

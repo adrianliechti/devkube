@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/adrianliechti/go-cli v0.0.9-0.20251224221129-e598926b8cc9
-	github.com/adrianliechti/loop v0.20.0
+	github.com/adrianliechti/loop v0.20.1
 	github.com/google/go-containerregistry v0.20.7
 	github.com/lmittmann/tint v1.1.2
 	helm.sh/helm/v4 v4.0.4
