@@ -1,4 +1,4 @@
-package dashboard
+package bridge
 
 import (
 	"context"
@@ -7,34 +7,18 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/go-cli"
-	"github.com/adrianliechti/loop/pkg/dashboard"
+	"github.com/adrianliechti/loop/pkg/bridge"
 )
 
 func Command() *cli.Command {
 	return &cli.Command{
-		Name:  "dashboard",
-		Usage: "open Dashboard in Browser",
+		Name:  "bridge",
+		Usage: "open Bridge Kubernetes dashboard",
 
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			client := app.MustClient(ctx, cmd)
 
-			port := app.MustPortOrRandom(ctx, cmd, 8888)
-			url := fmt.Sprintf("http://127.0.0.1:%d", port)
-
-			// ready := make(chan struct{})
-
-			// go func() {
-			// 	<-ready
-			// 	cli.OpenURL(url)
-			// }()
-
-			time.AfterFunc(2*time.Second, func() {
-				cli.OpenURL(url)
-			})
-
-			options := &dashboard.DashboardOptions{
-				Port: port,
-
+			platform := &bridge.PlatformConfig{
 				PlatformNamespaces: []string{
 					"kube-public",
 					"kube-system",
@@ -53,7 +37,24 @@ func Command() *cli.Command {
 				},
 			}
 
-			return dashboard.Run(ctx, client, options)
+			port := app.MustPortOrRandom(ctx, cmd, 8888)
+
+			srv, err := bridge.New(client, platform)
+
+			if err != nil {
+				return err
+			}
+
+			url := fmt.Sprintf("http://localhost:%d", port)
+			addr := fmt.Sprintf("localhost:%d", port)
+
+			time.AfterFunc(500*time.Millisecond, func() {
+				cli.Infof("Bridge on %s", url)
+				cli.OpenURL(url)
+			})
+
+			return srv.ListenAndServe(ctx, addr)
+
 		},
 	}
 }

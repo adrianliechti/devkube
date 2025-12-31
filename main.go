@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/adrianliechti/devkube/app"
+	"github.com/adrianliechti/devkube/app/bridge"
 	"github.com/adrianliechti/devkube/app/build"
 	"github.com/adrianliechti/devkube/app/connect"
 	"github.com/adrianliechti/devkube/app/create"
-	"github.com/adrianliechti/devkube/app/dashboard"
 	"github.com/adrianliechti/devkube/app/delete"
 	"github.com/adrianliechti/devkube/app/grafana"
 	"github.com/adrianliechti/devkube/app/install"
@@ -70,7 +70,7 @@ func initApp() cli.Command {
 
 			install.Command(),
 
-			dashboard.Command(),
+			bridge.Command(),
 			grafana.Command(),
 			otel.Command(),
 
