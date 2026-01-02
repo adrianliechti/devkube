@@ -54,7 +54,6 @@ func Command() *cli.Command {
 			})
 
 			return srv.ListenAndServe(ctx, addr)
-
 		},
 	}
 }
