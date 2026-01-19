@@ -62,7 +62,7 @@ func Client(ctx context.Context, cmd *cli.Command) (kubernetes.Client, error) {
 		return nil, err
 	}
 
-	client, err := kubernetes.NewFromBytes(data)
+	client, err := kubernetes.NewFromBytes(data, "")
 
 	if err != nil {
 		return nil, err
