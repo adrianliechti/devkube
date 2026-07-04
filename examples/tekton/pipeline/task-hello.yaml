@@ -5,7 +5,7 @@ metadata:
 spec:
   steps:
     - name: echo
-      image: alpine
+      image: public.ecr.aws/docker/library/alpine:3
       script: |
         #!/bin/sh
         echo "Hello World" 

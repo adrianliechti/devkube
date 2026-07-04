@@ -14,13 +14,21 @@ const (
 	// https://artifacthub.io/packages/helm/argo/argo-cd
 	repoURL      = "https://argoproj.github.io/argo-helm"
 	chartName    = "argo-cd"
-	chartVersion = "9.2.1"
+	chartVersion = "10.1.2"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
 	values := map[string]any{
+		// since chart 10.0.0 network policies are created by default,
+		// blocking cross-namespace access in this dev cluster
+		"global": map[string]any{
+			"networkPolicy": map[string]any{
+				"create": false,
+			},
+		},
+
 		"crds": map[string]any{
-			"enabled": true,
+			"install": true,
 			"keep":    true,
 		},
 

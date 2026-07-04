@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: registry
-          image: public.ecr.aws/docker/library/registry:2
+          image: public.ecr.aws/docker/library/registry:3
           env:
             - name: REGISTRY_HTTP_ADDR
               value: 0.0.0.0:80

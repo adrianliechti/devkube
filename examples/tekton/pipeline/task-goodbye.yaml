@@ -8,7 +8,7 @@ spec:
     type: string
   steps:
     - name: goodbye
-      image: ubuntu
+      image: public.ecr.aws/docker/library/ubuntu:latest
       script: |
         #!/bin/bash
         echo "Goodbye $(params.username)!"
