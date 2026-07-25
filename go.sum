@@ -28,8 +28,8 @@ github.com/adrianliechti/bridge v0.2.4 h1:Ss2zdJSsuvqQA3S1thR3TdWM7ZRVj7cnFLNEq3
 github.com/adrianliechti/bridge v0.2.4/go.mod h1:JBjE5i3YXlUDAIY1v5H/UB/ePn9ozpWFwLvmYzAdJ4o=
 github.com/adrianliechti/go-cli v0.0.14 h1:6QMsRILsh3Z9WAk9Radda4/0DhmPh0u+zlJGKdq5XCU=
 github.com/adrianliechti/go-cli v0.0.14/go.mod h1:MdF7xwIp3HzZfwytxT8L7joK64H5QMTWPu5aklc98Ig=
-github.com/adrianliechti/loop v0.30.2 h1:/NbHthFmMjvbpgjIlhEykAPplUKn+f777sxEH0AxkaQ=
-github.com/adrianliechti/loop v0.30.2/go.mod h1:Imf3zTeeZTqB0GbqrBkFbI1zv2jhSMnbgQDZx5DgI+A=
+github.com/adrianliechti/loop v0.30.3 h1:0qsOdVua7h62Sg7wWGPzXafJPHYzFEcWGnpXKW+f8UI=
+github.com/adrianliechti/loop v0.30.3/go.mod h1:Imf3zTeeZTqB0GbqrBkFbI1zv2jhSMnbgQDZx5DgI+A=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
 github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=

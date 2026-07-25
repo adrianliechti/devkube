@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/adrianliechti/bridge v0.2.4
 	github.com/adrianliechti/go-cli v0.0.14
-	github.com/adrianliechti/loop v0.30.2
+	github.com/adrianliechti/loop v0.30.3
 	github.com/google/go-containerregistry v0.21.7
 	github.com/lmittmann/tint v1.2.0
 	helm.sh/helm/v4 v4.2.3
