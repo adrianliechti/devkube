@@ -18,7 +18,10 @@ const (
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
-	values := map[string]any{}
+	values := map[string]any{
+		"replicas":      1,
+		"auditInterval": 300,
+	}
 
 	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
 		return err
