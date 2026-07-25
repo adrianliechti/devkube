@@ -1,4 +1,4 @@
-# Tekont
+# Tekton
 
 ## Install Tekton Dashboard, Pipelines & Triggers
 

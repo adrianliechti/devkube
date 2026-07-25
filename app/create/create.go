@@ -2,7 +2,7 @@ package create
 
 import (
 	"context"
-	"errors"
+	"slices"
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/devkube/app/setup"
@@ -16,20 +16,25 @@ func Command() *cli.Command {
 		Usage: "create cluster",
 
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			provider, cluster, _ := app.Cluster(ctx, cmd)
+			provider, cluster, err := app.Cluster(ctx, cmd)
 
-			if provider == nil {
-				return errors.New("invalid provider specified")
+			if err != nil {
+				return err
 			}
 
-			if cluster == "" {
-				return errors.New("invalid cluster specified")
+			clusters, err := provider.List(ctx)
+
+			if err != nil {
+				return err
 			}
 
-			cli.MustRun("Installing Kubernetes Cluster...", func() error {
-				provider.Create(ctx, cluster)
-				return nil
-			})
+			// creating an existing cluster fails - keep create idempotent so it
+			// can be re-run to (re-)install the extensions below
+			if !slices.Contains(clusters, cluster) {
+				cli.MustRun("Installing Kubernetes Cluster...", func() error {
+					return provider.Create(ctx, cluster)
+				})
+			}
 
 			client := app.MustClient(ctx, cmd)
 

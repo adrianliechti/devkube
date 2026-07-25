@@ -54,7 +54,7 @@ func Export(ctx context.Context, provider provider.Provider, cluster string, pat
 	result, err := kubeconfig.Merge(configs...)
 
 	if err != nil {
-		return os.WriteFile(path, data, 0600)
+		return err
 	}
 
 	return os.WriteFile(path, result, 0600)

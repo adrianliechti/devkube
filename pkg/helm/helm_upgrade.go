@@ -2,35 +2,25 @@ package helm
 
 import (
 	"context"
-	"log/slog"
-	"time"
 
+	"github.com/adrianliechti/devkube/pkg/kube"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
 	"helm.sh/helm/v4/pkg/action"
-	"helm.sh/helm/v4/pkg/chart/loader"
-	"helm.sh/helm/v4/pkg/cli"
-	"helm.sh/helm/v4/pkg/kube"
-	"helm.sh/helm/v4/pkg/registry"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	helmkube "helm.sh/helm/v4/pkg/kube"
 )
 
 func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, repoURL, chartName, chartVersion string, values map[string]any) error {
-	settings := cli.New()
+	config, err := newConfiguration(client, namespace)
 
-	config := new(action.Configuration)
-	config.LogHolder.SetLogger(slog.DiscardHandler)
-
-	if err := config.Init(NewClientGetter(client, namespace), namespace, ""); err != nil {
+	if err != nil {
 		return err
 	}
 
-	client.CoreV1().Namespaces().Create(ctx, &corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
-		},
-	}, metav1.CreateOptions{})
+	// unlike install, upgrade does not create the namespace itself
+	if err := kube.EnsureNamespace(ctx, client, namespace); err != nil {
+		return err
+	}
 
 	a := action.NewUpgrade(config)
 
@@ -42,25 +32,16 @@ func Upgrade(ctx context.Context, client kubernetes.Client, namespace, name, rep
 	a.ReuseValues = false
 	a.ResetValues = true
 
-	//a.Wait = true
 	a.Devel = true
 
 	a.CleanupOnFail = true
 
-	a.Timeout = 15 * time.Minute
-	a.WaitStrategy = kube.StatusWatcherStrategy
+	a.Timeout = timeout
+	a.WaitStrategy = helmkube.StatusWatcherStrategy
 
-	if client, err := registry.NewClient(); err == nil {
-		a.SetRegistryClient(client)
-	}
+	setRegistryClient(a.SetRegistryClient)
 
-	path, err := a.ChartPathOptions.LocateChart(chartName, settings)
-
-	if err != nil {
-		return err
-	}
-
-	chart, err := loader.Load(path)
+	chart, err := loadChart(&a.ChartPathOptions, chartName)
 
 	if err != nil {
 		return err

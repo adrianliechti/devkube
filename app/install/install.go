@@ -18,18 +18,6 @@ func Command() *cli.Command {
 		Hidden: true,
 
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			provider, cluster, _ := app.Cluster(ctx, cmd)
-
-			if provider == nil {
-				return errors.New("invalid provider specified")
-			}
-
-			if cluster == "" {
-				return errors.New("invalid cluster specified")
-			}
-
-			client := app.MustClient(ctx, cmd)
-
 			var e extension.Extension
 
 			if cmd.Args().Len() > 0 {
@@ -40,6 +28,7 @@ func Command() *cli.Command {
 				for _, i := range extension.Optional {
 					if strings.EqualFold(cmd.Args().Get(0), i.Name) {
 						e = i
+						break
 					}
 				}
 			} else {
@@ -56,6 +45,8 @@ func Command() *cli.Command {
 			if e.Ensure == nil {
 				return errors.New("unknown extension")
 			}
+
+			client := app.MustClient(ctx, cmd)
 
 			cli.MustRun("Installing "+e.Title+"...", func() error {
 				return e.Ensure(ctx, client)

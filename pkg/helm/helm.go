@@ -1,8 +1,16 @@
 package helm
 
 import (
+	"log/slog"
+	"time"
+
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 
+	"helm.sh/helm/v4/pkg/action"
+	"helm.sh/helm/v4/pkg/chart"
+	"helm.sh/helm/v4/pkg/chart/loader"
+	helmcli "helm.sh/helm/v4/pkg/cli"
+	"helm.sh/helm/v4/pkg/registry"
 	"helm.sh/helm/v4/pkg/storage/driver"
 
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -15,9 +23,38 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-var ErrReleaseExists = driver.ErrReleaseExists
-var ErrReleaseNotFound = driver.ErrReleaseNotFound
+const timeout = 15 * time.Minute
+
 var ErrNoDeployedReleases = driver.ErrNoDeployedReleases
+
+func newConfiguration(client kubernetes.Client, namespace string) (*action.Configuration, error) {
+	config := new(action.Configuration)
+	config.LogHolder.SetLogger(slog.DiscardHandler)
+
+	if err := config.Init(NewClientGetter(client, namespace), namespace, ""); err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+func loadChart(opts *action.ChartPathOptions, chartName string) (chart.Charter, error) {
+	path, err := opts.LocateChart(chartName, helmcli.New())
+
+	if err != nil {
+		return nil, err
+	}
+
+	return loader.Load(path)
+}
+
+// setRegistryClient wires up OCI support - charts served over plain HTTP(S)
+// work without it, so a failure here is not fatal.
+func setRegistryClient(set func(*registry.Client)) {
+	if client, err := registry.NewClient(); err == nil {
+		set(client)
+	}
+}
 
 func NewClientGetter(client kubernetes.Client, namespace string) genericclioptions.RESTClientGetter {
 	return &clientGetter{

@@ -12,6 +12,10 @@ func Command() *cli.Command {
 		Name:  "otel",
 		Usage: "forward otel collector",
 
+		Flags: []cli.Flag{
+			app.PortFlag,
+		},
+
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			client := app.MustClient(ctx, cmd)
 

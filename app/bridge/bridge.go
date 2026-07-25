@@ -7,43 +7,58 @@ import (
 
 	"github.com/adrianliechti/devkube/app"
 	"github.com/adrianliechti/go-cli"
-	"github.com/adrianliechti/loop/pkg/bridge"
+
+	"github.com/adrianliechti/bridge/pkg/config"
+	"github.com/adrianliechti/bridge/pkg/server"
 )
+
+// namespaces bridge should present as platform infrastructure
+// instead of user workload
+var platformNamespaces = []string{
+	"kube-public",
+	"kube-system",
+	"kube-node-lease",
+	"local-path-storage",
+
+	"cert-manager",
+	"crossplane-system",
+	"gatekeeper-system",
+
+	"argocd",
+	"tekton-pipelines",
+	"tekton-pipelines-resolvers",
+
+	"platform",
+}
 
 func Command() *cli.Command {
 	return &cli.Command{
 		Name:  "bridge",
 		Usage: "open Bridge Kubernetes dashboard",
 
+		Flags: []cli.Flag{
+			app.PortFlag,
+		},
+
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			client := app.MustClient(ctx, cmd)
-
-			platform := &bridge.PlatformConfig{
-				PlatformNamespaces: []string{
-					"kube-public",
-					"kube-system",
-					"kube-node-lease",
-					"local-path-storage",
-
-					"cert-manager",
-					"crossplane-system",
-					"gatekeeper-system",
-
-					"argocd",
-					"tekton-pipelines",
-					"tekton-pipelines-resolvers",
-
-					"platform",
-				},
-			}
-
-			port := app.MustPortOrRandom(ctx, cmd, 8888)
-
-			srv, err := bridge.New(client, platform)
+			// bridge reads the kubeconfig itself and serves every context in it
+			cfg, err := config.New()
 
 			if err != nil {
 				return err
 			}
+
+			if cfg.Kubernetes != nil {
+				cfg.Kubernetes.PlatformNamespaces = platformNamespaces
+			}
+
+			srv, err := server.New(cfg)
+
+			if err != nil {
+				return err
+			}
+
+			port := app.MustPortOrRandom(ctx, cmd, 8888)
 
 			url := fmt.Sprintf("http://localhost:%d", port)
 			addr := fmt.Sprintf("localhost:%d", port)
