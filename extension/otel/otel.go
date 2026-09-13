@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"strings"
 
+	"github.com/adrianliechti/devkube/pkg/kube"
 	"github.com/adrianliechti/loop/pkg/kubernetes"
 )
 
@@ -18,6 +19,10 @@ var (
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
+	if err := kube.EnsureNamespace(ctx, client, namespace); err != nil {
+		return err
+	}
+
 	if err := client.Apply(ctx, namespace, strings.NewReader(manifest)); err != nil {
 		return err
 	}

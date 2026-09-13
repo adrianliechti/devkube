@@ -43,19 +43,7 @@ func Command() *cli.Command {
 
 			client := app.MustClient(ctx, cmd)
 
-			var tunnelScope string = "default"
-			var tunnelNamespaces []string = nil
-
-			if val := cmd.StringSlice("namespace"); len(val) > 0 {
-				tunnelScope = val[0]
-				tunnelNamespaces = val
-			}
-
-			if val := cmd.String("scope"); val != "" {
-				tunnelScope = val
-			}
-
-			return Catapult(ctx, client, tunnelNamespaces, tunnelScope)
+			return Catapult(ctx, client, cmd.StringSlice("namespace"), cmd.String("scope"))
 		},
 	}
 }
@@ -69,19 +57,22 @@ func Catapult(ctx context.Context, client kubernetes.Client, namespaces []string
 		scope = client.Namespace()
 	}
 
+	addFunc := func(address string, hosts []string, ports []int) {
+		slog.InfoContext(ctx, "adding tunnel", "address", address, "hosts", hosts, "ports", ports)
+	}
+
+	deleteFunc := func(address string, hosts []string, ports []int) {
+		slog.InfoContext(ctx, "removing tunnel", "address", address, "hosts", hosts, "ports", ports)
+	}
+
 	catapult, err := catapult.New(client, catapult.CatapultOptions{
 		Scope:      scope,
 		Namespaces: namespaces,
 
 		Logger: slog.Default(),
 
-		AddFunc: func(address string, hosts []string, ports []int) {
-			slog.InfoContext(ctx, "adding tunnel", "address", address, "hosts", hosts, "ports", ports)
-		},
-
-		DeleteFunc: func(address string, hosts []string, ports []int) {
-			slog.InfoContext(ctx, "removing tunnel", "address", address, "hosts", hosts, "ports", ports)
-		},
+		AddFunc:    addFunc,
+		DeleteFunc: deleteFunc,
 	})
 
 	if err != nil {
@@ -93,29 +84,26 @@ func Catapult(ctx context.Context, client kubernetes.Client, namespaces []string
 
 		Logger: slog.Default(),
 
-		AddFunc: func(address string, hosts []string, ports []int) {
-			slog.InfoContext(ctx, "adding tunnel", "address", address, "hosts", hosts, "ports", ports)
-		},
-
-		DeleteFunc: func(address string, hosts []string, ports []int) {
-			slog.InfoContext(ctx, "removing tunnel", "address", address, "hosts", hosts, "ports", ports)
-		},
+		AddFunc:    addFunc,
+		DeleteFunc: deleteFunc,
 	})
 
 	if err != nil {
 		return err
 	}
 
-	err1 := make(chan error)
-	err2 := make(chan error)
+	// if one of them stops, tear down the other one as well
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
-	go func() {
-		err1 <- catapult.Start(ctx)
-	}()
+	errs := make(chan error, 2)
 
-	go func() {
-		err2 <- gateway.Start(ctx)
-	}()
+	for _, start := range []func(context.Context) error{catapult.Start, gateway.Start} {
+		go func() {
+			defer cancel()
+			errs <- start(ctx)
+		}()
+	}
 
-	return errors.Join(<-err1, <-err2)
+	return errors.Join(<-errs, <-errs)
 }

@@ -10,31 +10,33 @@ The default `create` command will spin up a local DevKube cluster in a single co
 $ devkube create
 ★ installing Kubernetes Cluster...
 ★ installing Cert-Manager...
-★ installing Registry...
+★ installing Metrics Server...
+★ installing Docker Registry...
 ★ installing Gatekeeper...
 ★ installing OpenTelemetry...
 ```
 
 Installed Components
 - [Cert-Manager](https://cert-manager.io) - X.509 Certificate Management
+- [Metrics Server](https://kubernetes-sigs.github.io/metrics-server/) - Container Resource Metrics
 - [Registry](https://distribution.github.io/distribution/) - Container Images Distribution
 - [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/website/) - Customizable Policy controller
-- [Grafana LGTM](ithub.com/grafana/docker-otel-lgtm) - Observability and Data Visualization
+- [Grafana LGTM](https://github.com/grafana/docker-otel-lgtm) - Observability and Data Visualization
 
-Optional Components
-- [Crossplane](https://www.crossplane.io) - Universal Control Plane
-- [Envoy Gateway](https://gateway.envoyproxy.io) - Manage Application and API traffic
-- [Argo CD](https://argo-cd.readthedocs.io) - Declarative GitOps CD
-- [Tekton](https://tekton.dev) - Cloud Native CI/CD
+Optional Components, installable using `devkube install <name>`
+- [Crossplane](https://www.crossplane.io) (`crossplane`) - Universal Control Plane
+- [Envoy Gateway](https://gateway.envoyproxy.io) (`envoy`) - Manage Application and API traffic
+- [Argo CD](https://argo-cd.readthedocs.io) (`argocd`) - Declarative GitOps CD
+- [Tekton](https://tekton.dev) (`tekton`) - Cloud Native CI/CD
 
 ## Management Tools
 
 ### Kubernetes Web UI
 
-open Dashboard in browser
+open the Bridge dashboard in browser
 
 ```shell
-$ devkube dashboard
+$ devkube bridge
 ```
 
 ### Grafana Web UI
@@ -45,9 +47,17 @@ open Grafana in browser
 $ devkube grafana
 ```
 
+### Export OpenTelemetry from your machine
+
+forward the in-cluster collector to localhost
+
+```shell
+$ devkube otel
+```
+
 ### Access cluster workload
 
-To access workload services within your cluster, `connect` allows you to forward these adresses and ports locally and allow easy access.
+To access workload services within your cluster, `connect` allows you to forward these addresses and ports locally and allow easy access.
 
 ```shell
 sudo devkube connect
@@ -82,7 +92,7 @@ devkube build demo .
 ...
 ★ removing container (default/loop-buildkit-704c031)..
 
-# run impage in kubernetes
+# run image in kubernetes
 kubectl run -it --rm demo --image registry.platform/demo /bin/bash
 demo:/# exit
 ```

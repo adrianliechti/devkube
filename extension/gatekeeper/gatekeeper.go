@@ -14,11 +14,14 @@ const (
 	// https://artifacthub.io/packages/helm/gatekeeper/gatekeeper
 	repoURL      = "https://open-policy-agent.github.io/gatekeeper/charts"
 	chartName    = "gatekeeper"
-	chartVersion = "3.22.2"
+	chartVersion = "3.23.0"
 )
 
 func Ensure(ctx context.Context, client kubernetes.Client) error {
-	values := map[string]any{}
+	values := map[string]any{
+		"replicas":      1,
+		"auditInterval": 300,
+	}
 
 	if err := helm.Ensure(ctx, client, namespace, name, repoURL, chartName, chartVersion, values); err != nil {
 		return err

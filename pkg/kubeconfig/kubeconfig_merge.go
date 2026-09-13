@@ -27,7 +27,9 @@ func Merge(config ...[]byte) ([]byte, error) {
 			result.Contexts[key] = context
 		}
 
-		result.CurrentContext = c.CurrentContext
+		if c.CurrentContext != "" {
+			result.CurrentContext = c.CurrentContext
+		}
 	}
 
 	return clientcmd.Write(*result)

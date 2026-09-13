@@ -6,9 +6,11 @@ networking:
 kubeadmConfigPatches:
 - |-
   kind: ClusterConfiguration
+  encryptionAlgorithm: ECDSA-P256
   controllerManager:
     extraArgs:
       bind-address: 0.0.0.0
+      leader-elect: "false"
   etcd:
     local:
       extraArgs:
@@ -16,6 +18,7 @@ kubeadmConfigPatches:
   scheduler:
     extraArgs:
       bind-address: 0.0.0.0
+      leader-elect: "false"
 - |-
   kind: KubeProxyConfiguration
   metricsBindAddress: 0.0.0.0

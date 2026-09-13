@@ -13,6 +13,10 @@ func Command() *cli.Command {
 		Name:  "grafana",
 		Usage: "open Grafana in Browser",
 
+		Flags: []cli.Flag{
+			app.PortFlag,
+		},
+
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			client := app.MustClient(ctx, cmd)
 
