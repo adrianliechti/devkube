@@ -21,14 +21,31 @@ checksum:
 changelog:
   sort: asc
 
-brews:
-  - repository:
+# Homebrew casks support both macOS and Linux.
+homebrew_casks:
+  - name: devkube
+    binaries: [devkube]
+    # The publisher adds postflight_steps; GoReleaser's hooks still emit postflight.
+    skip_upload: true
+    homepage: "https://github.com/adrianliechti/devkube"
+    description: "Create and manage local Kubernetes clusters"
+    repository:
       owner: adrianliechti
       name: homebrew-tap
 
     commit_author:
       name: Adrian Liechti
       email: adrian@localhost
+
+publishers:
+  - name: homebrew-cask
+    # Publish the extra cask file, excluding release archives.
+    ids: [homebrew-cask]
+    extra_files:
+      - glob: dist/homebrew/Casks/devkube.rb
+    env:
+      - GITHUB_TOKEN={{ .Env.GITHUB_TOKEN }}
+    cmd: ./scripts/publish-cask.sh {{ .Version }}
 
 scoops:
   - repository:

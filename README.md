@@ -93,7 +93,7 @@ demo:/# exit
 MacOS / Linux with [Homebrew](https://brew.sh)
 
 ```shell
-brew install adrianliechti/tap/devkube
+brew install --cask adrianliechti/tap/devkube
 ```
 
 Windows with [Scoop](https://scoop.sh)
